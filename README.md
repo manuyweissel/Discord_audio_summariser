@@ -65,13 +65,30 @@ DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 ```
 
-### 3️⃣ Configure OAuth2 & Invite
-1. In **Developer Portal → OAuth2 → URL Generator**:
-   * Scopes → `bot`, `applications.commands`
-   * Bot Permissions → `View Channels`, `Send Messages`, `Read Message History`, `Connect`, `Speak`
-2. Copy the generated URL ➜ open in browser ➜ choose server ➜ **Authorize**.
+### 3️⃣ Create & Configure the Discord Application
 
-### 4️⃣ Run the Bot
+1. **Create the Application & Bot**
+   ```text
+   Discord Developer Portal → New Application → “Voice‑Transcriber”
+   Bot tab → Add Bot
+   ```
+
+2. **Enable Intents**
+   * Privileged Gateway Intents → ✔️ **Message Content**
+   * ✔️ **Guild Voice States** _(mandatory for voice receive)_
+
+3. **Copy the Bot Token**
+   Paste it into your `.env` as `DISCORD_TOKEN`.
+
+4. **Generate the Invite URL**
+   Developer Portal → **OAuth2 → URL Generator**
+
+   * **Scopes** → `bot`, `applications.commands`
+   * **Bot Permissions** → `View Channels`, `Send Messages`, `Connect`, `Speak`, `Use Embedded Activities`, `Attach Files`, `Read Message History`
+
+   Copy the URL, open it, choose your server and **Authorize**.
+
+### 4️⃣ Run the Bot Run the Bot
 ```bash
 npm start
 ```
