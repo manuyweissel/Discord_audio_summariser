@@ -937,39 +937,32 @@ async function summarizeTranscript(guildId, channelId) {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert executive assistant specializing in creating visually stunning, professionally formatted German meeting protocols. You excel at transforming raw transcripts into polished, business-ready documents with excellent visual hierarchy and modern formatting.'
+                          content: 'You are a professional executive assistant specializing in creating clear, well-structured German meeting protocols. You excel at transforming transcripts into polished business documents that meet corporate standards.'
           },
-          {
-            role: 'user',
-            content: ```
-Erstelle ein professionelles und visuell ansprechendes Meeting-Protokoll aus dem folgenden Transkript. Achte darauf, die vorgegebene Vorlage genau zu befolgen, um ein konsistentes Erscheinungsbild zu gewährleisten.
+                      {
+              role: 'user',
+              content: `Create a professional meeting minutes document from the following transcript, adhering to the provided template for consistency and clarity.
 
-TRANSKRIPT:
+TRANSCRIPT:
 ${transcript}
 
-VORLAGE (bitte exakt befolgen):
+TEMPLATE (please follow exactly):
 ${blueprint}
 
-📊 **Status-Indikatoren:**
-- Verwende 🟢 für abgeschlossene/positive Punkte.
-- Verwende 🟡 für in Bearbeitung/ausstehende Punkte.
-- Verwende 🔴 für kritische/dringende Punkte.
-- Verwende ⚪ für offene/neue Punkte.
+CONTENT REQUIREMENTS:
+- Extract clear decisions and resolutions made during the meeting
+- Identify specific action items with assigned responsibilities and deadlines
+- Focus on measurable outcomes and concrete actions
+- Use precise, professional business language in German
 
-🎯 **Inhaltliche Qualität:**
-- Extrahiere klare Entscheidungen und Beschlüsse.
-- Identifiziere spezifische Action Items mit den jeweiligen Verantwortlichen.
-- Fokussiere auf messbare Ergebnisse und konkrete Handlungen.
-- Verwende präzise, professionelle Geschäftssprache auf Deutsch.
+FORMATTING GUIDELINES:
+- Set today's date: ${new Date().toLocaleDateString('de-DE')}
+- Estimate meeting duration based on transcript length
+- Mark unknown information with appropriate placeholders
+- Present the output as well-structured markdown suitable for business documentation
 
-📅 **Automatische Ergänzungen:**
-- Setze das heutige Datum in das Protokoll: ${new Date().toLocaleDateString('de-DE')}.
-- Schätze die Meeting-Dauer basierend auf dem Transkript.
-- Markiere unbekannte Informationen mit "".
-
-FORMAT: Das Ergebnis soll als ein formatierter Text im Markdown-Stil ausgegeben werden und visuell beeindruckend sowie business-ready sein!
-```
-          }
+Please ensure the final document maintains professional standards and executive-level presentation quality.`
+            }
         ]
       });
 
@@ -1015,25 +1008,25 @@ FORMAT: Das Ergebnis soll als ein formatierter Text im Markdown-Stil ausgegeben 
           messages: [
             {
               role: 'system',
-              content: 'You are an expert meeting analyst who extracts and structures key information from transcript segments. Focus on actionable items, decisions, and important business discussions. Present findings in clear, formatted German.'
+                              content: 'You are a professional meeting analyst who extracts and structures key information from transcript segments. Focus on actionable items, decisions, and business discussions. Present findings clearly in German.'
             },
-            {
-              role: 'user',
-              content: `Analysiere den folgenden Abschnitt des Transkripts und extrahiere die wichtigsten Informationen in klarer, strukturierter Form:
+                          {
+                role: 'user',
+                content: `Analyze the following transcript section and extract the most important information in a clear, structured format:
 
-📋 **TRANSKRIPT-ABSCHNITT ${i + 1} von ${textChunks.length}:**  
+TRANSCRIPT SECTION ${i + 1} of ${textChunks.length}:
 ${chunk}
 
-🔍 **Bitte konzentriere dich auf die folgenden Kategorien:**
-- 🎯 **Entscheidungen:** Dokumentiere alle konkreten Beschlüsse und Vereinbarungen, die während des Meetings getroffen wurden.
-- 📋 **Action Items:** Liste alle Aufgaben auf, einschließlich der verantwortlichen Personen und der vereinbarten Fristen.
-- 💬 **Key Discussions:** Halte die wichtigsten Diskussionspunkte fest, die während des Meetings angesprochen wurden.
-- ⏰ **Termine:** Identifiziere alle Deadlines und Meilensteine, die gesetzt wurden.
-- 📊 **Projektplan:** Notiere Änderungen oder Updates zum Projektplan.
-- ⚠️ **Risiken:** Beschreibe alle identifizierten Probleme oder Blocker, die das Projekt betreffen könnten.
+Please focus on the following categories:
+- **Decisions:** Document all concrete resolutions and agreements made during the meeting
+- **Action Items:** List all tasks including responsible parties and agreed deadlines
+- **Key Discussions:** Record the most important discussion points addressed in the meeting
+- **Deadlines:** Identify all deadlines and milestones that were established
+- **Project Planning:** Note any changes or updates to the project plan
+- **Risks:** Describe any identified issues or blockers that could affect the project
 
-**Format:** Präsentiere die Informationen in einer Liste mit Bullet Points. Verwende Emojis für jede Kategorie zur besseren Visualisierung. Achte darauf, prägnant und klar zu formulieren. Der gesamte Output sollte in einem professionellen Protokollstil verfasst sein, der für Meeting Minutes geeignet ist.`
-            }
+Format: Present the information as a structured list with bullet points. Ensure concise and clear formulation. The entire output should be written in a professional protocol style suitable for meeting minutes.`
+              }
           ]
         });
 
@@ -1071,33 +1064,32 @@ ${chunk}
         messages: [
           {
             role: 'system',
-            content: 'You are a senior executive assistant who specializes in creating visually stunning, comprehensive German meeting protocols. You excel at consolidating complex information into beautifully formatted, professional documents that executives love to read.'
+                          content: 'You are a senior executive assistant who specializes in creating comprehensive German meeting protocols. You excel at consolidating complex information into well-structured, professional documents suitable for executive review.'
           },
-          {
-            role: 'user',
-            content: `
-Konsolidiere die folgenden Abschnitte zu einem professionellen und visuell ansprechenden Meeting-Protokoll im PDF-Format.
+                      {
+              role: 'user',
+              content: `Consolidate the following sections into a comprehensive and professional meeting minutes document.
 
-📊 **ZUSAMMENGEFASSTE ABSCHNITTE:**
+ANALYZED SECTIONS:
 ${finalInput}
 
-🎨 **DESIGN-VORLAGE (bitte exakt befolgen):**
+TEMPLATE (follow exactly):
 ${blueprint}
 
-📋 **INHALTLICHE KONSOLIDIERUNG:**
-- Eliminiere Duplikate zwischen den Abschnitten.
-- Gruppiere verwandte Action Items sinnvoll.
-- Priorisiere Entscheidungen nach ihrer Wichtigkeit.
-- Erstelle eine kohärente Timeline aus allen relevanten Terminen.
+CONSOLIDATION REQUIREMENTS:
+- Eliminate duplicates between sections
+- Group related action items logically
+- Prioritize decisions by importance
+- Create a coherent timeline from all relevant dates and deadlines
 
-📅 **AUTO-VERVOLLSTÄNDIGUNG:**
-- Heutiges Datum: ${new Date().toLocaleDateString('de-DE')}
-- Schätze die Meeting-Dauer basierend auf dem Umfang des Transkripts.
-- Verwende eine professionelle deutsche Geschäftssprache.
+DOCUMENT SPECIFICATIONS:
+- Today's date: ${new Date().toLocaleDateString('de-DE')}
+- Estimate meeting duration based on transcript scope
+- Use professional German business language
+- Ensure executive-level quality suitable for immediate presentation
 
-Das finale Protokoll soll ein Executive-Level Dokument sein, das sofort für Präsentationen geeignet ist und eine klare Struktur sowie ein ansprechendes Design aufweist!
-`
-          }
+The final protocol should be a polished, comprehensive document that accurately reflects the meeting content while maintaining professional formatting standards.`
+            }
         ]
       });
 
@@ -1330,7 +1322,7 @@ client.on('interactionCreate', async (interaction) => {
       const day = String(now.getDate()).padStart(2, '0');
       const hour = String(now.getHours()).padStart(2, '0');
       const minute = String(now.getMinutes()).padStart(2, '0');
-      const baseFileName = `Meeting_Minutes_${year}_${month}_${day}_${hour}_${minute}`;
+      const baseFileName = `Meeting_Minutes_${year}_${month}_${day}__${hour}_${minute}`;
       
       // Extract meeting title from summary for better naming
       const titleMatch = summary.match(/Thema.*?-->(.*?)<!--/);

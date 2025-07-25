@@ -1,47 +1,45 @@
-Meeting-Minutes Thema
-Ziel des Meetings
-[z. B. Aufgabenverteilung für Phase 2, Entscheidungen zu Ressourcen, Status-Update]
-Details
-Datum: dd.mm.yyyy
-Zeit: xx:xx- xx:xx Uhr
-Ort: 
-Moderation: 
-Teilnehmer
-Vorname 
-Abwesende (optional): [Name – entschuldigt]
+# Meeting Minutes
 
-Hauptpunkte / Beschlüsse
-[Knappe, präzise Zusammenfassung der Diskussion oder Entscheidung]
-[z. B. „Feature X wird priorisiert – Umsetzung startet KW 21"]
-[z. B. „Budget-Freigabe für Dienstleister genehmigt"]
+## Meeting Overview
+**Subject:** [Meeting topic or purpose]
+**Date:** [DD.MM.YYYY]
+**Time:** [Start time] - [End time]
+**Location:** [Physical location or virtual meeting platform]
+**Chair:** [Meeting facilitator]
 
-Projektplanung – Änderungen oder neue Aufgaben
-Wurde Projektplan verändert?
-Ja / Nein
+## Participants
+**Present:**
+- [Name, Role/Department]
+- [Name, Role/Department]
 
-Falls Ja: Details hier notieren
-[z. B. Meilenstein Y verschoben auf TT.MM.JJJJ wegen Feedback-Schleife]
-[Neue Aufgabe: UX-Test definieren und vorbereiten bis KW 23]
+**Absent:**
+- [Name, Role/Department] - [Reason if relevant]
 
-To-Dos mit klaren Verantwortlichkeiten und deadlines
-bitte auch in unsere Projektexcel eintragen, jeder seine eigenen Aufgaben, es gibt immer nur eine Hauptverantwortliche Person
-Aufgabe
-Verantwortlich
-Deadline
-Status
-hier Aufgabe reinschreiben
-Name
-dd.mm.yyyy
-offen/in Arbeit/erledigt
+## Key Decisions and Resolutions
+- [Concise summary of each decision made]
+- [Action items with clear outcomes]
+- [Budget approvals or resource allocations]
 
+## Project Planning Updates
+**Project timeline modifications:** Yes / No
 
+**Details of changes:**
+- [Milestone adjustments with dates and rationale]
+- [New deliverables or scope changes]
+- [Resource reallocation decisions]
 
-Nächste Schritte/ Folge-Termin
-Nächstes Meeting: [TT.MM.JJJJ | Uhrzeit]
-Ziel: [z. B. Freigabe MVP, Priorisierung Phase 3]
+## Action Items
 
-Verantwortlich für Protokoll:
-[Name, Rolle] – [Datum der Fertigstellung]
+| Task | Responsible | Deadline | Status |
+|------|-------------|----------|--------|
+| [Specific task description] | [Name] | [DD.MM.YYYY] | Open/In Progress/Complete |
+| [Specific task description] | [Name] | [DD.MM.YYYY] | Open/In Progress/Complete |
 
-Review für Protokoll stattgefunden:
-[Name, Rolle] – [Datum der Fertigstellung]
+## Next Steps
+**Next meeting:** [DD.MM.YYYY at HH:MM]
+**Agenda focus:** [Primary objectives for next meeting]
+
+---
+
+**Minutes prepared by:** [Name, Role] - [Date]
+**Minutes reviewed by:** [Name, Role] - [Date]
