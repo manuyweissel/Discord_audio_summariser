@@ -19,7 +19,6 @@ import { spawn } from 'node:child_process';
 import ffmpegPath from 'ffmpeg-static';
 import { createLogger, format, transports } from 'winston';
 import { v4 as uuidv4 } from 'uuid';
-import MarkdownIt from 'markdown-it';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } from 'docx';
 
 // ---------- Logging Setup ----------
@@ -53,57 +52,14 @@ function calculateDurationMs(startTime) {
   return Date.now() - startTime;
 }
 
-// Initialize markdown parser
-const md = new MarkdownIt({
-  html: true,
-  linkify: true,
-  typographer: true
-});
-
-// Helper function to convert markdown to beautiful HTML
-function convertToHTML(markdownContent, meetingTitle = "Meeting") {
-  try {
-    // Load HTML template
-    const templatePath = path.join(process.cwd(), 'meeting_template.html');
-    let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
-    
-    // Convert markdown to HTML
-    const htmlContent = md.render(markdownContent);
-    
-    // Extract some metadata for template variables
-    const currentDate = new Date().toLocaleDateString('de-DE');
-    const timestamp = new Date().toLocaleString('de-DE');
-    
-    // Simple extraction of metrics (could be enhanced)
-    const participantCount = (htmlContent.match(/Anwesend/g) || []).length;
-    const actionItemCount = (htmlContent.match(/🎯|Aufgabe/g) || []).length;
-    const estimatedDuration = Math.max(30, Math.min(120, markdownContent.length / 100)); // Rough estimate
-    
-    // Replace template variables
-    htmlTemplate = htmlTemplate
-      .replace(/{{MEETING_TITLE}}/g, meetingTitle)
-      .replace(/{{MEETING_DATE}}/g, currentDate)
-      .replace(/{{CONTENT}}/g, htmlContent)
-      .replace(/{{DURATION}}/g, Math.round(estimatedDuration))
-      .replace(/{{PARTICIPANTS}}/g, participantCount || 'N/A')
-      .replace(/{{ACTION_ITEMS}}/g, actionItemCount || '0')
-      .replace(/{{TIMESTAMP}}/g, timestamp);
-    
-    return htmlTemplate;
-  } catch (error) {
-    console.error('Failed to convert to HTML:', error);
-    return null;
-  }
-}
-
 // Helper function to create professional Word document
-async function convertToWordDoc(markdownContent, meetingTitle = "Meeting") {
+async function convertToWordDoc(content, meetingTitle = "Meeting") {
   try {
     const currentDate = new Date().toLocaleDateString('de-DE');
     const timestamp = new Date().toLocaleString('de-DE');
     
-    // Parse markdown content to extract structured information
-    const lines = markdownContent.split('\n');
+    // Parse content to extract structured information
+    const lines = content.split('\n');
     const docElements = [];
     
     // Document title
@@ -111,30 +67,30 @@ async function convertToWordDoc(markdownContent, meetingTitle = "Meeting") {
       new Paragraph({
         children: [
           new TextRun({
-            text: "📋 Meeting Protokoll",
+            text: "Meeting Minutes",
             bold: true,
-            size: 32,
-            color: "2563EB"
+            size: 28,
+            color: "1E40AF"
           })
         ],
         heading: HeadingLevel.TITLE,
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 400 }
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 200 }
       }),
       new Paragraph({
         children: [
           new TextRun({
             text: `${meetingTitle} • ${currentDate}`,
-            size: 20,
+            size: 18,
             color: "64748B"
           })
         ],
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 600 }
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 400 }
       })
     );
     
-    // Process markdown content
+    // Process content
     let currentSection = "";
     let inTable = false;
     let tableRows = [];
@@ -156,31 +112,31 @@ async function convertToWordDoc(markdownContent, meetingTitle = "Meeting") {
           new Paragraph({
             children: [
               new TextRun({
-                text: line.replace(/^##\s*/, ''),
+                text: headingText,
                 bold: true,
-                size: 24,
+                size: 20,
                 color: "1E40AF"
               })
             ],
             heading: HeadingLevel.HEADING_1,
-            spacing: { before: 400, after: 200 }
+            spacing: { before: 300, after: 150 }
           })
         );
       } else if (line.startsWith('###')) {
         // Subsection heading
-        const headingText = line.replace(/^###\s*/, '');
+        const headingText = line.replace(/^###\s*/, '').replace(/\*\*/g, '').replace(/🏢|👥|🎯|📊|📝|🗓️|⚠️|📋/g, '').trim();
         docElements.push(
           new Paragraph({
             children: [
               new TextRun({
                 text: headingText,
                 bold: true,
-                size: 20,
-                color: "3B82F6"
+                size: 16,
+                color: "1E293B"
               })
             ],
             heading: HeadingLevel.HEADING_2,
-            spacing: { before: 300, after: 150 }
+            spacing: { before: 200, after: 100 }
           })
         );
       } else if (line.includes('|') && line.includes('-')) {
@@ -203,16 +159,17 @@ async function convertToWordDoc(markdownContent, meetingTitle = "Meeting") {
         // Regular paragraph
         if (line.startsWith('- ') || line.startsWith('* ')) {
           // Bullet point
-          const bulletText = line.replace(/^[-*]\s*/, '').replace(/\*\*/g, '');
+          const bulletText = line.replace(/^[-*]\s*/, '').replace(/\*\*/g, '').replace(/🏢|👥|🎯|📊|📝|🗓️|⚠️|📋|✅|❌|🟢|🟡|🔴|⚪|🔥/g, '').trim();
           docElements.push(
             new Paragraph({
               children: [
                 new TextRun({
                   text: `• ${bulletText}`,
-                  size: 22
+                  size: 20,
+                  color: "1E293B"
                 })
               ],
-              spacing: { after: 100 }
+              spacing: { after: 80 }
             })
           );
         } else if (line.startsWith('>')) {
@@ -233,17 +190,18 @@ async function convertToWordDoc(markdownContent, meetingTitle = "Meeting") {
           );
         } else if (line.length > 0 && !line.startsWith('<') && !line.includes('<!--')) {
           // Regular text
-          const cleanText = line.replace(/\*\*/g, '').replace(/📋|📅|👥|🎯|📊|⚠️|✅|❌|🟢|🟡|🔴|⚪|🔥/g, '');
+          const cleanText = line.replace(/\*\*/g, '').replace(/📋|📅|👥|🎯|📊|⚠️|✅|❌|🟢|🟡|🔴|⚪|🔥/g, '').trim();
           if (cleanText.trim()) {
             docElements.push(
               new Paragraph({
                 children: [
                   new TextRun({
                     text: cleanText,
-                    size: 22
+                    size: 20,
+                    color: "1E293B"
                   })
                 ],
-                spacing: { after: 120 }
+                spacing: { after: 100 }
               })
             );
           }
@@ -266,14 +224,14 @@ async function convertToWordDoc(markdownContent, meetingTitle = "Meeting") {
       new Paragraph({
         children: [
           new TextRun({
-            text: `📝 Automatisch generiert durch Meeting-Bot • 🔄 ${timestamp}`,
-            size: 18,
-            color: "9CA3AF",
+            text: `Generated automatically • ${timestamp}`,
+            size: 16,
+            color: "64748B",
             italics: true
           })
         ],
         alignment: AlignmentType.CENTER,
-        spacing: { before: 600 }
+        spacing: { before: 400 }
       })
     );
     
@@ -316,15 +274,15 @@ function createWordTable(rows) {
               new TextRun({
                 text: cleanText,
                 bold: index === 0, // Header row
-                size: index === 0 ? 20 : 18,
-                color: index === 0 ? "FFFFFF" : "000000"
+                size: index === 0 ? 18 : 16,
+                color: index === 0 ? "FFFFFF" : "1E293B"
               })
             ],
             alignment: AlignmentType.LEFT
           })
         ],
         shading: {
-          fill: index === 0 ? "3B82F6" : (index % 2 === 0 ? "F8FAFC" : "FFFFFF")
+          fill: index === 0 ? "1E40AF" : (index % 2 === 0 ? "F8FAFC" : "FFFFFF")
         },
         margins: {
           top: 200,
@@ -347,35 +305,68 @@ function createWordTable(rows) {
       type: WidthType.PERCENTAGE,
     },
     borders: {
-      top: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
-      bottom: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
-      left: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
-      right: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
-      insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
-      insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+      top: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
+      left: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
+      right: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
+      insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
+      insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
     },
   });
 }
 
 // Helper function to wait for all transcriptions to complete
-async function waitForPendingTranscriptions(sessionId, maxWaitTime = 30000) {
+async function waitForPendingTranscriptions(sessionId, maxWaitTime = 45000) {
   const startTime = Date.now();
-  const checkInterval = 500; // Check every 500ms
+  const checkInterval = 2000; // Check every 2 seconds
+  let lastLogTime = 0;
+  const logInterval = 5000; // Log every 5 seconds
   
   while (Date.now() - startTime < maxWaitTime) {
     const pending = pendingTranscriptions.get(sessionId);
     if (!pending || pending.size === 0) {
+      console.log('✅ All transcriptions completed');
       return true; // All transcriptions complete
     }
     
-    console.log(`⏳ Waiting for ${pending.size} transcription(s) to complete...`);
+    // Only log every few seconds to avoid spam
+    const now = Date.now();
+    if (now - lastLogTime > logInterval) {
+      console.log(`⏳ Waiting for ${pending.size} transcription(s) to complete...`);
+      lastLogTime = now;
+    }
+    
     await new Promise(resolve => setTimeout(resolve, checkInterval));
   }
   
-  // Timeout reached
+  // Timeout reached - give extra time for remaining transcriptions
   const remaining = pendingTranscriptions.get(sessionId)?.size || 0;
   if (remaining > 0) {
-    console.log(`⚠️ Timeout: ${remaining} transcription(s) still pending`);
+    console.log(`⚠️ Timeout reached: ${remaining} transcription(s) still pending. Giving extra time...`);
+    
+    // Give an additional 30 seconds for remaining transcriptions
+    const extraWaitTime = 30000;
+    const extraStartTime = Date.now();
+    
+    while (Date.now() - extraStartTime < extraWaitTime) {
+      const stillPending = pendingTranscriptions.get(sessionId);
+      if (!stillPending || stillPending.size === 0) {
+        console.log('✅ All remaining transcriptions completed during extra time');
+        return true;
+      }
+      
+      if (Date.now() - lastLogTime > logInterval) {
+        console.log(`⏳ Extra time: ${stillPending.size} transcription(s) still processing...`);
+        lastLogTime = Date.now();
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, checkInterval));
+    }
+    
+    const finalRemaining = pendingTranscriptions.get(sessionId)?.size || 0;
+    if (finalRemaining > 0) {
+      console.log(`⚠️ Final timeout: ${finalRemaining} transcription(s) could not complete. Proceeding anyway...`);
+    }
   }
   return false;
 }
@@ -651,7 +642,7 @@ function captureUserAudio(connection, userId) {
 
   // 1) Start receiving Opus
   const opusStream = connection.receiver.subscribe(userId, {
-    end: { behavior: EndBehaviorType.AfterSilence, duration: 1500 }
+          end: { behavior: EndBehaviorType.AfterSilence, duration: 2000 }
   });
 
   // 2) Decode to raw 48kHz stereo PCM
@@ -667,17 +658,19 @@ function captureUserAudio(connection, userId) {
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
   const wavPath = path.join(AUDIO_DIR, `${ts}-mono.wav`);
 
-  // 4) Pipe raw PCM into ffmpeg, convert to 16kHz mono
-  const ff = spawn(ffmpegPath, ['-y',
+      // 4) Pipe raw PCM into ffmpeg, convert to 16kHz mono with noise reduction
+    const ff = spawn(ffmpegPath, ['-y',
     '-loglevel', 'error',
     '-f', 's16le',     // input is raw 16-bit PCM
     '-ar', '48000',    // 48k sampling rate
     '-ac', '2',        // stereo
-    '-i', 'pipe:0',    // read from stdin
-
-    '-ac', '1',        // convert to mono
-    '-ar', '16000',    // 16 kHz
-    '-f', 'wav',
+          '-i', 'pipe:0',    // read from stdin
+      // Audio enhancement for better speech recognition
+      '-af', 'highpass=f=200,lowpass=f=3000,volume=1.5',
+      '-ac', '1',        // convert to mono
+          '-ar', '24000',    // 24 kHz (better for Whisper)
+      '-acodec', 'pcm_s16le', // 16-bit PCM
+      '-f', 'wav',
     wavPath,           // output file
   ]);
 
@@ -741,9 +734,31 @@ async function transcribeAudio(wavPath, sessionId, userId) {
   const startTime = Date.now();
 
   try {
+    // Check if file exists and has content
+    if (!fs.existsSync(wavPath)) {
+      console.error(`❌ Audio file not found: ${wavPath}`);
+      return '';
+    }
+    
+    const fileStats = fs.statSync(wavPath);
+    if (fileStats.size === 0) {
+      console.error(`❌ Audio file is empty: ${wavPath}`);
+      return '';
+    }
+    
+    console.log(`🎵 Transcribing audio file: ${fileStats.size} bytes`);
+    
+    // Add file size validation (Whisper has a 25MB limit)
+    if (fileStats.size > 25 * 1024 * 1024) {
+      console.error(`❌ Audio file too large: ${fileStats.size} bytes (max 25MB)`);
+      return '';
+    }
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(wavPath),
       model: 'whisper-1',
+      // No language specified = auto-detect (supports German, English, and others)
+      response_format: 'text',
+      temperature: 0.2 // Lower temperature for more consistent results
     });
     
     const text = typeof transcription === 'string'
@@ -790,10 +805,17 @@ async function transcribeAudio(wavPath, sessionId, userId) {
       console.error('❌ Whisper failed: Rate limit exceeded or insufficient credits');
     } else if (err.code === 'insufficient_quota') {
       console.error('❌ Whisper failed: Quota exceeded - please add credits to your OpenAI account');
-    } else if (err.message.includes('Connection')) {
+    } else if (err.status === 400) {
+      console.error('❌ Whisper failed: Bad request - check audio format or file size');
+    } else if (err.status === 413) {
+      console.error('❌ Whisper failed: File too large (max 25MB)');
+    } else if (err.message.includes('Connection') || err.message.includes('timeout')) {
       console.error('❌ Whisper failed: Connection error - check your internet connection');
+    } else if (err.message.includes('audio_format')) {
+      console.error('❌ Whisper failed: Unsupported audio format');
     } else {
       console.error('❌ Whisper failed:', err.message);
+      console.error('Full error:', err);
     }
     
     return '';
@@ -1183,16 +1205,40 @@ client.on('interactionCreate', async (interaction) => {
       pendingTranscriptions.get(sessionId).add(transcriptionId);
       
       try {
-        // 1) Capture user audio -> 16kHz WAV
+        // 1) Capture user audio -> WAV
         const wavPath = await captureUserAudio(connection, userId);
         if (!wavPath) {
           // Remove from pending if no audio captured
-          pendingTranscriptions.get(sessionId).delete(transcriptionId);
+          const pendingSet = pendingTranscriptions.get(sessionId);
+          if (pendingSet) {
+            pendingSet.delete(transcriptionId);
+          }
           return;
         }
 
-        // 2) Transcribe
-        const text = await transcribeAudio(wavPath, sessionId, userId);
+        // 2) Transcribe with retry logic
+        let text = '';
+        let retries = 2;
+        let lastError = null;
+        
+        while (retries >= 0) {
+          try {
+            text = await transcribeAudio(wavPath, sessionId, userId);
+            break; // Success, exit retry loop
+          } catch (transcribeErr) {
+            lastError = transcribeErr;
+            retries--;
+            if (retries >= 0) {
+              console.log(`🔄 Retrying transcription (${2 - retries}/3)...`);
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+            }
+          }
+        }
+        
+        if (!text && lastError) {
+          throw lastError; // Re-throw the last error if all retries failed
+        }
+        
         if (text?.trim()) {
           const username = await interaction.guild.members
             .fetch(userId)
@@ -1204,11 +1250,17 @@ client.on('interactionCreate', async (interaction) => {
         }
         
         // Mark transcription as complete
-        pendingTranscriptions.get(sessionId).delete(transcriptionId);
+        const pendingSet = pendingTranscriptions.get(sessionId);
+        if (pendingSet) {
+          pendingSet.delete(transcriptionId);
+        }
         
       } catch (err) {
         // Remove from pending on error
-        pendingTranscriptions.get(sessionId).delete(transcriptionId);
+        const pendingSet = pendingTranscriptions.get(sessionId);
+        if (pendingSet) {
+          pendingSet.delete(transcriptionId);
+        }
         
         logger.error("Voice processing failed", {
           extra: {
@@ -1245,6 +1297,10 @@ client.on('interactionCreate', async (interaction) => {
       // Update user with status
       await interaction.editReply('📝 Verarbeite noch offene Transkriptionen...');
       
+      // Give a small delay for any final audio processing to start
+      console.log('⏳ Allowing time for final audio processing...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
       const allComplete = await waitForPendingTranscriptions(sessionId);
       
       if (allComplete) {
@@ -1277,8 +1333,13 @@ client.on('interactionCreate', async (interaction) => {
     }
   
     if (summary) {
-      const ts = new Date().toISOString().replace(/[:.]/g, '-');
-      const baseFileName = `meeting-protokoll-${ts}`;
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hour = String(now.getHours()).padStart(2, '0');
+      const minute = String(now.getMinutes()).padStart(2, '0');
+      const baseFileName = `Meeting_Minutes_${year}_${month}_${day}_${hour}_${minute}`;
       
       // Extract meeting title from summary for better naming
       const titleMatch = summary.match(/Thema.*?-->(.*?)<!--/);
