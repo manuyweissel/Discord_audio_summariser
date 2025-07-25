@@ -941,39 +941,34 @@ async function summarizeTranscript(guildId, channelId) {
           },
           {
             role: 'user',
-            content: `Erstelle ein visuell ansprechendes, professionelles Meeting-Protokoll aus diesem Transkript.
+            content: ```
+Erstelle ein professionelles und visuell ansprechendes Meeting-Protokoll aus dem folgenden Transkript. Achte darauf, die vorgegebene Vorlage genau zu befolgen, um ein konsistentes Erscheinungsbild zu gewährleisten.
 
 TRANSKRIPT:
 ${transcript}
 
-VORLAGE (exakt befolgen):
+VORLAGE (bitte exakt befolgen):
 ${blueprint}
 
-STYLING-ANWEISUNGEN:
-✨ **Visuelle Exzellenz:**
-- Verwende die EXAKTE Vorlage mit allen Emojis und Formatierungen
-- Behalte alle Tabellen, Divider (---) und HTML-Elemente bei
-- Nutze aussagekräftige Emojis für bessere Lesbarkeit
-- Verwende **fett** und *kursiv* für Hervorhebungen
-
-📊 **Status-Indikatoren verwenden:**
-- 🟢 für abgeschlossene/positive Punkte
-- 🟡 für in Bearbeitung/ausstehende Punkte  
-- 🔴 für kritische/dringende Punkte
-- ⚪ für offene/neue Punkte
+📊 **Status-Indikatoren:**
+- Verwende 🟢 für abgeschlossene/positive Punkte.
+- Verwende 🟡 für in Bearbeitung/ausstehende Punkte.
+- Verwende 🔴 für kritische/dringende Punkte.
+- Verwende ⚪ für offene/neue Punkte.
 
 🎯 **Inhaltliche Qualität:**
-- Extrahiere konkrete Entscheidungen und Beschlüsse
-- Identifiziere klare Action Items mit Verantwortlichen
-- Fokussiere auf messbare Ergebnisse
-- Verwende präzise, professionelle deutsche Geschäftssprache
+- Extrahiere klare Entscheidungen und Beschlüsse.
+- Identifiziere spezifische Action Items mit den jeweiligen Verantwortlichen.
+- Fokussiere auf messbare Ergebnisse und konkrete Handlungen.
+- Verwende präzise, professionelle Geschäftssprache auf Deutsch.
 
 📅 **Automatische Ergänzungen:**
-- Setze das heutige Datum: ${new Date().toLocaleDateString('de-DE')}
-- Schätze die Meeting-Dauer basierend auf dem Transkript
-- Markiere unbekannte Infos mit "<!-- zu ergänzen -->"
+- Setze das heutige Datum in das Protokoll: ${new Date().toLocaleDateString('de-DE')}.
+- Schätze die Meeting-Dauer basierend auf dem Transkript.
+- Markiere unbekannte Informationen mit "".
 
-Das Ergebnis soll visuell beeindruckend und business-ready sein!`
+FORMAT: Das Ergebnis soll als ein formatierter Text im Markdown-Stil ausgegeben werden und visuell beeindruckend sowie business-ready sein!
+```
           }
         ]
       });
@@ -1024,20 +1019,20 @@ Das Ergebnis soll visuell beeindruckend und business-ready sein!`
             },
             {
               role: 'user',
-              content: `Analysiere diesen Transkript-Abschnitt und extrahiere Schlüsselinformationen:
+              content: `Analysiere den folgenden Abschnitt des Transkripts und extrahiere die wichtigsten Informationen in klarer, strukturierter Form:
 
-📋 **ABSCHNITT ${i + 1} von ${textChunks.length}:**
+📋 **TRANSKRIPT-ABSCHNITT ${i + 1} von ${textChunks.length}:**  
 ${chunk}
 
-🔍 **Fokus auf diese Kategorien:**
-- 🎯 **Entscheidungen:** Konkrete Beschlüsse und Vereinbarungen
-- 📋 **Action Items:** Aufgaben mit Verantwortlichen und Fristen  
-- 💬 **Key Discussions:** Wichtige Diskussionspunkte
-- ⏰ **Termine:** Deadlines und Meilensteine
-- 📊 **Projektplan:** Änderungen oder Updates
-- ⚠️ **Risiken:** Probleme oder Blocker
+🔍 **Bitte konzentriere dich auf die folgenden Kategorien:**
+- 🎯 **Entscheidungen:** Dokumentiere alle konkreten Beschlüsse und Vereinbarungen, die während des Meetings getroffen wurden.
+- 📋 **Action Items:** Liste alle Aufgaben auf, einschließlich der verantwortlichen Personen und der vereinbarten Fristen.
+- 💬 **Key Discussions:** Halte die wichtigsten Diskussionspunkte fest, die während des Meetings angesprochen wurden.
+- ⏰ **Termine:** Identifiziere alle Deadlines und Meilensteine, die gesetzt wurden.
+- 📊 **Projektplan:** Notiere Änderungen oder Updates zum Projektplan.
+- ⚠️ **Risiken:** Beschreibe alle identifizierten Probleme oder Blocker, die das Projekt betreffen könnten.
 
-**Format:** Verwende Emojis, Bullet Points und strukturierte Listen für maximale Klarheit.`
+**Format:** Präsentiere die Informationen in einer Liste mit Bullet Points. Verwende Emojis für jede Kategorie zur besseren Visualisierung. Achte darauf, prägnant und klar zu formulieren. Der gesamte Output sollte in einem professionellen Protokollstil verfasst sein, der für Meeting Minutes geeignet ist.`
             }
           ]
         });
@@ -1080,32 +1075,28 @@ ${chunk}
           },
           {
             role: 'user',
-            content: `Konsolidiere diese Abschnitte zu einem visuell beeindruckenden Meeting-Protokoll.
+            content: `
+Konsolidiere die folgenden Abschnitte zu einem professionellen und visuell ansprechenden Meeting-Protokoll im PDF-Format.
 
 📊 **ZUSAMMENGEFASSTE ABSCHNITTE:**
 ${finalInput}
 
-🎨 **DESIGN-VORLAGE (exakt befolgen):**
+🎨 **DESIGN-VORLAGE (bitte exakt befolgen):**
 ${blueprint}
 
-✨ **STYLING & KONSOLIDIERUNG:**
-- **Visuelle Exzellenz:** Behalte ALLE Emojis, Tabellen und Formatierungen der Vorlage
-- **Smart Consolidation:** Kombiniere ähnliche Punkte aus verschiedenen Abschnitten intelligent
-- **Status-Indikatoren:** Nutze 🟢🟡🔴⚪ für verschiedene Status-Kategorien
-- **Prioritäten:** Verwende 🔥-Emojis für Dringlichkeit (🔴 Critical, 🟡 Medium, 🟢 Low)
-
 📋 **INHALTLICHE KONSOLIDIERUNG:**
-- Eliminiere Duplikate zwischen Abschnitten
-- Gruppiere verwandte Action Items intelligent
-- Priorisiere Entscheidungen nach Wichtigkeit
-- Erstelle kohärente Timeline aus allen Terminen
+- Eliminiere Duplikate zwischen den Abschnitten.
+- Gruppiere verwandte Action Items sinnvoll.
+- Priorisiere Entscheidungen nach ihrer Wichtigkeit.
+- Erstelle eine kohärente Timeline aus allen relevanten Terminen.
 
 📅 **AUTO-VERVOLLSTÄNDIGUNG:**
 - Heutiges Datum: ${new Date().toLocaleDateString('de-DE')}
-- Geschätzte Meeting-Dauer aus Transkript-Umfang
-- Professionelle deutsche Geschäftssprache
+- Schätze die Meeting-Dauer basierend auf dem Umfang des Transkripts.
+- Verwende eine professionelle deutsche Geschäftssprache.
 
-Das finale Protokoll soll ein Executive-Level Dokument sein, das sofort präsentationsreif ist!`
+Das finale Protokoll soll ein Executive-Level Dokument sein, das sofort für Präsentationen geeignet ist und eine klare Struktur sowie ein ansprechendes Design aufweist!
+`
           }
         ]
       });
