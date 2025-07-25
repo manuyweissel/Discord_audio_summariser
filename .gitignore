@@ -3,3 +3,4 @@ node_modules/
 audios/
 summaries/
 transcripts/
+.venv/

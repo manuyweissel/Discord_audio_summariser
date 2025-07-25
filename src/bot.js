@@ -17,9 +17,504 @@ import path from 'node:path';
 import OpenAI from 'openai';
 import { spawn } from 'node:child_process';
 import ffmpegPath from 'ffmpeg-static';
+import { createLogger, format, transports } from 'winston';
+import { v4 as uuidv4 } from 'uuid';
+import MarkdownIt from 'markdown-it';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } from 'docx';
 
+// ---------- Logging Setup ----------
+const logger = createLogger({
+  level: 'info', // Changed from debug to reduce verbosity
+  format: format.combine(
+    format.timestamp({ format: 'HH:mm:ss' }),
+    format.errors({ stack: true }),
+    format.printf(({ level, message, timestamp, extra }) => {
+      // Simplified console format
+      if (extra) {
+        return `${timestamp} [${level.toUpperCase()}] ${message} | ${extra.action}:${extra.event}`;
+      }
+      return `${timestamp} [${level.toUpperCase()}] ${message}`;
+    })
+  ),
+  transports: [
+    new transports.Console(),
+    new transports.File({ 
+      filename: 'discord-bot.log',
+      format: format.combine(
+        format.timestamp(),
+        format.json()
+      )
+    })
+  ]
+});
+
+// Helper function to calculate duration
+function calculateDurationMs(startTime) {
+  return Date.now() - startTime;
+}
+
+// Initialize markdown parser
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true
+});
+
+// Helper function to convert markdown to beautiful HTML
+function convertToHTML(markdownContent, meetingTitle = "Meeting") {
+  try {
+    // Load HTML template
+    const templatePath = path.join(process.cwd(), 'meeting_template.html');
+    let htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+    
+    // Convert markdown to HTML
+    const htmlContent = md.render(markdownContent);
+    
+    // Extract some metadata for template variables
+    const currentDate = new Date().toLocaleDateString('de-DE');
+    const timestamp = new Date().toLocaleString('de-DE');
+    
+    // Simple extraction of metrics (could be enhanced)
+    const participantCount = (htmlContent.match(/Anwesend/g) || []).length;
+    const actionItemCount = (htmlContent.match(/🎯|Aufgabe/g) || []).length;
+    const estimatedDuration = Math.max(30, Math.min(120, markdownContent.length / 100)); // Rough estimate
+    
+    // Replace template variables
+    htmlTemplate = htmlTemplate
+      .replace(/{{MEETING_TITLE}}/g, meetingTitle)
+      .replace(/{{MEETING_DATE}}/g, currentDate)
+      .replace(/{{CONTENT}}/g, htmlContent)
+      .replace(/{{DURATION}}/g, Math.round(estimatedDuration))
+      .replace(/{{PARTICIPANTS}}/g, participantCount || 'N/A')
+      .replace(/{{ACTION_ITEMS}}/g, actionItemCount || '0')
+      .replace(/{{TIMESTAMP}}/g, timestamp);
+    
+    return htmlTemplate;
+  } catch (error) {
+    console.error('Failed to convert to HTML:', error);
+    return null;
+  }
+}
+
+// Helper function to create professional Word document
+async function convertToWordDoc(markdownContent, meetingTitle = "Meeting") {
+  try {
+    const currentDate = new Date().toLocaleDateString('de-DE');
+    const timestamp = new Date().toLocaleString('de-DE');
+    
+    // Parse markdown content to extract structured information
+    const lines = markdownContent.split('\n');
+    const docElements = [];
+    
+    // Document title
+    docElements.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "📋 Meeting Protokoll",
+            bold: true,
+            size: 32,
+            color: "2563EB"
+          })
+        ],
+        heading: HeadingLevel.TITLE,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 400 }
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `${meetingTitle} • ${currentDate}`,
+            size: 20,
+            color: "64748B"
+          })
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 600 }
+      })
+    );
+    
+    // Process markdown content
+    let currentSection = "";
+    let inTable = false;
+    let tableRows = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line.startsWith('##')) {
+        // Finish any open table
+        if (inTable && tableRows.length > 0) {
+          docElements.push(createWordTable(tableRows));
+          tableRows = [];
+          inTable = false;
+        }
+        
+        // Section heading
+        const headingText = line.replace(/^##\s*/, '').replace(/\*\*/g, '').replace(/🏢|👥|🎯|📊|📝|🗓️|⚠️|📋/g, '').trim();
+        docElements.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: line.replace(/^##\s*/, ''),
+                bold: true,
+                size: 24,
+                color: "1E40AF"
+              })
+            ],
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 }
+          })
+        );
+      } else if (line.startsWith('###')) {
+        // Subsection heading
+        const headingText = line.replace(/^###\s*/, '');
+        docElements.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: headingText,
+                bold: true,
+                size: 20,
+                color: "3B82F6"
+              })
+            ],
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 300, after: 150 }
+          })
+        );
+      } else if (line.includes('|') && line.includes('-')) {
+        // Table header separator - start table
+        inTable = true;
+      } else if (line.includes('|') && inTable) {
+        // Table row
+        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+        if (cells.length > 0) {
+          tableRows.push(cells);
+        }
+      } else if (line.includes('|') && !inTable) {
+        // Simple table row (start new table)
+        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+        if (cells.length > 0) {
+          tableRows = [cells];
+          inTable = true;
+        }
+      } else if (line && !inTable) {
+        // Regular paragraph
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+          // Bullet point
+          const bulletText = line.replace(/^[-*]\s*/, '').replace(/\*\*/g, '');
+          docElements.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `• ${bulletText}`,
+                  size: 22
+                })
+              ],
+              spacing: { after: 100 }
+            })
+          );
+        } else if (line.startsWith('>')) {
+          // Quote/Note
+          const quoteText = line.replace(/^>\s*/, '').replace(/\*\*/g, '');
+          docElements.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: quoteText,
+                  italic: true,
+                  size: 20,
+                  color: "6B7280"
+                })
+              ],
+              spacing: { after: 150 }
+            })
+          );
+        } else if (line.length > 0 && !line.startsWith('<') && !line.includes('<!--')) {
+          // Regular text
+          const cleanText = line.replace(/\*\*/g, '').replace(/📋|📅|👥|🎯|📊|⚠️|✅|❌|🟢|🟡|🔴|⚪|🔥/g, '');
+          if (cleanText.trim()) {
+            docElements.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: cleanText,
+                    size: 22
+                  })
+                ],
+                spacing: { after: 120 }
+              })
+            );
+          }
+        }
+      } else if (!line && inTable && tableRows.length > 0) {
+        // End of table
+        docElements.push(createWordTable(tableRows));
+        tableRows = [];
+        inTable = false;
+      }
+    }
+    
+    // Handle any remaining table
+    if (inTable && tableRows.length > 0) {
+      docElements.push(createWordTable(tableRows));
+    }
+    
+    // Footer
+    docElements.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `📝 Automatisch generiert durch Meeting-Bot • 🔄 ${timestamp}`,
+            size: 18,
+            color: "9CA3AF",
+            italics: true
+          })
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 600 }
+      })
+    );
+    
+    // Create document
+    const doc = new Document({
+      sections: [{
+        children: docElements,
+        properties: {
+          page: {
+            margin: {
+              top: 1440,    // 1 inch
+              right: 1440,
+              bottom: 1440,
+              left: 1440,
+            },
+          },
+        },
+      }],
+    });
+    
+    return await Packer.toBuffer(doc);
+  } catch (error) {
+    console.error('Failed to convert to Word:', error);
+    return null;
+  }
+}
+
+// Helper function to create Word table
+function createWordTable(rows) {
+  if (!rows || rows.length === 0) return new Paragraph({ children: [] });
+  
+  const tableRows = rows.map((row, index) => {
+    const cells = row.map(cellText => {
+      const cleanText = cellText.replace(/\*\*/g, '').replace(/🟢|🟡|🔴|⚪|🔥|📋|📅|👥|🎯|📊|⚠️|✅|❌/g, '').trim();
+      
+      return new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: cleanText,
+                bold: index === 0, // Header row
+                size: index === 0 ? 20 : 18,
+                color: index === 0 ? "FFFFFF" : "000000"
+              })
+            ],
+            alignment: AlignmentType.LEFT
+          })
+        ],
+        shading: {
+          fill: index === 0 ? "3B82F6" : (index % 2 === 0 ? "F8FAFC" : "FFFFFF")
+        },
+        margins: {
+          top: 200,
+          bottom: 200,
+          left: 300,
+          right: 300,
+        }
+      });
+    });
+    
+    return new TableRow({
+      children: cells
+    });
+  });
+  
+  return new Table({
+    rows: tableRows,
+    width: {
+      size: 100,
+      type: WidthType.PERCENTAGE,
+    },
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+      left: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+      right: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+      insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+      insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "E5E7EB" },
+    },
+  });
+}
+
+// Helper function to wait for all transcriptions to complete
+async function waitForPendingTranscriptions(sessionId, maxWaitTime = 30000) {
+  const startTime = Date.now();
+  const checkInterval = 500; // Check every 500ms
+  
+  while (Date.now() - startTime < maxWaitTime) {
+    const pending = pendingTranscriptions.get(sessionId);
+    if (!pending || pending.size === 0) {
+      return true; // All transcriptions complete
+    }
+    
+    console.log(`⏳ Waiting for ${pending.size} transcription(s) to complete...`);
+    await new Promise(resolve => setTimeout(resolve, checkInterval));
+  }
+  
+  // Timeout reached
+  const remaining = pendingTranscriptions.get(sessionId)?.size || 0;
+  if (remaining > 0) {
+    console.log(`⚠️ Timeout: ${remaining} transcription(s) still pending`);
+  }
+  return false;
+}
+
+// ---------- Environment and API Setup ----------
 const openai = new OpenAI(); // uses OPENAI_API_KEY env
 const BOT_TOKEN = process.env.DISCORD_TOKEN;
+
+// Log startup configuration
+const startupEventId = uuidv4();
+logger.info("Bot startup initiated", {
+  extra: {
+    footprint: null,
+    batch_uuid: startupEventId,
+    user_id: null,
+    event_id: uuidv4(),
+    action: "bot_startup",
+    event: "start"
+  }
+});
+
+// Validate environment variables
+if (!BOT_TOKEN) {
+  logger.error("Missing DISCORD_TOKEN environment variable", {
+    extra: {
+      footprint: null,
+      batch_uuid: startupEventId,
+      user_id: null,
+      event_id: uuidv4(),
+      action: "bot_startup",
+      event: "error"
+    }
+  });
+  process.exit(1);
+}
+
+if (!process.env.OPENAI_API_KEY) {
+  logger.error("Missing OPENAI_API_KEY environment variable", {
+    extra: {
+      footprint: null,
+      batch_uuid: startupEventId,
+      user_id: null,
+      event_id: uuidv4(),
+      action: "bot_startup",
+      event: "error"
+    }
+  });
+  process.exit(1);
+}
+
+// Test OpenAI API key validity at startup
+async function validateOpenAIKey() {
+  const validationEventId = uuidv4();
+  const startTime = Date.now();
+  
+  logger.debug("Validating OpenAI API key", {
+    extra: {
+      footprint: null,
+      batch_uuid: startupEventId,
+      user_id: null,
+      event_id: validationEventId,
+      action: "openai_validation",
+      event: "start"
+    }
+  });
+
+  try {
+    // Test with a minimal API call to check key validity and billing status
+    const models = await openai.models.list();
+    
+    logger.info("OpenAI API key validation successful", {
+      extra: {
+        footprint: null,
+        batch_uuid: startupEventId,
+        user_id: null,
+        event_id: validationEventId,
+        action: "openai_validation",
+        event: "complete",
+        duration_ms: calculateDurationMs(startTime)
+      }
+    });
+    
+    return true;
+  } catch (error) {
+    logger.error("OpenAI API key validation failed", {
+      extra: {
+        footprint: null,
+        batch_uuid: startupEventId,
+        user_id: null,
+        event_id: validationEventId,
+        action: "openai_validation",
+        event: "error",
+        duration_ms: calculateDurationMs(startTime),
+        error_type: error.constructor.name,
+        error_message: error.message,
+        error_code: error.code,
+        error_status: error.status
+      }
+    });
+    
+    // Check for common API key issues
+    if (error.status === 401) {
+      logger.error("Invalid OpenAI API key - check your OPENAI_API_KEY environment variable", {
+        extra: {
+          footprint: null,
+          batch_uuid: startupEventId,
+          user_id: null,
+          event_id: uuidv4(),
+          action: "openai_validation",
+          event: "error"
+        }
+      });
+    } else if (error.status === 429) {
+      logger.error("OpenAI API rate limit exceeded or insufficient credits", {
+        extra: {
+          footprint: null,
+          batch_uuid: startupEventId,
+          user_id: null,
+          event_id: uuidv4(),
+          action: "openai_validation",
+          event: "error"
+        }
+      });
+    } else if (error.code === 'insufficient_quota') {
+      logger.error("OpenAI API quota exceeded - please add credits to your account", {
+        extra: {
+          footprint: null,
+          batch_uuid: startupEventId,
+          user_id: null,
+          event_id: uuidv4(),
+          action: "openai_validation",
+          event: "error"
+        }
+      });
+    }
+    
+    return false;
+  }
+}
 
 const client = new Client({
   intents: [
@@ -30,47 +525,85 @@ const client = new Client({
   ],
 });
 
-// ---------- raw-audio storage ----------
+// ---------- Storage Setup ----------
 const AUDIO_DIR = path.join(process.cwd(), 'audios');
-fs.mkdirSync(AUDIO_DIR, { recursive: true });
-
-// ---------- simple file logger ----------
 const TRANSCRIPT_DIR = path.join(process.cwd(), 'transcripts');
-fs.mkdirSync(TRANSCRIPT_DIR, { recursive: true });
-
-// ---------- summary storage ----------
 const SUMMARY_DIR = path.join(process.cwd(), 'summaries');
+
+fs.mkdirSync(AUDIO_DIR, { recursive: true });
+fs.mkdirSync(TRANSCRIPT_DIR, { recursive: true });
 fs.mkdirSync(SUMMARY_DIR, { recursive: true });
 
 function makeLogFileName(guildId, channelId) {
-  // e.g. 2025-04-27T18-45-12
   const ts = new Date().toISOString().replace(/:/g, '-').split('.')[0];
   return path.join(TRANSCRIPT_DIR, `${guildId}-${channelId}-${ts}.log`);
 }
+
 const sessionLogs = new Map();
+const pendingTranscriptions = new Map(); // Track pending transcriptions by session
 
 function writeTranscript(guildId, channelId, username, text) {
   const key = `${guildId}:${channelId}`;
   if (!sessionLogs.has(key)) {
     sessionLogs.set(key, makeLogFileName(guildId, channelId));
   }
+  
   const logFile = sessionLogs.get(key);
   const line = `[${new Date().toISOString()}] ${username}: ${text}\n`;
+  
   fs.appendFile(logFile, line, (err) => {
-    if (err) console.error('❌ Failed to write transcript:', err);
+    if (err) {
+      logger.error("Failed to write transcript", {
+        extra: {
+          footprint: null,
+          batch_uuid: `${guildId}:${channelId}`,
+          user_id: username,
+          event_id: uuidv4(),
+          action: "transcript_write",
+          event: "error"
+        }
+      });
+    }
   });
 }
 
-// ---------- slash commands ----------
+// ---------- Slash Commands Setup ----------
 const commands = [
   new SlashCommandBuilder().setName('join')
-    .setDescription('Join the caller’s voice channel & start transcribing'),
+    .setDescription('Join the caller\'s voice channel & start transcribing'),
   new SlashCommandBuilder().setName('leave')
     .setDescription('Leave the current voice channel'),
 ];
 
 client.once('ready', async () => {
-  console.log(`Logged in as ${client.user.tag}`);
+  const readyEventId = uuidv4();
+  const startTime = Date.now();
+  
+  logger.info("Discord client ready", {
+    extra: {
+      footprint: null,
+      batch_uuid: startupEventId,
+      user_id: null,
+      event_id: readyEventId,
+      action: "discord_ready",
+      event: "start"
+    }
+  });
+
+  // Validate OpenAI API key
+  const isApiKeyValid = await validateOpenAIKey();
+  if (!isApiKeyValid) {
+    logger.error("Bot will continue but OpenAI features may not work", {
+      extra: {
+        footprint: null,
+        batch_uuid: startupEventId,
+        user_id: null,
+        event_id: uuidv4(),
+        action: "discord_ready",
+        event: "warning"
+      }
+    });
+  }
 
   const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
 
@@ -79,14 +612,43 @@ client.once('ready', async () => {
       Routes.applicationCommands(client.user.id),
       { body: commands.map(cmd => cmd.toJSON()) }
     );
-    console.log('✅ Slash commands registered');
+    
+    logger.info("Slash commands registered successfully", {
+      extra: {
+        footprint: null,
+        batch_uuid: startupEventId,
+        user_id: null,
+        event_id: readyEventId,
+        action: "discord_ready",
+        event: "complete",
+        duration_ms: calculateDurationMs(startTime)
+      }
+    });
+    
+    console.log(`✅ Bot ready: ${client.user.tag}`);
+    console.log('✅ Commands registered');
+    
   } catch (err) {
-    console.error('❌ Failed to register slash commands:', err);
+    logger.error("Failed to register slash commands", {
+      extra: {
+        footprint: null,
+        batch_uuid: startupEventId,
+        user_id: null,
+        event_id: readyEventId,
+        action: "discord_ready",
+        event: "error",
+        duration_ms: calculateDurationMs(startTime)
+      }
+    }, err);
   }
 });
 
-// ---------- single-step captureUserAudio ----------
+// ---------- Audio Capture Function ----------
 function captureUserAudio(connection, userId) {
+  const captureEventId = uuidv4();
+  const sessionId = `${connection.joinConfig.guildId}:${connection.joinConfig.channelId}`;
+  const startTime = Date.now();
+
   // 1) Start receiving Opus
   const opusStream = connection.receiver.subscribe(userId, {
     end: { behavior: EndBehaviorType.AfterSilence, duration: 1500 }
@@ -124,12 +686,25 @@ function captureUserAudio(connection, userId) {
   return new Promise((resolve, reject) => {
     ff.on('close', code => {
       if (code !== 0) {
+        logger.error("FFmpeg conversion failed", {
+          extra: {
+            footprint: null,
+            batch_uuid: sessionId,
+            user_id: userId,
+            event_id: captureEventId,
+            action: "audio_capture",
+            event: "error",
+            duration_ms: calculateDurationMs(startTime),
+            ffmpeg_exit_code: code
+          }
+        });
         reject(new Error(`ffmpeg exit code ${code}`));
       } else {
         // We have a valid 16 kHz mono WAV at wavPath
         const bytes = fs.existsSync(wavPath)
           ? fs.statSync(wavPath).size
           : 0;
+        
         if (bytes < 16_000) {
           // Less than ~0.2 seconds, skip
           fs.unlinkSync(wavPath);
@@ -140,41 +715,97 @@ function captureUserAudio(connection, userId) {
         }
       }
     });
-    ff.on('error', reject);
+    
+    ff.on('error', (error) => {
+      logger.error("FFmpeg process error", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: userId,
+          event_id: captureEventId,
+          action: "audio_capture",
+          event: "error",
+          duration_ms: calculateDurationMs(startTime)
+        }
+      }, error);
+      reject(error);
+    });
   });
 }
 
-// ---------- simpler transcribeAudio ----------
-async function transcribeAudio(wavPath) {
+// ---------- Audio Transcription Function ----------
+async function transcribeAudio(wavPath, sessionId, userId) {
   if (!wavPath) return '';
+
+  const transcribeEventId = uuidv4();
+  const startTime = Date.now();
 
   try {
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(wavPath),
       model: 'whisper-1',
     });
-    const text =
-      typeof transcription === 'string'
-        ? transcription
-        : transcription.text ?? '';
-    console.log('📝 Whisper →', text || '[empty]');
+    
+    const text = typeof transcription === 'string'
+      ? transcription
+      : transcription.text ?? '';
+    
+    if (text?.trim()) {
+      console.log('📝 Whisper →', text);
+      logger.info("Transcription successful", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: userId,
+          event_id: transcribeEventId,
+          action: "audio_transcription",
+          event: "complete"
+        }
+      });
+    }
+    
     return text;
+    
   } catch (err) {
-    console.error('❌ Whisper failed:', err.message);
+    logger.error("Audio transcription failed", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: userId,
+        event_id: transcribeEventId,
+        action: "audio_transcription",
+        event: "error",
+        duration_ms: calculateDurationMs(startTime),
+        error_type: err.constructor.name,
+        error_message: err.message,
+        error_code: err.code,
+        error_status: err.status
+      }
+    });
+    
+    // Specific error handling for different OpenAI API issues
+    if (err.status === 401) {
+      console.error('❌ Whisper failed: Invalid API key - check your OpenAI account');
+    } else if (err.status === 429) {
+      console.error('❌ Whisper failed: Rate limit exceeded or insufficient credits');
+    } else if (err.code === 'insufficient_quota') {
+      console.error('❌ Whisper failed: Quota exceeded - please add credits to your OpenAI account');
+    } else if (err.message.includes('Connection')) {
+      console.error('❌ Whisper failed: Connection error - check your internet connection');
+    } else {
+      console.error('❌ Whisper failed:', err.message);
+    }
+    
     return '';
   }
 }
 
-// ---------- helper to approximate token count ----------
+// ---------- Token Estimation Functions ----------
 function approximateTokens(str) {
-  // Rough approximation: 1 token ~ 4 characters in English
-  // (For German or multi-lingual content, still approximate.)
   return Math.ceil(str.length / 4);
 }
 
-// ---------- helper to chunk text if it’s too large ----------
 function chunkTextByTokens(text, maxTokens = 6000) {
-  // We'll chunk by characters, ensuring each chunk ~ maxTokens * 4 characters
   const maxChars = maxTokens * 4;
   const chunks = [];
 
@@ -188,94 +819,334 @@ function chunkTextByTokens(text, maxTokens = 6000) {
   return chunks;
 }
 
-// ---------- summarize Transcript (with chunking if needed) ----------
+// ---------- Transcript Summarization Function ----------
 async function summarizeTranscript(guildId, channelId) {
+  const summarizeEventId = uuidv4();
+  const sessionId = `${guildId}:${channelId}`;
+  const startTime = Date.now();
+  
+  logger.debug("Starting transcript summarization", {
+    extra: {
+      footprint: null,
+      batch_uuid: sessionId,
+      user_id: null,
+      event_id: summarizeEventId,
+      action: "transcript_summarization",
+      event: "start"
+    }
+  });
+
   const key = `${guildId}:${channelId}`;
   const logFile = sessionLogs.get(key);
-  if (!logFile || !fs.existsSync(logFile)) return null;
+  
+  if (!logFile || !fs.existsSync(logFile)) {
+    logger.warning("No transcript file found for summarization", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: summarizeEventId,
+        action: "transcript_summarization",
+        event: "error",
+        duration_ms: calculateDurationMs(startTime)
+      }
+    });
+    return null;
+  }
 
   const transcript = fs.readFileSync(logFile, 'utf-8');
-  if (!transcript.trim()) return null;
+  if (!transcript.trim()) {
+    logger.warning("Empty transcript found", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: summarizeEventId,
+        action: "transcript_summarization",
+        event: "error",
+        duration_ms: calculateDurationMs(startTime)
+      }
+    });
+    return null;
+  }
 
   const totalTokens = approximateTokens(transcript);
-  console.log(`Transcript is ~${totalTokens} tokens`);
+  
+  logger.info("Processing transcript for summarization", {
+    extra: {
+      footprint: null,
+      batch_uuid: sessionId,
+      user_id: null,
+      event_id: summarizeEventId,
+      action: "transcript_summarization",
+      event: "validate_input",
+      estimated_tokens: totalTokens,
+      transcript_length: transcript.length
+    }
+  });
 
-  // If the transcript is short enough, just do a single summarization
-  if (totalTokens <= 6000) {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',  // changed to gpt-4o
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful assistant that turns raw meeting transcripts into concise "Meeting Protokoll" in German, with timestamps and bullet points.'
-        },
-        {
-          role: 'user',
-          content: `Bitte fasse dieses Transkript in ein Meeting-Protokoll zusammen:\n\n${transcript}`
-        }
-      ]
-    });
+  try {
+    let summary;
+    
+    if (totalTokens <= 6000) {
+      // Load the meeting minutes blueprint
+      const blueprintPath = path.join(process.cwd(), 'meeting_minutes_blueprint.md');
+      let blueprint = '';
+      
+      try {
+        blueprint = fs.readFileSync(blueprintPath, 'utf-8');
+      } catch (err) {
+        logger.error("Failed to load meeting minutes blueprint", {
+          extra: {
+            footprint: null,
+            batch_uuid: sessionId,
+            user_id: null,
+            event_id: uuidv4(),
+            action: "blueprint_load",
+            event: "error"
+          }
+        }, err);
+        blueprint = 'Standard meeting minutes template not found. Please create a basic summary.';
+      }
 
-    return completion.choices[0].message.content.trim();
-
-  } else {
-    // Otherwise we chunk the transcript, summarize each chunk, then do a final summary
-    console.log('Transcript is too large; chunking...');
-    const textChunks = chunkTextByTokens(transcript, 6000);
-    const partialSummaries = [];
-
-    // Summarize each chunk
-    for (let i = 0; i < textChunks.length; i++) {
-      const chunk = textChunks[i];
-      console.log(`Summarizing chunk ${i + 1} of ${textChunks.length}...`);
-
+      // Single summarization for shorter transcripts
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4o', 
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that turns raw meeting transcripts into concise "Meeting Protokoll" in German, with timestamps and bullet points.'
+            content: 'You are an expert executive assistant specializing in creating visually stunning, professionally formatted German meeting protocols. You excel at transforming raw transcripts into polished, business-ready documents with excellent visual hierarchy and modern formatting.'
           },
           {
             role: 'user',
-            content: `Hier ist ein Teil des Transkripts. Bitte fasse diesen Abschnitt zusammen:\n\n${chunk}`
+            content: `Erstelle ein visuell ansprechendes, professionelles Meeting-Protokoll aus diesem Transkript.
+
+TRANSKRIPT:
+${transcript}
+
+VORLAGE (exakt befolgen):
+${blueprint}
+
+STYLING-ANWEISUNGEN:
+✨ **Visuelle Exzellenz:**
+- Verwende die EXAKTE Vorlage mit allen Emojis und Formatierungen
+- Behalte alle Tabellen, Divider (---) und HTML-Elemente bei
+- Nutze aussagekräftige Emojis für bessere Lesbarkeit
+- Verwende **fett** und *kursiv* für Hervorhebungen
+
+📊 **Status-Indikatoren verwenden:**
+- 🟢 für abgeschlossene/positive Punkte
+- 🟡 für in Bearbeitung/ausstehende Punkte  
+- 🔴 für kritische/dringende Punkte
+- ⚪ für offene/neue Punkte
+
+🎯 **Inhaltliche Qualität:**
+- Extrahiere konkrete Entscheidungen und Beschlüsse
+- Identifiziere klare Action Items mit Verantwortlichen
+- Fokussiere auf messbare Ergebnisse
+- Verwende präzise, professionelle deutsche Geschäftssprache
+
+📅 **Automatische Ergänzungen:**
+- Setze das heutige Datum: ${new Date().toLocaleDateString('de-DE')}
+- Schätze die Meeting-Dauer basierend auf dem Transkript
+- Markiere unbekannte Infos mit "<!-- zu ergänzen -->"
+
+Das Ergebnis soll visuell beeindruckend und business-ready sein!`
           }
         ]
       });
 
-      const partialSummary = completion.choices[0].message.content.trim();
-      partialSummaries.push(partialSummary);
+      summary = completion.choices[0].message.content.trim();
+
+    } else {
+      // Chunked summarization for longer transcripts
+      logger.info("Transcript requires chunking", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: null,
+          event_id: uuidv4(),
+          action: "transcript_summarization",
+          event: "validate_input"
+        }
+      });
+      
+      const textChunks = chunkTextByTokens(transcript, 6000);
+      const partialSummaries = [];
+
+      // Summarize each chunk
+      for (let i = 0; i < textChunks.length; i++) {
+        const chunkEventId = uuidv4();
+        const chunkStartTime = Date.now();
+        
+        logger.debug("Processing transcript chunk", {
+          extra: {
+            footprint: null,
+            batch_uuid: sessionId,
+            user_id: null,
+            event_id: chunkEventId,
+            action: "chunk_summarization",
+            event: "start",
+            chunk_index: i + 1,
+            total_chunks: textChunks.length
+          }
+        });
+
+        const chunk = textChunks[i];
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-4o', 
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert meeting analyst who extracts and structures key information from transcript segments. Focus on actionable items, decisions, and important business discussions. Present findings in clear, formatted German.'
+            },
+            {
+              role: 'user',
+              content: `Analysiere diesen Transkript-Abschnitt und extrahiere Schlüsselinformationen:
+
+📋 **ABSCHNITT ${i + 1} von ${textChunks.length}:**
+${chunk}
+
+🔍 **Fokus auf diese Kategorien:**
+- 🎯 **Entscheidungen:** Konkrete Beschlüsse und Vereinbarungen
+- 📋 **Action Items:** Aufgaben mit Verantwortlichen und Fristen  
+- 💬 **Key Discussions:** Wichtige Diskussionspunkte
+- ⏰ **Termine:** Deadlines und Meilensteine
+- 📊 **Projektplan:** Änderungen oder Updates
+- ⚠️ **Risiken:** Probleme oder Blocker
+
+**Format:** Verwende Emojis, Bullet Points und strukturierte Listen für maximale Klarheit.`
+            }
+          ]
+        });
+
+        const partialSummary = completion.choices[0].message.content.trim();
+        partialSummaries.push(partialSummary);
+        
+        logger.info("Transcript chunk processed", {
+          extra: {
+            footprint: null,
+            batch_uuid: sessionId,
+            user_id: null,
+            event_id: chunkEventId,
+            action: "chunk_summarization",
+            event: "complete",
+            duration_ms: calculateDurationMs(chunkStartTime),
+            chunk_index: i + 1
+          }
+        });
+      }
+
+      // Load the blueprint for final summarization too
+      const blueprintPath = path.join(process.cwd(), 'meeting_minutes_blueprint.md');
+      let blueprint = '';
+      
+      try {
+        blueprint = fs.readFileSync(blueprintPath, 'utf-8');
+      } catch (err) {
+        blueprint = 'Standard meeting minutes template not found. Please create a basic summary.';
+      }
+
+      // Final summarization
+      const finalInput = partialSummaries.join('\n\n---\n\n');
+      const finalCompletion = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a senior executive assistant who specializes in creating visually stunning, comprehensive German meeting protocols. You excel at consolidating complex information into beautifully formatted, professional documents that executives love to read.'
+          },
+          {
+            role: 'user',
+            content: `Konsolidiere diese Abschnitte zu einem visuell beeindruckenden Meeting-Protokoll.
+
+📊 **ZUSAMMENGEFASSTE ABSCHNITTE:**
+${finalInput}
+
+🎨 **DESIGN-VORLAGE (exakt befolgen):**
+${blueprint}
+
+✨ **STYLING & KONSOLIDIERUNG:**
+- **Visuelle Exzellenz:** Behalte ALLE Emojis, Tabellen und Formatierungen der Vorlage
+- **Smart Consolidation:** Kombiniere ähnliche Punkte aus verschiedenen Abschnitten intelligent
+- **Status-Indikatoren:** Nutze 🟢🟡🔴⚪ für verschiedene Status-Kategorien
+- **Prioritäten:** Verwende 🔥-Emojis für Dringlichkeit (🔴 Critical, 🟡 Medium, 🟢 Low)
+
+📋 **INHALTLICHE KONSOLIDIERUNG:**
+- Eliminiere Duplikate zwischen Abschnitten
+- Gruppiere verwandte Action Items intelligent
+- Priorisiere Entscheidungen nach Wichtigkeit
+- Erstelle kohärente Timeline aus allen Terminen
+
+📅 **AUTO-VERVOLLSTÄNDIGUNG:**
+- Heutiges Datum: ${new Date().toLocaleDateString('de-DE')}
+- Geschätzte Meeting-Dauer aus Transkript-Umfang
+- Professionelle deutsche Geschäftssprache
+
+Das finale Protokoll soll ein Executive-Level Dokument sein, das sofort präsentationsreif ist!`
+          }
+        ]
+      });
+
+      summary = finalCompletion.choices[0].message.content.trim();
     }
 
-    // Now do a final summarization of the partial summaries
-    console.log('Performing a final summary of all partial summaries...');
-    const finalInput = partialSummaries.join('\n\n---\n\n');
-
-    const finalCompletion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful assistant that combines partial meeting transcripts into one concise final "Meeting Protokoll" in German, with timestamps and bullet points.'
-        },
-        {
-          role: 'user',
-          content: `Bitte fasse alle diese Teil-Zusammenfassungen nun in ein einzelnes Meeting-Protokoll zusammen:\n\n${finalInput}`
-        }
-      ]
+    logger.info("Transcript summarization completed", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: summarizeEventId,
+        action: "transcript_summarization",
+        event: "complete",
+        duration_ms: calculateDurationMs(startTime),
+        summary_length: summary.length
+      }
     });
 
-    return finalCompletion.choices[0].message.content.trim();
+    return summary;
+
+  } catch (err) {
+    logger.error("Transcript summarization failed", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: summarizeEventId,
+        action: "transcript_summarization",
+        event: "error",
+        duration_ms: calculateDurationMs(startTime),
+        error_type: err.constructor.name,
+        error_message: err.message,
+        error_code: err.code,
+        error_status: err.status
+      }
+    });
+    
+    throw err;
   }
 }
 
-// ---------- main logic ----------
+// ---------- Main Bot Logic ----------
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
+
+  const interactionEventId = uuidv4();
+  const startTime = Date.now();
 
   if (interaction.commandName === 'join') {
     const channel = interaction.member.voice?.channel;
     if (!channel) {
+      logger.warning("User not in voice channel", {
+        extra: {
+          footprint: null,
+          batch_uuid: interactionEventId,
+          user_id: interaction.user.id,
+          event_id: uuidv4(),
+          action: "interaction_handling",
+          event: "error"
+        }
+      });
       return interaction.reply({ content: 'Jump into a voice channel first!', ephemeral: true });
     }
 
@@ -285,67 +1156,246 @@ client.on('interactionCreate', async (interaction) => {
       adapterCreator: channel.guild.voiceAdapterCreator,
     });
 
-    interaction.reply(`🎙️ Transcriber online in **${channel.name}**. Speak and I’ll type!`);
+    logger.info("Joined voice channel", {
+      extra: {
+        footprint: null,
+        batch_uuid: interactionEventId,
+        user_id: interaction.user.id,
+        event_id: uuidv4(),
+        action: "voice_join",
+        event: "complete",
+        channel_name: channel.name,
+        channel_id: channel.id
+      }
+    });
+
+    interaction.reply(`🎙️ **Transkription gestartet** in **${channel.name}**\n📝 Sprechen Sie - ich erstelle automatisch ein Protokoll!`);
     
     connection.receiver.speaking.on('start', async (userId) => {
+      const sessionId = `${interaction.guild.id}:${channel.id}`;
+      
+      // Track this transcription as pending
+      if (!pendingTranscriptions.has(sessionId)) {
+        pendingTranscriptions.set(sessionId, new Set());
+      }
+      
+      const transcriptionId = uuidv4();
+      pendingTranscriptions.get(sessionId).add(transcriptionId);
+      
       try {
         // 1) Capture user audio -> 16kHz WAV
         const wavPath = await captureUserAudio(connection, userId);
-        if (!wavPath) return;
+        if (!wavPath) {
+          // Remove from pending if no audio captured
+          pendingTranscriptions.get(sessionId).delete(transcriptionId);
+          return;
+        }
 
         // 2) Transcribe
-        const text = await transcribeAudio(wavPath);
+        const text = await transcribeAudio(wavPath, sessionId, userId);
         if (text?.trim()) {
           const username = await interaction.guild.members
             .fetch(userId)
             .then(u => u.displayName)
             .catch(() => 'Someone');
 
-          // 3) Post log
+          // 3) Log transcript
           writeTranscript(interaction.guild.id, channel.id, username, text);
         }
+        
+        // Mark transcription as complete
+        pendingTranscriptions.get(sessionId).delete(transcriptionId);
+        
       } catch (err) {
-        console.error(err);
+        // Remove from pending on error
+        pendingTranscriptions.get(sessionId).delete(transcriptionId);
+        
+        logger.error("Voice processing failed", {
+          extra: {
+            footprint: null,
+            batch_uuid: sessionId,
+            user_id: userId,
+            event_id: uuidv4(),
+            action: "voice_processing",
+            event: "error"
+          }
+        }, err);
       }
     });
   }
 
   if (interaction.commandName === 'leave') {
-    // 1) Grab and destroy the voice connection
-    const conn = getVoiceConnection(interaction.guild.id);
-    if (!conn) {
-      return interaction.reply({ content: 'I’m not in a voice channel right now.', ephemeral: true });
-    }
-    const voiceChannelId = conn.joinConfig.channelId;
-    conn.destroy();
+    // Defer reply for long-running operation
+    await interaction.deferReply();
+    
+    const leaveEventId = uuidv4();
+    const leaveStartTime = Date.now();
   
-    // 2) Summarize the transcript file for that voice channel
+    const conn = getVoiceConnection(interaction.guild.id);
+    let sessionId = null;
+    
+    if (conn) {
+      sessionId = `${interaction.guild.id}:${conn.joinConfig.channelId}`;
+      conn.destroy();
+      console.log('🔌 Voice connection closed');
+      
+      // Wait for all pending transcriptions to complete
+      console.log('📝 Finalizing transcriptions...');
+      
+      // Update user with status
+      await interaction.editReply('📝 Verarbeite noch offene Transkriptionen...');
+      
+      const allComplete = await waitForPendingTranscriptions(sessionId);
+      
+      if (allComplete) {
+        console.log('✅ All transcriptions completed');
+        await interaction.editReply('📝 Erstelle Meeting-Protokoll...');
+      } else {
+        console.log('⚠️ Some transcriptions may be incomplete');
+        await interaction.editReply('⚠️ Erstelle Protokoll (einige Transkriptionen unvollständig)...');
+      }
+      
+      // Clean up the pending transcriptions for this session
+      pendingTranscriptions.delete(sessionId);
+    }
+  
     let summary = null;
     try {
-      summary = await summarizeTranscript(interaction.guild.id, voiceChannelId);
+      summary = await summarizeTranscript(interaction.guild.id, conn?.joinConfig.channelId);
     } catch (err) {
-      console.error('❌ Failed to summarise transcript:', err);
+      logger.error("Failed to summarize transcript", {
+        extra: {
+          footprint: null,
+          batch_uuid: interactionEventId,
+          user_id: interaction.user.id,
+          event_id: leaveEventId,
+          action: "voice_leave",
+          event: "error",
+          duration_ms: calculateDurationMs(leaveStartTime)
+        }
+      }, err);
     }
   
-    // 3) Clear that log entry so a future /join starts fresh
-    sessionLogs.delete(`${interaction.guild.id}:${voiceChannelId}`);
-  
-    // 4) If we have a summary, save it and reply; otherwise fallback
     if (summary) {
-      const ts = new Date().toISOString().replace(/[:.]/g, '-').split('T').join('-');
-      const fname = `${interaction.guild.id}-${voiceChannelId}-${ts}.txt`;
-      const outPath = path.join(SUMMARY_DIR, fname);
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      const baseFileName = `meeting-protokoll-${ts}`;
+      
+      // Extract meeting title from summary for better naming
+      const titleMatch = summary.match(/Thema.*?-->(.*?)<!--/);
+      const meetingTitle = titleMatch ? titleMatch[1].trim() : "Meeting";
   
-      fs.writeFileSync(outPath, summary, 'utf-8');
-      console.log(`🗄️ saved summary to ${outPath}`);
-  
-      await interaction.reply({
-        content: `📝 **Meeting Protokoll** saved to \`summary/${fname}\`:\n\n${summary}`
+      // Generate professional Word document
+      const wordFileName = `${baseFileName}.docx`;
+      const wordPath = path.join(SUMMARY_DIR, wordFileName);
+      let wordBuffer = null;
+      
+      try {
+        wordBuffer = await convertToWordDoc(summary, meetingTitle);
+        if (wordBuffer) {
+          fs.writeFileSync(wordPath, wordBuffer);
+          console.log(`📄 Word document generated: ${wordFileName}`);
+        }
+      } catch (error) {
+        console.error('Failed to generate Word document:', error);
+      }
+      
+      let filesToUpload = [];
+      let uploadMessage = '';
+      
+      // Prepare upload message and files
+      if (wordBuffer) {
+        fs.writeFileSync(wordPath, wordBuffer);
+        const { AttachmentBuilder } = await import('discord.js');
+        const attachment = new AttachmentBuilder(wordPath, { name: wordFileName });
+      
+        await interaction.editReply({
+          content: `📝 **Meeting-Protokoll erstellt!** 📄\n\n📄 **Microsoft Word (.docx)** - Professionell editierbar\n\n💼 Das Word-Dokument ist business-ready!`,
+          files: [attachment]
+        });
+      
+        console.log(`✅ Uploaded: ${wordFileName}`);
+      } else {
+        await interaction.editReply(`⚠️ Meeting-Protokoll konnte nicht erstellt werden.`);
+      }
+      
+      logger.info("Summary files created", {
+        extra: {
+          footprint: null,
+          batch_uuid: interactionEventId,
+          user_id: interaction.user.id,
+          event_id: leaveEventId,
+          action: "voice_leave",
+          event: "complete",
+          duration_ms: calculateDurationMs(leaveStartTime)
+        }
       });
+
+      try {
+        // Upload both files to Discord
+        const { AttachmentBuilder } = await import('discord.js');
+        const attachments = filesToUpload.map(file => 
+          new AttachmentBuilder(file.path, { name: file.name })
+        );
+        
+        await interaction.editReply({
+          content: uploadMessage,
+          files: attachments
+        });
+        
+        console.log(`✅ Files uploaded: ${filesToUpload.map(f => f.name).join(', ')}`);
+        
+      } catch (uploadError) {
+        logger.error("Failed to upload summary files", {
+          extra: {
+            footprint: null,
+            batch_uuid: interactionEventId,
+            user_id: interaction.user.id,
+            event_id: uuidv4(),
+            action: "file_upload",
+            event: "error"
+          }
+        }, uploadError);
+        
+        // Fallback: provide download links
+        const fileList = filesToUpload.map(f => `• \`${f.name}\``).join('\n');
+        await interaction.editReply(
+          `📝 **Meeting-Protokoll** wurde erstellt!\n📁 Dateien gespeichert:\n${fileList}\n\n*Hinweis: Datei-Upload fehlgeschlagen, bitte lokale Dateien verwenden.*`
+        );
+      }
     } else {
-      await interaction.reply('Disconnected. No transcript found or nothing to summarise.');
+      await interaction.editReply('❌ Verbindung getrennt. Kein Transkript gefunden oder nichts zu erstellen.');
     }
   }
+});
+
+// Global error handling
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error("Unhandled Promise Rejection", {
+    extra: {
+      footprint: null,
+      batch_uuid: null,
+      user_id: null,
+      event_id: uuidv4(),
+      action: "error_handling",
+      event: "error",
+      error_type: "UnhandledPromiseRejection"
+    }
+  }, reason);
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error("Uncaught Exception", {
+    extra: {
+      footprint: null,
+      batch_uuid: null,
+      user_id: null,
+      event_id: uuidv4(),
+      action: "error_handling",
+      event: "error",
+      error_type: "UncaughtException"
+    }
+  }, error);
+  process.exit(1);
 });
 
 client.login(BOT_TOKEN);
