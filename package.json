@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/bot.js",
-    "test-openai": "node test-openai.js"
+    "test-openai": "node test-openai.js",
+    "transcribe-wav": "node transcribe_wav_files.js"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +18,9 @@
     "discord.js": "^14.18.0",
     "docx": "^8.2.2",
     "dotenv": "^16.5.0",
+    "express": "^4.18.2",
     "ffmpeg-static": "^5.2.0",
+    "node-cron": "^3.0.3",
     "openai": "^4.96.0",
     "opusscript": "^0.0.8",
     "uuid": "^9.0.0",

@@ -20,6 +20,12 @@ import ffmpegPath from 'ffmpeg-static';
 import { createLogger, format, transports } from 'winston';
 import { v4 as uuidv4 } from 'uuid';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } from 'docx';
+import { EventEmitter } from 'node:events';
+import cron from 'node-cron';
+import express from 'express';
+
+// Increase default max listeners to avoid warnings during bursty audio sessions
+EventEmitter.defaultMaxListeners = 50;
 
 // ---------- Logging Setup ----------
 const logger = createLogger({
@@ -50,6 +56,71 @@ const logger = createLogger({
 // Helper function to calculate duration
 function calculateDurationMs(startTime) {
   return Date.now() - startTime;
+}
+
+// ---------- Weekly Meeting Reminder ----------
+function scheduleWeeklyMeetingReminder(client) {
+  if (!WEEKLY_MEETING_CHANNEL_ID) {
+    logger.warn("WEEKLY_MEETING_CHANNEL_ID not set – weekly reminders disabled");
+    return;
+  }
+
+  // Runs every Thursday at 09:00 in Europe/Berlin
+  cron.schedule(
+    '0 9 * * 4',
+    async () => {
+      const reminderEventId = uuidv4();
+      const startTime = Date.now();
+
+      try {
+        const channel = await client.channels.fetch(WEEKLY_MEETING_CHANNEL_ID);
+        if (!channel || !channel.isTextBased()) {
+          logger.error("Weekly reminder: channel not found or not text-based", {
+            extra: {
+              footprint: null,
+              batch_uuid: null,
+              user_id: null,
+              event_id: reminderEventId,
+              action: "weekly_reminder",
+              event: "error"
+            }
+          });
+          return;
+        }
+
+        await channel.send(
+          "📝 Weekly prep: Please add agenda bullets for the weekly meeting to the current thread " +
+          "and the shared doc:\n" +
+          "https://docs.google.com/document/d/1P_3opjrJlhraPfpcRjGKUqtw2QwsmdSTp74tocNcNxg/edit?usp=sharing"
+        );
+
+        logger.info("Weekly meeting reminder sent", {
+          extra: {
+            footprint: null,
+            batch_uuid: null,
+            user_id: null,
+            event_id: reminderEventId,
+            action: "weekly_reminder",
+            event: "complete",
+            duration_ms: calculateDurationMs(startTime)
+          }
+        });
+      } catch (err) {
+        logger.error("Failed to send weekly meeting reminder", {
+          extra: {
+            footprint: null,
+            batch_uuid: null,
+            user_id: null,
+            event_id: reminderEventId,
+            action: "weekly_reminder",
+            event: "error",
+            duration_ms: calculateDurationMs(startTime)
+          }
+        }, err);
+      }
+    },
+    { timezone: TIMEZONE }
+  );
 }
 
 // Helper function to create professional Word document
@@ -316,7 +387,7 @@ function createWordTable(rows) {
 }
 
 // Helper function to wait for all transcriptions to complete
-async function waitForPendingTranscriptions(sessionId, maxWaitTime = 45000) {
+async function waitForPendingTranscriptions(sessionId, maxWaitTime = 15000) {
   const startTime = Date.now();
   const checkInterval = 2000; // Check every 2 seconds
   let lastLogTime = 0;
@@ -344,8 +415,8 @@ async function waitForPendingTranscriptions(sessionId, maxWaitTime = 45000) {
   if (remaining > 0) {
     console.log(`⚠️ Timeout reached: ${remaining} transcription(s) still pending. Giving extra time...`);
     
-    // Give an additional 30 seconds for remaining transcriptions
-    const extraWaitTime = 30000;
+    // Give an additional 15 seconds for remaining transcriptions
+    const extraWaitTime = 15000;
     const extraStartTime = Date.now();
     
     while (Date.now() - extraStartTime < extraWaitTime) {
@@ -371,9 +442,64 @@ async function waitForPendingTranscriptions(sessionId, maxWaitTime = 45000) {
   return false;
 }
 
+// ---------- Grafana Integration Helpers ----------
+async function getOrCreateDailyGrafanaThread(client, dateKey) {
+  if (!INCIDENTS_CHANNEL_ID) {
+    throw new Error("INCIDENTS_CHANNEL_ID not set");
+  }
+
+  // Reuse cached thread if possible
+  const existingId = grafanaDailyThreads.get(dateKey);
+  if (existingId) {
+    const existingChannel = await client.channels.fetch(existingId).catch(() => null);
+    if (existingChannel && existingChannel.isThread()) {
+      return existingChannel;
+    }
+  }
+
+  const incidentsChannel = await client.channels.fetch(INCIDENTS_CHANNEL_ID);
+  if (!incidentsChannel || !incidentsChannel.isTextBased()) {
+    throw new Error("Incidents channel not found or not text-based");
+  }
+
+  // Create a new thread for this date
+  const thread = await incidentsChannel.threads.create({
+    name: `Grafana alerts – ${dateKey}`,
+    autoArchiveDuration: 1440 // 24h
+  });
+
+  grafanaDailyThreads.set(dateKey, thread.id);
+  return thread;
+}
+
+function formatGrafanaAlertMessage(payload) {
+  // These fields may change; adjust based on the actual Grafana JSON
+  const ruleName = payload.ruleName || payload.title || 'Unknown rule';
+  const state = payload.state || payload.status || 'unknown';
+  const message = payload.message || '';
+  const ruleUrl = payload.ruleUrl || payload.dashboardUrl || '';
+
+  let text = `⚠️ **Grafana alert**\n` +
+             `**Rule:** ${ruleName}\n` +
+             `**State:** ${state}\n`;
+
+  if (message) {
+    text += `**Message:** ${message}\n`;
+  }
+  if (ruleUrl) {
+    text += `**Link:** ${ruleUrl}\n`;
+  }
+
+  return text;
+}
+
 // ---------- Environment and API Setup ----------
 const openai = new OpenAI(); // uses OPENAI_API_KEY env
 const BOT_TOKEN = process.env.DISCORD_TOKEN;
+const WEEKLY_MEETING_CHANNEL_ID = process.env.WEEKLY_MEETING_CHANNEL_ID;
+const INCIDENTS_CHANNEL_ID = process.env.INCIDENTS_CHANNEL_ID;
+const TIMEZONE = process.env.TIMEZONE || 'Europe/Berlin';
+const GRAFANA_WEBHOOK_PORT = Number(process.env.GRAFANA_WEBHOOK_PORT || 3000);
 
 // Log startup configuration
 const startupEventId = uuidv4();
@@ -415,6 +541,32 @@ if (!process.env.OPENAI_API_KEY) {
     }
   });
   process.exit(1);
+}
+
+if (!WEEKLY_MEETING_CHANNEL_ID) {
+  logger.warn("WEEKLY_MEETING_CHANNEL_ID not set - weekly reminders will be disabled", {
+    extra: {
+      footprint: null,
+      batch_uuid: startupEventId,
+      user_id: null,
+      event_id: uuidv4(),
+      action: "bot_startup",
+      event: "warning"
+    }
+  });
+}
+
+if (!INCIDENTS_CHANNEL_ID) {
+  logger.warn("INCIDENTS_CHANNEL_ID not set - Grafana alerts will be disabled", {
+    extra: {
+      footprint: null,
+      batch_uuid: startupEventId,
+      user_id: null,
+      event_id: uuidv4(),
+      action: "bot_startup",
+      event: "warning"
+    }
+  });
 }
 
 // Test OpenAI API key validity at startup
@@ -533,8 +685,45 @@ function makeLogFileName(guildId, channelId) {
 const sessionLogs = new Map();
 const pendingTranscriptions = new Map(); // Track pending transcriptions by session
 
-function writeTranscript(guildId, channelId, username, text) {
-  const key = `${guildId}:${channelId}`;
+// Track daily Grafana alert threads: dateKey ("YYYY-MM-DD") -> threadId
+const grafanaDailyThreads = new Map();
+
+// Simple per-session concurrency limiter (default: 2 concurrent tasks)
+const concurrencyStates = new Map();
+function withSessionConcurrency(sessionId, fn, limit = 2) {
+  if (!concurrencyStates.has(sessionId)) {
+    concurrencyStates.set(sessionId, { active: 0, queue: [] });
+  }
+  const state = concurrencyStates.get(sessionId);
+  return new Promise((resolve, reject) => {
+    const run = async () => {
+      state.active += 1;
+      try {
+        const result = await fn();
+        resolve(result);
+      } catch (e) {
+        reject(e);
+      } finally {
+        state.active -= 1;
+        if (state.queue.length > 0) {
+          const next = state.queue.shift();
+          next();
+        }
+      }
+    };
+    if (state.active < limit) {
+      run();
+    } else {
+      state.queue.push(run);
+    }
+  });
+}
+
+// Prevent overlapping capture sessions per (sessionId,userId)
+const captureInProgress = new Set();
+
+function writeTranscript(guildId, channelId, username, text, sessionId) {
+  const key = sessionId || `${guildId}:${channelId}`;
   if (!sessionLogs.has(key)) {
     sessionLogs.set(key, makeLogFileName(guildId, channelId));
   }
@@ -632,6 +821,12 @@ client.once('ready', async () => {
       }
     }, err);
   }
+
+  // Schedule weekly meeting reminder
+  scheduleWeeklyMeetingReminder(client);
+
+  // Start HTTP server for Grafana alerts
+  startGrafanaWebhookServer(client);
 });
 
 // ---------- Audio Capture Function ----------
@@ -640,19 +835,22 @@ function captureUserAudio(connection, userId) {
   const sessionId = `${connection.joinConfig.guildId}:${connection.joinConfig.channelId}`;
   const startTime = Date.now();
 
-  // 1) Start receiving Opus
+  console.log(`🔊 Creating audio subscription for user ${userId}`);
+
+  // 1) Start receiving Opus (silence-based batching)
   const opusStream = connection.receiver.subscribe(userId, {
-          end: { behavior: EndBehaviorType.AfterSilence, duration: 2000 }
+    end: { behavior: EndBehaviorType.AfterSilence, duration: 2000 }
   });
+  // Avoid listener leak warnings on bursty sessions
+  opusStream.setMaxListeners(25);
 
   // 2) Decode to raw 48kHz stereo PCM
-  const pcmStream = opusStream.pipe(
-    new prism.opus.Decoder({
-      rate: 48000,
-      channels: 2,
-      frameSize: 960
-    })
-  );
+  const decoder = new prism.opus.Decoder({
+    rate: 48000,
+    channels: 2,
+    frameSize: 960
+  });
+  const pcmStream = opusStream.pipe(decoder);
 
   // 3) Generate a unique filename
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
@@ -666,7 +864,8 @@ function captureUserAudio(connection, userId) {
     '-ac', '2',        // stereo
           '-i', 'pipe:0',    // read from stdin
       // Audio enhancement for better speech recognition
-      '-af', 'highpass=f=200,lowpass=f=3000,volume=1.5',
+      // Conservative enhancement to avoid clipping
+      '-af', 'loudnorm=I=-23:TP=-2:LRA=7,highpass=f=120,lowpass=f=3800,volume=1.2',
       '-ac', '1',        // convert to mono
           '-ar', '24000',    // 24 kHz (better for Whisper)
       '-acodec', 'pcm_s16le', // 16-bit PCM
@@ -698,8 +897,11 @@ function captureUserAudio(connection, userId) {
           ? fs.statSync(wavPath).size
           : 0;
         
+        console.log(`📊 Audio file ${path.basename(wavPath)} - User ${userId}: ${bytes} bytes`);
+        
         if (bytes < 16_000) {
           // Less than ~0.2 seconds, skip
+          console.log(`🗑️ Discarding ${path.basename(wavPath)} - too small (${bytes} bytes < 16KB)`);
           fs.unlinkSync(wavPath);
           resolve(null);
         } else {
@@ -707,6 +909,10 @@ function captureUserAudio(connection, userId) {
           resolve(wavPath);
         }
       }
+      try {
+        opusStream.removeAllListeners();
+        decoder.removeAllListeners();
+      } catch {}
     });
     
     ff.on('error', (error) => {
@@ -721,6 +927,10 @@ function captureUserAudio(connection, userId) {
           duration_ms: calculateDurationMs(startTime)
         }
       }, error);
+      try {
+        opusStream.removeAllListeners();
+        decoder.removeAllListeners();
+      } catch {}
       reject(error);
     });
   });
@@ -785,7 +995,7 @@ async function transcribeAudio(wavPath, sessionId, userId) {
     logger.error("Audio transcription failed", {
       extra: {
         footprint: null,
-        batch_uuid: sessionId,
+        batch_uuid: actualSessionId,
         user_id: userId,
         event_id: transcribeEventId,
         action: "audio_transcription",
@@ -818,7 +1028,8 @@ async function transcribeAudio(wavPath, sessionId, userId) {
       console.error('Full error:', err);
     }
     
-    return '';
+    // Throw to allow caller-side retry logic to trigger
+    throw err;
   }
 }
 
@@ -842,15 +1053,15 @@ function chunkTextByTokens(text, maxTokens = 6000) {
 }
 
 // ---------- Transcript Summarization Function ----------
-async function summarizeTranscript(guildId, channelId) {
+async function summarizeTranscript(guildId, channelId, sessionId) {
   const summarizeEventId = uuidv4();
-  const sessionId = `${guildId}:${channelId}`;
+  const actualSessionId = sessionId || `${guildId}:${channelId}`;
   const startTime = Date.now();
   
   logger.debug("Starting transcript summarization", {
     extra: {
       footprint: null,
-      batch_uuid: sessionId,
+      batch_uuid: actualSessionId,
       user_id: null,
       event_id: summarizeEventId,
       action: "transcript_summarization",
@@ -858,14 +1069,14 @@ async function summarizeTranscript(guildId, channelId) {
     }
   });
 
-  const key = `${guildId}:${channelId}`;
+  const key = actualSessionId;
   const logFile = sessionLogs.get(key);
   
   if (!logFile || !fs.existsSync(logFile)) {
     logger.warning("No transcript file found for summarization", {
       extra: {
         footprint: null,
-        batch_uuid: sessionId,
+        batch_uuid: actualSessionId,
         user_id: null,
         event_id: summarizeEventId,
         action: "transcript_summarization",
@@ -881,7 +1092,7 @@ async function summarizeTranscript(guildId, channelId) {
     logger.warning("Empty transcript found", {
       extra: {
         footprint: null,
-        batch_uuid: sessionId,
+        batch_uuid: actualSessionId,
         user_id: null,
         event_id: summarizeEventId,
         action: "transcript_summarization",
@@ -1099,7 +1310,7 @@ The final protocol should be a polished, comprehensive document that accurately 
     logger.info("Transcript summarization completed", {
       extra: {
         footprint: null,
-        batch_uuid: sessionId,
+        batch_uuid: actualSessionId,
         user_id: null,
         event_id: summarizeEventId,
         action: "transcript_summarization",
@@ -1115,7 +1326,7 @@ The final protocol should be a polished, comprehensive document that accurately 
     logger.error("Transcript summarization failed", {
       extra: {
         footprint: null,
-        batch_uuid: sessionId,
+        batch_uuid: actualSessionId,
         user_id: null,
         event_id: summarizeEventId,
         action: "transcript_summarization",
@@ -1178,6 +1389,21 @@ client.on('interactionCreate', async (interaction) => {
     
     connection.receiver.speaking.on('start', async (userId) => {
       const sessionId = `${interaction.guild.id}:${channel.id}`;
+      const captureKey = `${sessionId}:${userId}`;
+      
+      // Debug: Log which user started speaking
+      console.log(`🎤 User ${userId} started speaking`);
+      
+      // Check if connection is still valid
+      if (connection.state.status === 'destroyed') {
+        console.log('⚠️ Ignoring speaking event - connection destroyed');
+        return;
+      }
+      
+      if (captureInProgress.has(captureKey)) {
+        return; // avoid re-entrant capture for same speaker/session
+      }
+      captureInProgress.add(captureKey);
       
       // Track this transcription as pending
       if (!pendingTranscriptions.has(sessionId)) {
@@ -1188,32 +1414,39 @@ client.on('interactionCreate', async (interaction) => {
       pendingTranscriptions.get(sessionId).add(transcriptionId);
       
       try {
-        // 1) Capture user audio -> WAV
-        const wavPath = await captureUserAudio(connection, userId);
+        // 1) Capture user audio -> WAV (limit parallelism per session)
+        console.log(`🎵 Starting audio capture for user ${userId}`);
+        const wavPath = await withSessionConcurrency(sessionId, () => captureUserAudio(connection, userId), 2);
         if (!wavPath) {
+          console.log(`❌ No audio captured for user ${userId} (too short or failed)`);
           // Remove from pending if no audio captured
           const pendingSet = pendingTranscriptions.get(sessionId);
           if (pendingSet) {
             pendingSet.delete(transcriptionId);
           }
+          captureInProgress.delete(captureKey);
           return;
         }
+        console.log(`✅ Audio captured for user ${userId}: ${wavPath}`);
 
-        // 2) Transcribe with retry logic
+        // 2) Transcribe with retry logic (also concurrency-limited)
         let text = '';
-        let retries = 2;
+        let retries = 4;
         let lastError = null;
         
+        let attempt = 0;
         while (retries >= 0) {
           try {
-            text = await transcribeAudio(wavPath, sessionId, userId);
+            text = await withSessionConcurrency(sessionId, () => transcribeAudio(wavPath, sessionId, userId), 2);
             break; // Success, exit retry loop
           } catch (transcribeErr) {
             lastError = transcribeErr;
             retries--;
             if (retries >= 0) {
-              console.log(`🔄 Retrying transcription (${2 - retries}/3)...`);
-              await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+              attempt += 1;
+              const backoff = Math.min(15000, 500 * 2 ** (attempt - 1)) + Math.floor(Math.random() * 250);
+              console.log(`🔄 Retrying transcription (attempt ${attempt + 1}) in ${backoff}ms...`);
+              await new Promise(resolve => setTimeout(resolve, backoff));
             }
           }
         }
@@ -1228,23 +1461,13 @@ client.on('interactionCreate', async (interaction) => {
             .then(u => u.displayName)
             .catch(() => 'Someone');
 
+          console.log(`📝 ${username} (${userId}): ${text}`);
+          
           // 3) Log transcript
-          writeTranscript(interaction.guild.id, channel.id, username, text);
-        }
-        
-        // Mark transcription as complete
-        const pendingSet = pendingTranscriptions.get(sessionId);
-        if (pendingSet) {
-          pendingSet.delete(transcriptionId);
+          writeTranscript(interaction.guild.id, channel.id, username, text, sessionId);
         }
         
       } catch (err) {
-        // Remove from pending on error
-        const pendingSet = pendingTranscriptions.get(sessionId);
-        if (pendingSet) {
-          pendingSet.delete(transcriptionId);
-        }
-        
         logger.error("Voice processing failed", {
           extra: {
             footprint: null,
@@ -1255,6 +1478,14 @@ client.on('interactionCreate', async (interaction) => {
             event: "error"
           }
         }, err);
+      } finally {
+        // ✅ Always cleanup - regardless of success or failure
+        const pendingSet = pendingTranscriptions.get(sessionId);
+        if (pendingSet) {
+          pendingSet.delete(transcriptionId);
+          console.log(`🧹 Cleaned up transcription ${transcriptionId.substr(0, 8)}... (${pendingSet.size} remaining)`);
+        }
+        captureInProgress.delete(captureKey);
       }
     });
   }
@@ -1270,7 +1501,18 @@ client.on('interactionCreate', async (interaction) => {
     let sessionId = null;
     
     if (conn) {
-      sessionId = `${interaction.guild.id}:${conn.joinConfig.channelId}`;
+      // Capture channelId before destroying the connection
+      const channelId = conn.joinConfig.channelId;
+      sessionId = `${interaction.guild.id}:${channelId}`;
+      
+      // Clean up any remaining pending transcriptions before destroying connection
+      const pendingSet = pendingTranscriptions.get(sessionId);
+      const pendingCount = pendingSet ? pendingSet.size : 0;
+      if (pendingCount > 0) {
+        console.log(`🧹 Cleaning up ${pendingCount} stale pending transcription(s)...`);
+        pendingTranscriptions.delete(sessionId);
+      }
+      
       conn.destroy();
       console.log('🔌 Voice connection closed');
       
@@ -1283,6 +1525,12 @@ client.on('interactionCreate', async (interaction) => {
       // Give a small delay for any final audio processing to start
       console.log('⏳ Allowing time for final audio processing...');
       await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Check if there are any pending transcriptions left to wait for
+      const remainingAfterCleanup = pendingTranscriptions.get(sessionId);
+      if (!remainingAfterCleanup || remainingAfterCleanup.size === 0) {
+        console.log('✅ No pending transcriptions - proceeding immediately');
+      }
       
       const allComplete = await waitForPendingTranscriptions(sessionId);
       
@@ -1300,7 +1548,9 @@ client.on('interactionCreate', async (interaction) => {
   
     let summary = null;
     try {
-      summary = await summarizeTranscript(interaction.guild.id, conn?.joinConfig.channelId);
+      // Use the preserved channelId to avoid undefined after destroy
+      const preservedChannelId = sessionId ? sessionId.split(':')[1] : null;
+      summary = await summarizeTranscript(interaction.guild.id, preservedChannelId, sessionId);
     } catch (err) {
       logger.error("Failed to summarize transcript", {
         extra: {
@@ -1313,6 +1563,12 @@ client.on('interactionCreate', async (interaction) => {
           duration_ms: calculateDurationMs(leaveStartTime)
         }
       }, err);
+    } finally {
+      // Clean up session logs regardless of success or failure
+      if (sessionId) {
+        sessionLogs.delete(sessionId);
+        console.log(`🗑️ Cleaned up session log for ${sessionId}`);
+      }
     }
   
     if (summary) {
@@ -1343,74 +1599,130 @@ client.on('interactionCreate', async (interaction) => {
         console.error('Failed to generate Word document:', error);
       }
       
-      let filesToUpload = [];
-      let uploadMessage = '';
-      
-      // Prepare upload message and files
+      // Create and upload Word document
       if (wordBuffer) {
-        fs.writeFileSync(wordPath, wordBuffer);
-        const { AttachmentBuilder } = await import('discord.js');
-        const attachment = new AttachmentBuilder(wordPath, { name: wordFileName });
-      
-        await interaction.editReply({
-          content: `📝 **Meeting-Protokoll erstellt!** 📄\n\n📄 **Microsoft Word (.docx)** - Professionell editierbar\n\n💼 Das Word-Dokument ist business-ready!`,
-          files: [attachment]
-        });
-      
-        console.log(`✅ Uploaded: ${wordFileName}`);
+        try {
+          fs.writeFileSync(wordPath, wordBuffer);
+          const { AttachmentBuilder } = await import('discord.js');
+          const attachment = new AttachmentBuilder(wordPath, { name: wordFileName });
+        
+          await interaction.editReply({
+            content: `📝 **Meeting-Protokoll erstellt!** 📄\n\n📄 **Microsoft Word (.docx)** - Professionell editierbar\n\n💼 Das Word-Dokument ist business-ready!`,
+            files: [attachment]
+          });
+        
+          console.log(`✅ Uploaded: ${wordFileName}`);
+          
+          logger.info("Summary files created and uploaded successfully", {
+            extra: {
+              footprint: null,
+              batch_uuid: interactionEventId,
+              user_id: interaction.user.id,
+              event_id: leaveEventId,
+              action: "voice_leave",
+              event: "complete",
+              duration_ms: calculateDurationMs(leaveStartTime)
+            }
+          });
+          
+        } catch (uploadError) {
+          logger.error("Failed to upload summary file", {
+            extra: {
+              footprint: null,
+              batch_uuid: interactionEventId,
+              user_id: interaction.user.id,
+              event_id: uuidv4(),
+              action: "file_upload",
+              event: "error"
+            }
+          }, uploadError);
+          
+          await interaction.editReply(
+            `📝 **Meeting-Protokoll erstellt!** \n📁 Datei gespeichert: \`${wordFileName}\`\n\n*Hinweis: Datei-Upload fehlgeschlagen, bitte lokale Datei verwenden.*`
+          );
+        }
       } else {
         await interaction.editReply(`⚠️ Meeting-Protokoll konnte nicht erstellt werden.`);
-      }
-      
-      logger.info("Summary files created", {
-        extra: {
-          footprint: null,
-          batch_uuid: interactionEventId,
-          user_id: interaction.user.id,
-          event_id: leaveEventId,
-          action: "voice_leave",
-          event: "complete",
-          duration_ms: calculateDurationMs(leaveStartTime)
-        }
-      });
-
-      try {
-        // Upload both files to Discord
-        const { AttachmentBuilder } = await import('discord.js');
-        const attachments = filesToUpload.map(file => 
-          new AttachmentBuilder(file.path, { name: file.name })
-        );
-        
-        await interaction.editReply({
-          content: uploadMessage,
-          files: attachments
-        });
-        
-        console.log(`✅ Files uploaded: ${filesToUpload.map(f => f.name).join(', ')}`);
-        
-      } catch (uploadError) {
-        logger.error("Failed to upload summary files", {
-          extra: {
-            footprint: null,
-            batch_uuid: interactionEventId,
-            user_id: interaction.user.id,
-            event_id: uuidv4(),
-            action: "file_upload",
-            event: "error"
-          }
-        }, uploadError);
-        
-        // Fallback: provide download links
-        const fileList = filesToUpload.map(f => `• \`${f.name}\``).join('\n');
-        await interaction.editReply(
-          `📝 **Meeting-Protokoll** wurde erstellt!\n📁 Dateien gespeichert:\n${fileList}\n\n*Hinweis: Datei-Upload fehlgeschlagen, bitte lokale Dateien verwenden.*`
-        );
       }
     } else {
       await interaction.editReply('❌ Verbindung getrennt. Kein Transkript gefunden oder nichts zu erstellen.');
     }
   }
 });
+
+// ---------- Grafana Webhook Server ----------
+function startGrafanaWebhookServer(client) {
+  if (!INCIDENTS_CHANNEL_ID) {
+    logger.warn("INCIDENTS_CHANNEL_ID not set – Grafana alerts disabled");
+    return;
+  }
+
+  const app = express();
+  app.use(express.json());
+
+  app.post('/grafana-alert', async (req, res) => {
+    const alertEventId = uuidv4();
+    const startTime = Date.now();
+
+    try {
+      const payload = req.body;
+      const now = new Date();
+      const dateKey = now.toISOString().slice(0, 10); // YYYY-MM-DD
+
+      const thread = await getOrCreateDailyGrafanaThread(client, dateKey);
+      const text = formatGrafanaAlertMessage(payload);
+
+      await thread.send(text);
+
+      logger.info("Grafana alert forwarded to Discord", {
+        extra: {
+          footprint: null,
+          batch_uuid: null,
+          user_id: null,
+          event_id: alertEventId,
+          action: "grafana_alert",
+          event: "complete",
+          duration_ms: calculateDurationMs(startTime)
+        }
+      });
+
+      res.status(200).json({ ok: true });
+    } catch (err) {
+      logger.error("Failed to handle Grafana alert", {
+        extra: {
+          footprint: null,
+          batch_uuid: null,
+          user_id: null,
+          event_id: alertEventId,
+          action: "grafana_alert",
+          event: "error",
+          duration_ms: calculateDurationMs(startTime)
+        }
+      }, err);
+      res.status(500).json({ error: 'failed' });
+    }
+  });
+
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', uptime: process.uptime() });
+  });
+
+  app.listen(GRAFANA_WEBHOOK_PORT, '0.0.0.0', () => {
+    console.log(`📡 Grafana webhook listening on port ${GRAFANA_WEBHOOK_PORT} (all interfaces)`);
+    logger.info("Grafana webhook server started", {
+      extra: {
+        footprint: null,
+        batch_uuid: null,
+        user_id: null,
+        event_id: uuidv4(),
+        action: "grafana_webhook_start",
+        event: "start",
+        port: GRAFANA_WEBHOOK_PORT,
+        bind_address: '0.0.0.0'
+      }
+    });
+  });
+}
 
 // Global error handling
 process.on('unhandledRejection', (reason, promise) => {
