@@ -44,6 +44,24 @@ This document describes all environment variables required for the Discord voice
 **Default**: `3000`  
 **Example**: `GRAFANA_WEBHOOK_PORT=3000`
 
+### GRAFANA_WEBHOOK_SECRET
+**Required**: No (but strongly recommended for production)  
+**Description**: Secret token for authenticating Grafana webhook requests. When set, incoming requests must include this value in the `x-webhook-secret` header.  
+**Security Note**: Always set this in production to prevent unauthorized alerts!  
+**Example**: `GRAFANA_WEBHOOK_SECRET=your_secure_random_string_here`
+
+### CIRCUIT_BREAKER_THRESHOLD
+**Required**: No  
+**Description**: Number of consecutive API failures before the circuit breaker opens and temporarily blocks further requests.  
+**Default**: `5`  
+**Example**: `CIRCUIT_BREAKER_THRESHOLD=5`
+
+### CIRCUIT_BREAKER_TIMEOUT
+**Required**: No  
+**Description**: Time in milliseconds to wait before the circuit breaker allows requests again after opening.  
+**Default**: `60000` (1 minute)  
+**Example**: `CIRCUIT_BREAKER_TIMEOUT=60000`
+
 ## Setup Instructions
 
 1. Create a `.env` file in the project root directory
@@ -65,6 +83,11 @@ TIMEZONE=Europe/Berlin
 # Optional - Grafana Integration
 INCIDENTS_CHANNEL_ID=9876543210987654321
 GRAFANA_WEBHOOK_PORT=3000
+GRAFANA_WEBHOOK_SECRET=your_secure_random_string_here
+
+# Optional - Circuit Breaker Settings
+CIRCUIT_BREAKER_THRESHOLD=5
+CIRCUIT_BREAKER_TIMEOUT=60000
 ```
 
 ## Features Enabled by Optional Variables
@@ -102,10 +125,11 @@ cron.schedule('* * * * *', async () => { ... });
 ```
 
 ### Test Grafana Webhook
-Send a manual test request:
+Send a manual test request (include secret header if GRAFANA_WEBHOOK_SECRET is set):
 ```bash
 curl -X POST http://localhost:3000/grafana-alert \
   -H "Content-Type: application/json" \
+  -H "x-webhook-secret: your_secret_here" \
   -d '{"ruleName":"Test rule","state":"firing","message":"Something is wrong"}'
 ```
 

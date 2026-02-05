@@ -1,508 +1,28 @@
-import 'dotenv/config';
-import {
-  Client,
-  GatewayIntentBits,
-  REST,
-  Routes,
-  SlashCommandBuilder
-} from 'discord.js';
-import {
-  joinVoiceChannel,
-  EndBehaviorType,
-  getVoiceConnection
-} from '@discordjs/voice';
-import prism from 'prism-media';
-import fs from 'node:fs';
-import path from 'node:path';
-import OpenAI from 'openai';
-import { spawn } from 'node:child_process';
-import ffmpegPath from 'ffmpeg-static';
-import { createLogger, format, transports } from 'winston';
+import { Client, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { getVoiceConnection } from '@discordjs/voice';
 import { v4 as uuidv4 } from 'uuid';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } from 'docx';
-import { EventEmitter } from 'node:events';
-import cron from 'node-cron';
-import express from 'express';
 
-// Increase default max listeners to avoid warnings during bursty audio sessions
-EventEmitter.defaultMaxListeners = 50;
+// Import modules
+import { BOT_TOKEN, validateConfig } from './config.js';
+import logger from './logger.js';
+import { validateOpenAIKey } from './services/transcription.js';
+import { runRecovery, schedulePeriodicRecovery, getRecoveryStatus } from './services/recovery.js';
+import { markStaleSessions, cleanupOldSessions } from './services/manifest.js';
+import { commands, handleInteraction } from './commands/index.js';
+import { getActiveSessions, getGuildFromSession, cleanupSession } from './commands/join.js';
+import { startGrafanaWebhookServer, stopGrafanaWebhookServer } from './integrations/grafana.js';
+import { scheduleWeeklyMeetingReminder } from './integrations/weekly-reminder.js';
+import { cleanupTokenizer } from './utils/index.js';
 
-// ---------- Logging Setup ----------
-const logger = createLogger({
-  level: 'info', // Changed from debug to reduce verbosity
-  format: format.combine(
-    format.timestamp({ format: 'HH:mm:ss' }),
-    format.errors({ stack: true }),
-    format.printf(({ level, message, timestamp, extra }) => {
-      // Simplified console format
-      if (extra) {
-        return `${timestamp} [${level.toUpperCase()}] ${message} | ${extra.action}:${extra.event}`;
-      }
-      return `${timestamp} [${level.toUpperCase()}] ${message}`;
-    })
-  ),
-  transports: [
-    new transports.Console(),
-    new transports.File({ 
-      filename: 'discord-bot.log',
-      format: format.combine(
-        format.timestamp(),
-        format.json()
-      )
-    })
-  ]
-});
+// Cleanup interval (24 hours)
+const SESSION_CLEANUP_INTERVAL = 24 * 60 * 60 * 1000;
 
-// Helper function to calculate duration
-function calculateDurationMs(startTime) {
-  return Date.now() - startTime;
-}
+// Track if shutdown is in progress
+let isShuttingDown = false;
 
-// ---------- Weekly Meeting Reminder ----------
-function scheduleWeeklyMeetingReminder(client) {
-  if (!WEEKLY_MEETING_CHANNEL_ID) {
-    logger.warn("WEEKLY_MEETING_CHANNEL_ID not set – weekly reminders disabled");
-    return;
-  }
-
-  // Runs every Thursday at 09:00 in Europe/Berlin
-  cron.schedule(
-    '0 9 * * 4',
-    async () => {
-      const reminderEventId = uuidv4();
-      const startTime = Date.now();
-
-      try {
-        const channel = await client.channels.fetch(WEEKLY_MEETING_CHANNEL_ID);
-        if (!channel || !channel.isTextBased()) {
-          logger.error("Weekly reminder: channel not found or not text-based", {
-            extra: {
-              footprint: null,
-              batch_uuid: null,
-              user_id: null,
-              event_id: reminderEventId,
-              action: "weekly_reminder",
-              event: "error"
-            }
-          });
-          return;
-        }
-
-        await channel.send(
-          "📝 Weekly prep: Please add agenda bullets for the weekly meeting to the current thread " +
-          "and the shared doc:\n" +
-          "https://docs.google.com/document/d/1P_3opjrJlhraPfpcRjGKUqtw2QwsmdSTp74tocNcNxg/edit?usp=sharing"
-        );
-
-        logger.info("Weekly meeting reminder sent", {
-          extra: {
-            footprint: null,
-            batch_uuid: null,
-            user_id: null,
-            event_id: reminderEventId,
-            action: "weekly_reminder",
-            event: "complete",
-            duration_ms: calculateDurationMs(startTime)
-          }
-        });
-      } catch (err) {
-        logger.error("Failed to send weekly meeting reminder", {
-          extra: {
-            footprint: null,
-            batch_uuid: null,
-            user_id: null,
-            event_id: reminderEventId,
-            action: "weekly_reminder",
-            event: "error",
-            duration_ms: calculateDurationMs(startTime)
-          }
-        }, err);
-      }
-    },
-    { timezone: TIMEZONE }
-  );
-}
-
-// Helper function to create professional Word document
-async function convertToWordDoc(content, meetingTitle = "Meeting") {
-  try {
-    const currentDate = new Date().toLocaleDateString('de-DE');
-    const timestamp = new Date().toLocaleString('de-DE');
-    
-    // Parse content to extract structured information
-    const lines = content.split('\n');
-    const docElements = [];
-    
-    // Document title
-    docElements.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: "Meeting Minutes",
-            bold: true,
-            size: 28,
-            color: "1E40AF"
-          })
-        ],
-        heading: HeadingLevel.TITLE,
-        alignment: AlignmentType.LEFT,
-        spacing: { after: 200 }
-      }),
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: `${meetingTitle} • ${currentDate}`,
-            size: 18,
-            color: "64748B"
-          })
-        ],
-        alignment: AlignmentType.LEFT,
-        spacing: { after: 400 }
-      })
-    );
-    
-    // Process content
-    let currentSection = "";
-    let inTable = false;
-    let tableRows = [];
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      
-      if (line.startsWith('##')) {
-        // Finish any open table
-        if (inTable && tableRows.length > 0) {
-          docElements.push(createWordTable(tableRows));
-          tableRows = [];
-          inTable = false;
-        }
-        
-        // Section heading
-        const headingText = line.replace(/^##\s*/, '').replace(/\*\*/g, '').replace(/🏢|👥|🎯|📊|📝|🗓️|⚠️|📋/g, '').trim();
-        docElements.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: headingText,
-                bold: true,
-                size: 20,
-                color: "1E40AF"
-              })
-            ],
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 300, after: 150 }
-          })
-        );
-      } else if (line.startsWith('###')) {
-        // Subsection heading
-        const headingText = line.replace(/^###\s*/, '').replace(/\*\*/g, '').replace(/🏢|👥|🎯|📊|📝|🗓️|⚠️|📋/g, '').trim();
-        docElements.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: headingText,
-                bold: true,
-                size: 16,
-                color: "1E293B"
-              })
-            ],
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 200, after: 100 }
-          })
-        );
-      } else if (line.includes('|') && line.includes('-')) {
-        // Table header separator - start table
-        inTable = true;
-      } else if (line.includes('|') && inTable) {
-        // Table row
-        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
-        if (cells.length > 0) {
-          tableRows.push(cells);
-        }
-      } else if (line.includes('|') && !inTable) {
-        // Simple table row (start new table)
-        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
-        if (cells.length > 0) {
-          tableRows = [cells];
-          inTable = true;
-        }
-      } else if (line && !inTable) {
-        // Regular paragraph
-        if (line.startsWith('- ') || line.startsWith('* ')) {
-          // Bullet point
-          const bulletText = line.replace(/^[-*]\s*/, '').replace(/\*\*/g, '').replace(/🏢|👥|🎯|📊|📝|🗓️|⚠️|📋|✅|❌|🟢|🟡|🔴|⚪|🔥/g, '').trim();
-          docElements.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `• ${bulletText}`,
-                  size: 20,
-                  color: "1E293B"
-                })
-              ],
-              spacing: { after: 80 }
-            })
-          );
-        } else if (line.startsWith('>')) {
-          // Quote/Note
-          const quoteText = line.replace(/^>\s*/, '').replace(/\*\*/g, '');
-          docElements.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: quoteText,
-                  italic: true,
-                  size: 20,
-                  color: "6B7280"
-                })
-              ],
-              spacing: { after: 150 }
-            })
-          );
-        } else if (line.length > 0 && !line.startsWith('<') && !line.includes('<!--')) {
-          // Regular text
-          const cleanText = line.replace(/\*\*/g, '').replace(/📋|📅|👥|🎯|📊|⚠️|✅|❌|🟢|🟡|🔴|⚪|🔥/g, '').trim();
-          if (cleanText.trim()) {
-            docElements.push(
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: cleanText,
-                    size: 20,
-                    color: "1E293B"
-                  })
-                ],
-                spacing: { after: 100 }
-              })
-            );
-          }
-        }
-      } else if (!line && inTable && tableRows.length > 0) {
-        // End of table
-        docElements.push(createWordTable(tableRows));
-        tableRows = [];
-        inTable = false;
-      }
-    }
-    
-    // Handle any remaining table
-    if (inTable && tableRows.length > 0) {
-      docElements.push(createWordTable(tableRows));
-    }
-    
-    // Footer
-    docElements.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: `Generated automatically • ${timestamp}`,
-            size: 16,
-            color: "64748B",
-            italics: true
-          })
-        ],
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 400 }
-      })
-    );
-    
-    // Create document
-    const doc = new Document({
-      sections: [{
-        children: docElements,
-        properties: {
-          page: {
-            margin: {
-              top: 1440,    // 1 inch
-              right: 1440,
-              bottom: 1440,
-              left: 1440,
-            },
-          },
-        },
-      }],
-    });
-    
-    return await Packer.toBuffer(doc);
-  } catch (error) {
-    console.error('Failed to convert to Word:', error);
-    return null;
-  }
-}
-
-// Helper function to create Word table
-function createWordTable(rows) {
-  if (!rows || rows.length === 0) return new Paragraph({ children: [] });
-  
-  const tableRows = rows.map((row, index) => {
-    const cells = row.map(cellText => {
-      const cleanText = cellText.replace(/\*\*/g, '').replace(/🟢|🟡|🔴|⚪|🔥|📋|📅|👥|🎯|📊|⚠️|✅|❌/g, '').trim();
-      
-      return new TableCell({
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: cleanText,
-                bold: index === 0, // Header row
-                size: index === 0 ? 18 : 16,
-                color: index === 0 ? "FFFFFF" : "1E293B"
-              })
-            ],
-            alignment: AlignmentType.LEFT
-          })
-        ],
-        shading: {
-          fill: index === 0 ? "1E40AF" : (index % 2 === 0 ? "F8FAFC" : "FFFFFF")
-        },
-        margins: {
-          top: 200,
-          bottom: 200,
-          left: 300,
-          right: 300,
-        }
-      });
-    });
-    
-    return new TableRow({
-      children: cells
-    });
-  });
-  
-  return new Table({
-    rows: tableRows,
-    width: {
-      size: 100,
-      type: WidthType.PERCENTAGE,
-    },
-    borders: {
-      top: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
-      bottom: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
-      left: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
-      right: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
-      insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
-      insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "E2E8F0" },
-    },
-  });
-}
-
-// Helper function to wait for all transcriptions to complete
-async function waitForPendingTranscriptions(sessionId, maxWaitTime = 15000) {
-  const startTime = Date.now();
-  const checkInterval = 2000; // Check every 2 seconds
-  let lastLogTime = 0;
-  const logInterval = 5000; // Log every 5 seconds
-  
-  while (Date.now() - startTime < maxWaitTime) {
-    const pending = pendingTranscriptions.get(sessionId);
-    if (!pending || pending.size === 0) {
-      console.log('✅ All transcriptions completed');
-      return true; // All transcriptions complete
-    }
-    
-    // Only log every few seconds to avoid spam
-    const now = Date.now();
-    if (now - lastLogTime > logInterval) {
-      console.log(`⏳ Waiting for ${pending.size} transcription(s) to complete...`);
-      lastLogTime = now;
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, checkInterval));
-  }
-  
-  // Timeout reached - give extra time for remaining transcriptions
-  const remaining = pendingTranscriptions.get(sessionId)?.size || 0;
-  if (remaining > 0) {
-    console.log(`⚠️ Timeout reached: ${remaining} transcription(s) still pending. Giving extra time...`);
-    
-    // Give an additional 15 seconds for remaining transcriptions
-    const extraWaitTime = 15000;
-    const extraStartTime = Date.now();
-    
-    while (Date.now() - extraStartTime < extraWaitTime) {
-      const stillPending = pendingTranscriptions.get(sessionId);
-      if (!stillPending || stillPending.size === 0) {
-        console.log('✅ All remaining transcriptions completed during extra time');
-        return true;
-      }
-      
-      if (Date.now() - lastLogTime > logInterval) {
-        console.log(`⏳ Extra time: ${stillPending.size} transcription(s) still processing...`);
-        lastLogTime = Date.now();
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, checkInterval));
-    }
-    
-    const finalRemaining = pendingTranscriptions.get(sessionId)?.size || 0;
-    if (finalRemaining > 0) {
-      console.log(`⚠️ Final timeout: ${finalRemaining} transcription(s) could not complete. Proceeding anyway...`);
-    }
-  }
-  return false;
-}
-
-// ---------- Grafana Integration Helpers ----------
-async function getOrCreateDailyGrafanaThread(client, dateKey) {
-  if (!INCIDENTS_CHANNEL_ID) {
-    throw new Error("INCIDENTS_CHANNEL_ID not set");
-  }
-
-  // Reuse cached thread if possible
-  const existingId = grafanaDailyThreads.get(dateKey);
-  if (existingId) {
-    const existingChannel = await client.channels.fetch(existingId).catch(() => null);
-    if (existingChannel && existingChannel.isThread()) {
-      return existingChannel;
-    }
-  }
-
-  const incidentsChannel = await client.channels.fetch(INCIDENTS_CHANNEL_ID);
-  if (!incidentsChannel || !incidentsChannel.isTextBased()) {
-    throw new Error("Incidents channel not found or not text-based");
-  }
-
-  // Create a new thread for this date
-  const thread = await incidentsChannel.threads.create({
-    name: `Grafana alerts – ${dateKey}`,
-    autoArchiveDuration: 1440 // 24h
-  });
-
-  grafanaDailyThreads.set(dateKey, thread.id);
-  return thread;
-}
-
-function formatGrafanaAlertMessage(payload) {
-  // These fields may change; adjust based on the actual Grafana JSON
-  const ruleName = payload.ruleName || payload.title || 'Unknown rule';
-  const state = payload.state || payload.status || 'unknown';
-  const message = payload.message || '';
-  const ruleUrl = payload.ruleUrl || payload.dashboardUrl || '';
-
-  let text = `⚠️ **Grafana alert**\n` +
-             `**Rule:** ${ruleName}\n` +
-             `**State:** ${state}\n`;
-
-  if (message) {
-    text += `**Message:** ${message}\n`;
-  }
-  if (ruleUrl) {
-    text += `**Link:** ${ruleUrl}\n`;
-  }
-
-  return text;
-}
-
-// ---------- Environment and API Setup ----------
-const openai = new OpenAI(); // uses OPENAI_API_KEY env
-const BOT_TOKEN = process.env.DISCORD_TOKEN;
-const WEEKLY_MEETING_CHANNEL_ID = process.env.WEEKLY_MEETING_CHANNEL_ID;
-const INCIDENTS_CHANNEL_ID = process.env.INCIDENTS_CHANNEL_ID;
-const TIMEZONE = process.env.TIMEZONE || 'Europe/Berlin';
-const GRAFANA_WEBHOOK_PORT = Number(process.env.GRAFANA_WEBHOOK_PORT || 3000);
-
-// Log startup configuration
+// ---------- Startup ----------
 const startupEventId = uuidv4();
+
 logger.info("Bot startup initiated", {
   extra: {
     footprint: null,
@@ -514,151 +34,12 @@ logger.info("Bot startup initiated", {
   }
 });
 
-// Validate environment variables
-if (!BOT_TOKEN) {
-  logger.error("Missing DISCORD_TOKEN environment variable", {
-    extra: {
-      footprint: null,
-      batch_uuid: startupEventId,
-      user_id: null,
-      event_id: uuidv4(),
-      action: "bot_startup",
-      event: "error"
-    }
-  });
+// Validate configuration
+if (!validateConfig(logger, startupEventId)) {
   process.exit(1);
 }
 
-if (!process.env.OPENAI_API_KEY) {
-  logger.error("Missing OPENAI_API_KEY environment variable", {
-    extra: {
-      footprint: null,
-      batch_uuid: startupEventId,
-      user_id: null,
-      event_id: uuidv4(),
-      action: "bot_startup",
-      event: "error"
-    }
-  });
-  process.exit(1);
-}
-
-if (!WEEKLY_MEETING_CHANNEL_ID) {
-  logger.warn("WEEKLY_MEETING_CHANNEL_ID not set - weekly reminders will be disabled", {
-    extra: {
-      footprint: null,
-      batch_uuid: startupEventId,
-      user_id: null,
-      event_id: uuidv4(),
-      action: "bot_startup",
-      event: "warning"
-    }
-  });
-}
-
-if (!INCIDENTS_CHANNEL_ID) {
-  logger.warn("INCIDENTS_CHANNEL_ID not set - Grafana alerts will be disabled", {
-    extra: {
-      footprint: null,
-      batch_uuid: startupEventId,
-      user_id: null,
-      event_id: uuidv4(),
-      action: "bot_startup",
-      event: "warning"
-    }
-  });
-}
-
-// Test OpenAI API key validity at startup
-async function validateOpenAIKey() {
-  const validationEventId = uuidv4();
-  const startTime = Date.now();
-  
-  logger.debug("Validating OpenAI API key", {
-    extra: {
-      footprint: null,
-      batch_uuid: startupEventId,
-      user_id: null,
-      event_id: validationEventId,
-      action: "openai_validation",
-      event: "start"
-    }
-  });
-
-  try {
-    // Test with a minimal API call to check key validity and billing status
-    const models = await openai.models.list();
-    
-    logger.info("OpenAI API key validation successful", {
-      extra: {
-        footprint: null,
-        batch_uuid: startupEventId,
-        user_id: null,
-        event_id: validationEventId,
-        action: "openai_validation",
-        event: "complete",
-        duration_ms: calculateDurationMs(startTime)
-      }
-    });
-    
-    return true;
-  } catch (error) {
-    logger.error("OpenAI API key validation failed", {
-      extra: {
-        footprint: null,
-        batch_uuid: startupEventId,
-        user_id: null,
-        event_id: validationEventId,
-        action: "openai_validation",
-        event: "error",
-        duration_ms: calculateDurationMs(startTime),
-        error_type: error.constructor.name,
-        error_message: error.message,
-        error_code: error.code,
-        error_status: error.status
-      }
-    });
-    
-    // Check for common API key issues
-    if (error.status === 401) {
-      logger.error("Invalid OpenAI API key - check your OPENAI_API_KEY environment variable", {
-        extra: {
-          footprint: null,
-          batch_uuid: startupEventId,
-          user_id: null,
-          event_id: uuidv4(),
-          action: "openai_validation",
-          event: "error"
-        }
-      });
-    } else if (error.status === 429) {
-      logger.error("OpenAI API rate limit exceeded or insufficient credits", {
-        extra: {
-          footprint: null,
-          batch_uuid: startupEventId,
-          user_id: null,
-          event_id: uuidv4(),
-          action: "openai_validation",
-          event: "error"
-        }
-      });
-    } else if (error.code === 'insufficient_quota') {
-      logger.error("OpenAI API quota exceeded - please add credits to your account", {
-        extra: {
-          footprint: null,
-          batch_uuid: startupEventId,
-          user_id: null,
-          event_id: uuidv4(),
-          action: "openai_validation",
-          event: "error"
-        }
-      });
-    }
-    
-    return false;
-  }
-}
-
+// ---------- Discord Client Setup ----------
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -668,97 +49,11 @@ const client = new Client({
   ],
 });
 
-// ---------- Storage Setup ----------
-const AUDIO_DIR = path.join(process.cwd(), 'audios');
-const TRANSCRIPT_DIR = path.join(process.cwd(), 'transcripts');
-const SUMMARY_DIR = path.join(process.cwd(), 'summaries');
-
-fs.mkdirSync(AUDIO_DIR, { recursive: true });
-fs.mkdirSync(TRANSCRIPT_DIR, { recursive: true });
-fs.mkdirSync(SUMMARY_DIR, { recursive: true });
-
-function makeLogFileName(guildId, channelId) {
-  const ts = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-  return path.join(TRANSCRIPT_DIR, `${guildId}-${channelId}-${ts}.log`);
-}
-
-const sessionLogs = new Map();
-const pendingTranscriptions = new Map(); // Track pending transcriptions by session
-
-// Track daily Grafana alert threads: dateKey ("YYYY-MM-DD") -> threadId
-const grafanaDailyThreads = new Map();
-
-// Simple per-session concurrency limiter (default: 2 concurrent tasks)
-const concurrencyStates = new Map();
-function withSessionConcurrency(sessionId, fn, limit = 2) {
-  if (!concurrencyStates.has(sessionId)) {
-    concurrencyStates.set(sessionId, { active: 0, queue: [] });
-  }
-  const state = concurrencyStates.get(sessionId);
-  return new Promise((resolve, reject) => {
-    const run = async () => {
-      state.active += 1;
-      try {
-        const result = await fn();
-        resolve(result);
-      } catch (e) {
-        reject(e);
-      } finally {
-        state.active -= 1;
-        if (state.queue.length > 0) {
-          const next = state.queue.shift();
-          next();
-        }
-      }
-    };
-    if (state.active < limit) {
-      run();
-    } else {
-      state.queue.push(run);
-    }
-  });
-}
-
-// Prevent overlapping capture sessions per (sessionId,userId)
-const captureInProgress = new Set();
-
-function writeTranscript(guildId, channelId, username, text, sessionId) {
-  const key = sessionId || `${guildId}:${channelId}`;
-  if (!sessionLogs.has(key)) {
-    sessionLogs.set(key, makeLogFileName(guildId, channelId));
-  }
-  
-  const logFile = sessionLogs.get(key);
-  const line = `[${new Date().toISOString()}] ${username}: ${text}\n`;
-  
-  fs.appendFile(logFile, line, (err) => {
-    if (err) {
-      logger.error("Failed to write transcript", {
-        extra: {
-          footprint: null,
-          batch_uuid: `${guildId}:${channelId}`,
-          user_id: username,
-          event_id: uuidv4(),
-          action: "transcript_write",
-          event: "error"
-        }
-      });
-    }
-  });
-}
-
-// ---------- Slash Commands Setup ----------
-const commands = [
-  new SlashCommandBuilder().setName('join')
-    .setDescription('Join the caller\'s voice channel & start transcribing'),
-  new SlashCommandBuilder().setName('leave')
-    .setDescription('Leave the current voice channel'),
-];
-
+// ---------- Ready Event ----------
 client.once('ready', async () => {
   const readyEventId = uuidv4();
   const startTime = Date.now();
-  
+
   logger.info("Discord client ready", {
     extra: {
       footprint: null,
@@ -771,7 +66,7 @@ client.once('ready', async () => {
   });
 
   // Validate OpenAI API key
-  const isApiKeyValid = await validateOpenAIKey();
+  const isApiKeyValid = await validateOpenAIKey(startupEventId);
   if (!isApiKeyValid) {
     logger.error("Bot will continue but OpenAI features may not work", {
       extra: {
@@ -785,6 +80,7 @@ client.once('ready', async () => {
     });
   }
 
+  // Register slash commands
   const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
 
   try {
@@ -792,7 +88,7 @@ client.once('ready', async () => {
       Routes.applicationCommands(client.user.id),
       { body: commands.map(cmd => cmd.toJSON()) }
     );
-    
+
     logger.info("Slash commands registered successfully", {
       extra: {
         footprint: null,
@@ -801,13 +97,13 @@ client.once('ready', async () => {
         event_id: readyEventId,
         action: "discord_ready",
         event: "complete",
-        duration_ms: calculateDurationMs(startTime)
+        duration_ms: Date.now() - startTime
       }
     });
-    
+
     console.log(`✅ Bot ready: ${client.user.tag}`);
     console.log('✅ Commands registered');
-    
+
   } catch (err) {
     logger.error("Failed to register slash commands", {
       extra: {
@@ -817,7 +113,7 @@ client.once('ready', async () => {
         event_id: readyEventId,
         action: "discord_ready",
         event: "error",
-        duration_ms: calculateDurationMs(startTime)
+        duration_ms: Date.now() - startTime
       }
     }, err);
   }
@@ -825,933 +121,221 @@ client.once('ready', async () => {
   // Schedule weekly meeting reminder
   scheduleWeeklyMeetingReminder(client);
 
-  // Start HTTP server for Grafana alerts
-  startGrafanaWebhookServer(client);
-});
+  // Start Grafana webhook server (pass getActiveSessions for health endpoint)
+  startGrafanaWebhookServer(client, getActiveSessions);
 
-// ---------- Audio Capture Function ----------
-function captureUserAudio(connection, userId) {
-  const captureEventId = uuidv4();
-  const sessionId = `${connection.joinConfig.guildId}:${connection.joinConfig.channelId}`;
-  const startTime = Date.now();
-
-  console.log(`🔊 Creating audio subscription for user ${userId}`);
-
-  // 1) Start receiving Opus (silence-based batching)
-  const opusStream = connection.receiver.subscribe(userId, {
-    end: { behavior: EndBehaviorType.AfterSilence, duration: 2000 }
-  });
-  // Avoid listener leak warnings on bursty sessions
-  opusStream.setMaxListeners(25);
-
-  // 2) Decode to raw 48kHz stereo PCM
-  const decoder = new prism.opus.Decoder({
-    rate: 48000,
-    channels: 2,
-    frameSize: 960
-  });
-  const pcmStream = opusStream.pipe(decoder);
-
-  // 3) Generate a unique filename
-  const ts = new Date().toISOString().replace(/[:.]/g, '-');
-  const wavPath = path.join(AUDIO_DIR, `${ts}-mono.wav`);
-
-      // 4) Pipe raw PCM into ffmpeg, convert to 16kHz mono with noise reduction
-    const ff = spawn(ffmpegPath, ['-y',
-    '-loglevel', 'error',
-    '-f', 's16le',     // input is raw 16-bit PCM
-    '-ar', '48000',    // 48k sampling rate
-    '-ac', '2',        // stereo
-          '-i', 'pipe:0',    // read from stdin
-      // Audio enhancement for better speech recognition
-      // Conservative enhancement to avoid clipping
-      '-af', 'loudnorm=I=-23:TP=-2:LRA=7,highpass=f=120,lowpass=f=3800,volume=1.2',
-      '-ac', '1',        // convert to mono
-          '-ar', '24000',    // 24 kHz (better for Whisper)
-      '-acodec', 'pcm_s16le', // 16-bit PCM
-      '-f', 'wav',
-    wavPath,           // output file
-  ]);
-
-  pcmStream.pipe(ff.stdin);
-
-  return new Promise((resolve, reject) => {
-    ff.on('close', code => {
-      if (code !== 0) {
-        logger.error("FFmpeg conversion failed", {
-          extra: {
-            footprint: null,
-            batch_uuid: sessionId,
-            user_id: userId,
-            event_id: captureEventId,
-            action: "audio_capture",
-            event: "error",
-            duration_ms: calculateDurationMs(startTime),
-            ffmpeg_exit_code: code
-          }
-        });
-        reject(new Error(`ffmpeg exit code ${code}`));
-      } else {
-        // We have a valid 16 kHz mono WAV at wavPath
-        const bytes = fs.existsSync(wavPath)
-          ? fs.statSync(wavPath).size
-          : 0;
-        
-        console.log(`📊 Audio file ${path.basename(wavPath)} - User ${userId}: ${bytes} bytes`);
-        
-        if (bytes < 16_000) {
-          // Less than ~0.2 seconds, skip
-          console.log(`🗑️ Discarding ${path.basename(wavPath)} - too small (${bytes} bytes < 16KB)`);
-          fs.unlinkSync(wavPath);
-          resolve(null);
-        } else {
-          console.log(`📁 saved ${path.basename(wavPath)} (${(bytes/1024).toFixed(1)} kB)`);
-          resolve(wavPath);
-        }
-      }
-      try {
-        opusStream.removeAllListeners();
-        decoder.removeAllListeners();
-      } catch {}
-    });
-    
-    ff.on('error', (error) => {
-      logger.error("FFmpeg process error", {
-        extra: {
-          footprint: null,
-          batch_uuid: sessionId,
-          user_id: userId,
-          event_id: captureEventId,
-          action: "audio_capture",
-          event: "error",
-          duration_ms: calculateDurationMs(startTime)
-        }
-      }, error);
-      try {
-        opusStream.removeAllListeners();
-        decoder.removeAllListeners();
-      } catch {}
-      reject(error);
-    });
-  });
-}
-
-// ---------- Audio Transcription Function ----------
-async function transcribeAudio(wavPath, sessionId, userId) {
-  if (!wavPath) return '';
-
-  const transcribeEventId = uuidv4();
-  const startTime = Date.now();
-
-  try {
-    // Check if file exists and has content
-    if (!fs.existsSync(wavPath)) {
-      console.error(`❌ Audio file not found: ${wavPath}`);
-      return '';
-    }
-    
-    const fileStats = fs.statSync(wavPath);
-    if (fileStats.size === 0) {
-      console.error(`❌ Audio file is empty: ${wavPath}`);
-      return '';
-    }
-    
-    console.log(`🎵 Transcribing audio file: ${fileStats.size} bytes`);
-    
-    // Add file size validation (Whisper has a 25MB limit)
-    if (fileStats.size > 25 * 1024 * 1024) {
-      console.error(`❌ Audio file too large: ${fileStats.size} bytes (max 25MB)`);
-      return '';
-    }
-    const transcription = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(wavPath),
-      model: 'whisper-1',
-      // No language specified = auto-detect (supports German, English, and others)
-      response_format: 'text',
-      temperature: 0.2 // Lower temperature for more consistent results
-    });
-    
-    const text = typeof transcription === 'string'
-      ? transcription
-      : transcription.text ?? '';
-    
-    if (text?.trim()) {
-      console.log('📝 Whisper →', text);
-      logger.info("Transcription successful", {
-        extra: {
-          footprint: null,
-          batch_uuid: sessionId,
-          user_id: userId,
-          event_id: transcribeEventId,
-          action: "audio_transcription",
-          event: "complete"
-        }
-      });
-    }
-    
-    return text;
-    
-  } catch (err) {
-    logger.error("Audio transcription failed", {
-      extra: {
-        footprint: null,
-        batch_uuid: actualSessionId,
-        user_id: userId,
-        event_id: transcribeEventId,
-        action: "audio_transcription",
-        event: "error",
-        duration_ms: calculateDurationMs(startTime),
-        error_type: err.constructor.name,
-        error_message: err.message,
-        error_code: err.code,
-        error_status: err.status
-      }
-    });
-    
-    // Specific error handling for different OpenAI API issues
-    if (err.status === 401) {
-      console.error('❌ Whisper failed: Invalid API key - check your OpenAI account');
-    } else if (err.status === 429) {
-      console.error('❌ Whisper failed: Rate limit exceeded or insufficient credits');
-    } else if (err.code === 'insufficient_quota') {
-      console.error('❌ Whisper failed: Quota exceeded - please add credits to your OpenAI account');
-    } else if (err.status === 400) {
-      console.error('❌ Whisper failed: Bad request - check audio format or file size');
-    } else if (err.status === 413) {
-      console.error('❌ Whisper failed: File too large (max 25MB)');
-    } else if (err.message.includes('Connection') || err.message.includes('timeout')) {
-      console.error('❌ Whisper failed: Connection error - check your internet connection');
-    } else if (err.message.includes('audio_format')) {
-      console.error('❌ Whisper failed: Unsupported audio format');
-    } else {
-      console.error('❌ Whisper failed:', err.message);
-      console.error('Full error:', err);
-    }
-    
-    // Throw to allow caller-side retry logic to trigger
-    throw err;
-  }
-}
-
-// ---------- Token Estimation Functions ----------
-function approximateTokens(str) {
-  return Math.ceil(str.length / 4);
-}
-
-function chunkTextByTokens(text, maxTokens = 6000) {
-  const maxChars = maxTokens * 4;
-  const chunks = [];
-
-  let start = 0;
-  while (start < text.length) {
-    const end = start + maxChars;
-    chunks.push(text.slice(start, end));
-    start = end;
-  }
-
-  return chunks;
-}
-
-// ---------- Transcript Summarization Function ----------
-async function summarizeTranscript(guildId, channelId, sessionId) {
-  const summarizeEventId = uuidv4();
-  const actualSessionId = sessionId || `${guildId}:${channelId}`;
-  const startTime = Date.now();
-  
-  logger.debug("Starting transcript summarization", {
-    extra: {
-      footprint: null,
-      batch_uuid: actualSessionId,
-      user_id: null,
-      event_id: summarizeEventId,
-      action: "transcript_summarization",
-      event: "start"
-    }
-  });
-
-  const key = actualSessionId;
-  const logFile = sessionLogs.get(key);
-  
-  if (!logFile || !fs.existsSync(logFile)) {
-    logger.warning("No transcript file found for summarization", {
-      extra: {
-        footprint: null,
-        batch_uuid: actualSessionId,
-        user_id: null,
-        event_id: summarizeEventId,
-        action: "transcript_summarization",
-        event: "error",
-        duration_ms: calculateDurationMs(startTime)
-      }
-    });
-    return null;
-  }
-
-  const transcript = fs.readFileSync(logFile, 'utf-8');
-  if (!transcript.trim()) {
-    logger.warning("Empty transcript found", {
-      extra: {
-        footprint: null,
-        batch_uuid: actualSessionId,
-        user_id: null,
-        event_id: summarizeEventId,
-        action: "transcript_summarization",
-        event: "error",
-        duration_ms: calculateDurationMs(startTime)
-      }
-    });
-    return null;
-  }
-
-  const totalTokens = approximateTokens(transcript);
-  
-  logger.info("Processing transcript for summarization", {
-    extra: {
-      footprint: null,
-      batch_uuid: sessionId,
-      user_id: null,
-      event_id: summarizeEventId,
-      action: "transcript_summarization",
-      event: "validate_input",
-      estimated_tokens: totalTokens,
-      transcript_length: transcript.length
-    }
-  });
-
-  try {
-    let summary;
-    
-    if (totalTokens <= 6000) {
-      // Load the meeting minutes blueprint
-      const blueprintPath = path.join(process.cwd(), 'meeting_minutes_blueprint.md');
-      let blueprint = '';
-      
-      try {
-        blueprint = fs.readFileSync(blueprintPath, 'utf-8');
-      } catch (err) {
-        logger.error("Failed to load meeting minutes blueprint", {
-          extra: {
-            footprint: null,
-            batch_uuid: sessionId,
-            user_id: null,
-            event_id: uuidv4(),
-            action: "blueprint_load",
-            event: "error"
-          }
-        }, err);
-        blueprint = 'Standard meeting minutes template not found. Please create a basic summary.';
-      }
-
-      // Single summarization for shorter transcripts
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-                          content: 'You are a professional executive assistant specializing in creating clear, well-structured German meeting protocols. You excel at transforming transcripts into polished business documents that meet corporate standards.'
-          },
-                      {
-              role: 'user',
-              content: `Create a professional meeting minutes document from the following transcript, adhering to the provided template for consistency and clarity.
-
-TRANSCRIPT:
-${transcript}
-
-TEMPLATE (please follow exactly):
-${blueprint}
-
-CONTENT REQUIREMENTS:
-- Extract clear decisions and resolutions made during the meeting
-- Identify specific action items with assigned responsibilities and deadlines
-- Focus on measurable outcomes and concrete actions
-- Use precise, professional business language in German
-
-FORMATTING GUIDELINES:
-- Set today's date: ${new Date().toLocaleDateString('de-DE')}
-- Estimate meeting duration based on transcript length
-- Mark unknown information with appropriate placeholders
-- Present the output as well-structured markdown suitable for business documentation
-
-Please ensure the final document maintains professional standards and executive-level presentation quality.`
-            }
-        ]
-      });
-
-      summary = completion.choices[0].message.content.trim();
-
-    } else {
-      // Chunked summarization for longer transcripts
-      logger.info("Transcript requires chunking", {
-        extra: {
-          footprint: null,
-          batch_uuid: sessionId,
-          user_id: null,
-          event_id: uuidv4(),
-          action: "transcript_summarization",
-          event: "validate_input"
-        }
-      });
-      
-      const textChunks = chunkTextByTokens(transcript, 6000);
-      const partialSummaries = [];
-
-      // Summarize each chunk
-      for (let i = 0; i < textChunks.length; i++) {
-        const chunkEventId = uuidv4();
-        const chunkStartTime = Date.now();
-        
-        logger.debug("Processing transcript chunk", {
-          extra: {
-            footprint: null,
-            batch_uuid: sessionId,
-            user_id: null,
-            event_id: chunkEventId,
-            action: "chunk_summarization",
-            event: "start",
-            chunk_index: i + 1,
-            total_chunks: textChunks.length
-          }
-        });
-
-        const chunk = textChunks[i];
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-4o', 
-          messages: [
-            {
-              role: 'system',
-                              content: 'You are a professional meeting analyst who extracts and structures key information from transcript segments. Focus on actionable items, decisions, and business discussions. Present findings clearly in German.'
-            },
-                          {
-                role: 'user',
-                content: `Analyze the following transcript section and extract the most important information in a clear, structured format:
-
-TRANSCRIPT SECTION ${i + 1} of ${textChunks.length}:
-${chunk}
-
-Please focus on the following categories:
-- **Decisions:** Document all concrete resolutions and agreements made during the meeting
-- **Action Items:** List all tasks including responsible parties and agreed deadlines
-- **Key Discussions:** Record the most important discussion points addressed in the meeting
-- **Deadlines:** Identify all deadlines and milestones that were established
-- **Project Planning:** Note any changes or updates to the project plan
-- **Risks:** Describe any identified issues or blockers that could affect the project
-
-Format: Present the information as a structured list with bullet points. Ensure concise and clear formulation. The entire output should be written in a professional protocol style suitable for meeting minutes.`
-              }
-          ]
-        });
-
-        const partialSummary = completion.choices[0].message.content.trim();
-        partialSummaries.push(partialSummary);
-        
-        logger.info("Transcript chunk processed", {
-          extra: {
-            footprint: null,
-            batch_uuid: sessionId,
-            user_id: null,
-            event_id: chunkEventId,
-            action: "chunk_summarization",
-            event: "complete",
-            duration_ms: calculateDurationMs(chunkStartTime),
-            chunk_index: i + 1
-          }
-        });
-      }
-
-      // Load the blueprint for final summarization too
-      const blueprintPath = path.join(process.cwd(), 'meeting_minutes_blueprint.md');
-      let blueprint = '';
-      
-      try {
-        blueprint = fs.readFileSync(blueprintPath, 'utf-8');
-      } catch (err) {
-        blueprint = 'Standard meeting minutes template not found. Please create a basic summary.';
-      }
-
-      // Final summarization
-      const finalInput = partialSummaries.join('\n\n---\n\n');
-      const finalCompletion = await openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-                          content: 'You are a senior executive assistant who specializes in creating comprehensive German meeting protocols. You excel at consolidating complex information into well-structured, professional documents suitable for executive review.'
-          },
-                      {
-              role: 'user',
-              content: `Consolidate the following sections into a comprehensive and professional meeting minutes document.
-
-ANALYZED SECTIONS:
-${finalInput}
-
-TEMPLATE (follow exactly):
-${blueprint}
-
-CONSOLIDATION REQUIREMENTS:
-- Eliminate duplicates between sections
-- Group related action items logically
-- Prioritize decisions by importance
-- Create a coherent timeline from all relevant dates and deadlines
-
-DOCUMENT SPECIFICATIONS:
-- Today's date: ${new Date().toLocaleDateString('de-DE')}
-- Estimate meeting duration based on transcript scope
-- Use professional German business language
-- Ensure executive-level quality suitable for immediate presentation
-
-The final protocol should be a polished, comprehensive document that accurately reflects the meeting content while maintaining professional formatting standards.`
-            }
-        ]
-      });
-
-      summary = finalCompletion.choices[0].message.content.trim();
-    }
-
-    logger.info("Transcript summarization completed", {
-      extra: {
-        footprint: null,
-        batch_uuid: actualSessionId,
-        user_id: null,
-        event_id: summarizeEventId,
-        action: "transcript_summarization",
-        event: "complete",
-        duration_ms: calculateDurationMs(startTime),
-        summary_length: summary.length
-      }
-    });
-
-    return summary;
-
-  } catch (err) {
-    logger.error("Transcript summarization failed", {
-      extra: {
-        footprint: null,
-        batch_uuid: actualSessionId,
-        user_id: null,
-        event_id: summarizeEventId,
-        action: "transcript_summarization",
-        event: "error",
-        duration_ms: calculateDurationMs(startTime),
-        error_type: err.constructor.name,
-        error_message: err.message,
-        error_code: err.code,
-        error_status: err.status
-      }
-    });
-    
-    throw err;
-  }
-}
-
-// ---------- Main Bot Logic ----------
-client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
-
-  const interactionEventId = uuidv4();
-  const startTime = Date.now();
-
-  if (interaction.commandName === 'join') {
-    const channel = interaction.member.voice?.channel;
-    if (!channel) {
-      logger.warning("User not in voice channel", {
-        extra: {
-          footprint: null,
-          batch_uuid: interactionEventId,
-          user_id: interaction.user.id,
-          event_id: uuidv4(),
-          action: "interaction_handling",
-          event: "error"
-        }
-      });
-      return interaction.reply({ content: 'Jump into a voice channel first!', ephemeral: true });
-    }
-
-    const connection = joinVoiceChannel({
-      channelId: channel.id,
-      guildId: channel.guild.id,
-      adapterCreator: channel.guild.voiceAdapterCreator,
-    });
-
-    logger.info("Joined voice channel", {
-      extra: {
-        footprint: null,
-        batch_uuid: interactionEventId,
-        user_id: interaction.user.id,
-        event_id: uuidv4(),
-        action: "voice_join",
-        event: "complete",
-        channel_name: channel.name,
-        channel_id: channel.id
-      }
-    });
-
-    interaction.reply(`🎙️ **Transkription gestartet** in **${channel.name}**\n📝 Sprechen Sie - ich erstelle automatisch ein Protokoll!`);
-    
-    connection.receiver.speaking.on('start', async (userId) => {
-      const sessionId = `${interaction.guild.id}:${channel.id}`;
-      const captureKey = `${sessionId}:${userId}`;
-      
-      // Debug: Log which user started speaking
-      console.log(`🎤 User ${userId} started speaking`);
-      
-      // Check if connection is still valid
-      if (connection.state.status === 'destroyed') {
-        console.log('⚠️ Ignoring speaking event - connection destroyed');
-        return;
-      }
-      
-      if (captureInProgress.has(captureKey)) {
-        return; // avoid re-entrant capture for same speaker/session
-      }
-      captureInProgress.add(captureKey);
-      
-      // Track this transcription as pending
-      if (!pendingTranscriptions.has(sessionId)) {
-        pendingTranscriptions.set(sessionId, new Set());
-      }
-      
-      const transcriptionId = uuidv4();
-      pendingTranscriptions.get(sessionId).add(transcriptionId);
-      
-      try {
-        // 1) Capture user audio -> WAV (limit parallelism per session)
-        console.log(`🎵 Starting audio capture for user ${userId}`);
-        const wavPath = await withSessionConcurrency(sessionId, () => captureUserAudio(connection, userId), 2);
-        if (!wavPath) {
-          console.log(`❌ No audio captured for user ${userId} (too short or failed)`);
-          // Remove from pending if no audio captured
-          const pendingSet = pendingTranscriptions.get(sessionId);
-          if (pendingSet) {
-            pendingSet.delete(transcriptionId);
-          }
-          captureInProgress.delete(captureKey);
-          return;
-        }
-        console.log(`✅ Audio captured for user ${userId}: ${wavPath}`);
-
-        // 2) Transcribe with retry logic (also concurrency-limited)
-        let text = '';
-        let retries = 4;
-        let lastError = null;
-        
-        let attempt = 0;
-        while (retries >= 0) {
-          try {
-            text = await withSessionConcurrency(sessionId, () => transcribeAudio(wavPath, sessionId, userId), 2);
-            break; // Success, exit retry loop
-          } catch (transcribeErr) {
-            lastError = transcribeErr;
-            retries--;
-            if (retries >= 0) {
-              attempt += 1;
-              const backoff = Math.min(15000, 500 * 2 ** (attempt - 1)) + Math.floor(Math.random() * 250);
-              console.log(`🔄 Retrying transcription (attempt ${attempt + 1}) in ${backoff}ms...`);
-              await new Promise(resolve => setTimeout(resolve, backoff));
-            }
-          }
-        }
-        
-        if (!text && lastError) {
-          throw lastError; // Re-throw the last error if all retries failed
-        }
-        
-        if (text?.trim()) {
-          const username = await interaction.guild.members
-            .fetch(userId)
-            .then(u => u.displayName)
-            .catch(() => 'Someone');
-
-          console.log(`📝 ${username} (${userId}): ${text}`);
-          
-          // 3) Log transcript
-          writeTranscript(interaction.guild.id, channel.id, username, text, sessionId);
-        }
-        
-      } catch (err) {
-        logger.error("Voice processing failed", {
-          extra: {
-            footprint: null,
-            batch_uuid: sessionId,
-            user_id: userId,
-            event_id: uuidv4(),
-            action: "voice_processing",
-            event: "error"
-          }
-        }, err);
-      } finally {
-        // ✅ Always cleanup - regardless of success or failure
-        const pendingSet = pendingTranscriptions.get(sessionId);
-        if (pendingSet) {
-          pendingSet.delete(transcriptionId);
-          console.log(`🧹 Cleaned up transcription ${transcriptionId.substr(0, 8)}... (${pendingSet.size} remaining)`);
-        }
-        captureInProgress.delete(captureKey);
-      }
-    });
-  }
-
-  if (interaction.commandName === 'leave') {
-    // Defer reply for long-running operation
-    await interaction.deferReply();
-    
-    const leaveEventId = uuidv4();
-    const leaveStartTime = Date.now();
-  
-    const conn = getVoiceConnection(interaction.guild.id);
-    let sessionId = null;
-    
-    if (conn) {
-      // Capture channelId before destroying the connection
-      const channelId = conn.joinConfig.channelId;
-      sessionId = `${interaction.guild.id}:${channelId}`;
-      
-      // Clean up any remaining pending transcriptions before destroying connection
-      const pendingSet = pendingTranscriptions.get(sessionId);
-      const pendingCount = pendingSet ? pendingSet.size : 0;
-      if (pendingCount > 0) {
-        console.log(`🧹 Cleaning up ${pendingCount} stale pending transcription(s)...`);
-        pendingTranscriptions.delete(sessionId);
-      }
-      
-      conn.destroy();
-      console.log('🔌 Voice connection closed');
-      
-      // Wait for all pending transcriptions to complete
-      console.log('📝 Finalizing transcriptions...');
-      
-      // Update user with status
-      await interaction.editReply('📝 Verarbeite noch offene Transkriptionen...');
-      
-      // Give a small delay for any final audio processing to start
-      console.log('⏳ Allowing time for final audio processing...');
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Check if there are any pending transcriptions left to wait for
-      const remainingAfterCleanup = pendingTranscriptions.get(sessionId);
-      if (!remainingAfterCleanup || remainingAfterCleanup.size === 0) {
-        console.log('✅ No pending transcriptions - proceeding immediately');
-      }
-      
-      const allComplete = await waitForPendingTranscriptions(sessionId);
-      
-      if (allComplete) {
-        console.log('✅ All transcriptions completed');
-        await interaction.editReply('📝 Erstelle Meeting-Protokoll...');
-      } else {
-        console.log('⚠️ Some transcriptions may be incomplete');
-        await interaction.editReply('⚠️ Erstelle Protokoll (einige Transkriptionen unvollständig)...');
-      }
-      
-      // Clean up the pending transcriptions for this session
-      pendingTranscriptions.delete(sessionId);
-    }
-  
-    let summary = null;
+  // ---------- Periodic Maintenance ----------
+  // Schedule cleanup of old sessions (runs daily)
+  setInterval(() => {
     try {
-      // Use the preserved channelId to avoid undefined after destroy
-      const preservedChannelId = sessionId ? sessionId.split(':')[1] : null;
-      summary = await summarizeTranscript(interaction.guild.id, preservedChannelId, sessionId);
+      const { cleanedSessions, cleanedEntries } = cleanupOldSessions(7);
+      if (cleanedSessions > 0 || cleanedEntries > 0) {
+        logger.info("Scheduled session cleanup completed", {
+          extra: {
+            footprint: null,
+            batch_uuid: null,
+            user_id: null,
+            event_id: uuidv4(),
+            action: "scheduled_cleanup",
+            event: "complete",
+            cleaned_sessions: cleanedSessions,
+            cleaned_entries: cleanedEntries
+          }
+        });
+      }
     } catch (err) {
-      logger.error("Failed to summarize transcript", {
-        extra: {
-          footprint: null,
-          batch_uuid: interactionEventId,
-          user_id: interaction.user.id,
-          event_id: leaveEventId,
-          action: "voice_leave",
-          event: "error",
-          duration_ms: calculateDurationMs(leaveStartTime)
-        }
-      }, err);
-    } finally {
-      // Clean up session logs regardless of success or failure
-      if (sessionId) {
-        sessionLogs.delete(sessionId);
-        console.log(`🗑️ Cleaned up session log for ${sessionId}`);
-      }
+      console.error('⚠️ Scheduled cleanup failed:', err.message);
     }
-  
-    if (summary) {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hour = String(now.getHours()).padStart(2, '0');
-      const minute = String(now.getMinutes()).padStart(2, '0');
-      const baseFileName = `Meeting_Minutes_${year}_${month}_${day}__${hour}_${minute}`;
-      
-      // Extract meeting title from summary for better naming
-      const titleMatch = summary.match(/Thema.*?-->(.*?)<!--/);
-      const meetingTitle = titleMatch ? titleMatch[1].trim() : "Meeting";
-  
-      // Generate professional Word document
-      const wordFileName = `${baseFileName}.docx`;
-      const wordPath = path.join(SUMMARY_DIR, wordFileName);
-      let wordBuffer = null;
-      
-      try {
-        wordBuffer = await convertToWordDoc(summary, meetingTitle);
-        if (wordBuffer) {
-          fs.writeFileSync(wordPath, wordBuffer);
-          console.log(`📄 Word document generated: ${wordFileName}`);
-        }
-      } catch (error) {
-        console.error('Failed to generate Word document:', error);
-      }
-      
-      // Create and upload Word document
-      if (wordBuffer) {
-        try {
-          fs.writeFileSync(wordPath, wordBuffer);
-          const { AttachmentBuilder } = await import('discord.js');
-          const attachment = new AttachmentBuilder(wordPath, { name: wordFileName });
-        
-          await interaction.editReply({
-            content: `📝 **Meeting-Protokoll erstellt!** 📄\n\n📄 **Microsoft Word (.docx)** - Professionell editierbar\n\n💼 Das Word-Dokument ist business-ready!`,
-            files: [attachment]
-          });
-        
-          console.log(`✅ Uploaded: ${wordFileName}`);
-          
-          logger.info("Summary files created and uploaded successfully", {
-            extra: {
-              footprint: null,
-              batch_uuid: interactionEventId,
-              user_id: interaction.user.id,
-              event_id: leaveEventId,
-              action: "voice_leave",
-              event: "complete",
-              duration_ms: calculateDurationMs(leaveStartTime)
-            }
-          });
-          
-        } catch (uploadError) {
-          logger.error("Failed to upload summary file", {
-            extra: {
-              footprint: null,
-              batch_uuid: interactionEventId,
-              user_id: interaction.user.id,
-              event_id: uuidv4(),
-              action: "file_upload",
-              event: "error"
-            }
-          }, uploadError);
-          
-          await interaction.editReply(
-            `📝 **Meeting-Protokoll erstellt!** \n📁 Datei gespeichert: \`${wordFileName}\`\n\n*Hinweis: Datei-Upload fehlgeschlagen, bitte lokale Datei verwenden.*`
-          );
-        }
-      } else {
-        await interaction.editReply(`⚠️ Meeting-Protokoll konnte nicht erstellt werden.`);
-      }
-    } else {
-      await interaction.editReply('❌ Verbindung getrennt. Kein Transkript gefunden oder nichts zu erstellen.');
-    }
+  }, SESSION_CLEANUP_INTERVAL);
+  console.log('📅 Scheduled daily cleanup of old sessions (7+ days)');
+
+  // ---------- Audio Recovery System ----------
+  // First, mark any stale "active" sessions (older than 2 hours) for recovery
+  // This handles cases where the bot crashed without calling /leave
+  const staleCount = markStaleSessions(2);
+  if (staleCount > 0) {
+    console.log(`🔄 Found ${staleCount} stale session(s) from previous bot runs`);
   }
+
+  // Check for untranscribed audio from previous sessions
+  const recoveryStatus = getRecoveryStatus();
+  if (recoveryStatus.totalUntranscribed > 0) {
+    console.log(`\n📋 Found ${recoveryStatus.totalUntranscribed} untranscribed audio file(s) from ${recoveryStatus.sessionsNeedingRecovery} session(s)`);
+
+    // Only run recovery if API key is valid
+    if (isApiKeyValid) {
+      console.log('🔄 Starting audio recovery in 10 seconds...');
+
+      // Delay recovery to ensure bot is fully ready
+      setTimeout(async () => {
+        try {
+          await runRecovery(true); // Auto-summarize completed sessions
+        } catch (err) {
+          console.error('❌ Recovery failed:', err.message);
+        }
+      }, 10000);
+    } else {
+      console.log('⚠️ Skipping recovery - OpenAI API key not valid');
+      console.log('💡 Audio files are saved and will be processed on next restart');
+    }
+  } else {
+    console.log('✅ No pending audio recovery needed');
+  }
+
+  // Schedule periodic recovery (every 30 minutes)
+  schedulePeriodicRecovery(30 * 60 * 1000);
 });
 
-// ---------- Grafana Webhook Server ----------
-function startGrafanaWebhookServer(client) {
-  if (!INCIDENTS_CHANNEL_ID) {
-    logger.warn("INCIDENTS_CHANNEL_ID not set – Grafana alerts disabled");
+// ---------- Interaction Handler ----------
+client.on('interactionCreate', handleInteraction);
+
+// ---------- Global Error Handling ----------
+process.on('unhandledRejection', (reason) => {
+  // Log the actual error to console for debugging
+  console.error('❌ Unhandled Promise Rejection:', reason);
+  
+  logger.error(`Unhandled Promise Rejection: ${reason?.message || reason}`, {
+    extra: {
+      footprint: null,
+      batch_uuid: null,
+      user_id: null,
+      event_id: uuidv4(),
+      action: "error_handling",
+      event: "error",
+      error_type: "UnhandledPromiseRejection",
+      error_message: reason?.message || String(reason),
+      error_stack: reason?.stack
+    }
+  });
+});
+
+process.on('uncaughtException', (error) => {
+  // Log the actual error to console for debugging
+  console.error('❌ Uncaught Exception:', error);
+  
+  logger.error(`Uncaught Exception: ${error.message}`, {
+    extra: {
+      footprint: null,
+      batch_uuid: null,
+      user_id: null,
+      event_id: uuidv4(),
+      action: "error_handling",
+      event: "error",
+      error_type: "UncaughtException",
+      error_message: error.message,
+      error_stack: error.stack
+    }
+  });
+  gracefulShutdown('uncaughtException');
+});
+
+// ---------- Graceful Shutdown ----------
+/**
+ * Gracefully shutdown the bot, cleaning up all resources
+ * @param {string} signal - Signal that triggered shutdown
+ */
+async function gracefulShutdown(signal) {
+  if (isShuttingDown) {
+    console.log('⏳ Shutdown already in progress...');
     return;
   }
-
-  const app = express();
-  app.use(express.json());
-
-  app.post('/grafana-alert', async (req, res) => {
-    const alertEventId = uuidv4();
-    const startTime = Date.now();
-
-    try {
-      const payload = req.body;
-      const now = new Date();
-      const dateKey = now.toISOString().slice(0, 10); // YYYY-MM-DD
-
-      const thread = await getOrCreateDailyGrafanaThread(client, dateKey);
-      const text = formatGrafanaAlertMessage(payload);
-
-      await thread.send(text);
-
-      logger.info("Grafana alert forwarded to Discord", {
-        extra: {
-          footprint: null,
-          batch_uuid: null,
-          user_id: null,
-          event_id: alertEventId,
-          action: "grafana_alert",
-          event: "complete",
-          duration_ms: calculateDurationMs(startTime)
-        }
-      });
-
-      res.status(200).json({ ok: true });
-    } catch (err) {
-      logger.error("Failed to handle Grafana alert", {
-        extra: {
-          footprint: null,
-          batch_uuid: null,
-          user_id: null,
-          event_id: alertEventId,
-          action: "grafana_alert",
-          event: "error",
-          duration_ms: calculateDurationMs(startTime)
-        }
-      }, err);
-      res.status(500).json({ error: 'failed' });
+  
+  isShuttingDown = true;
+  const shutdownEventId = uuidv4();
+  const shutdownStartTime = Date.now();
+  
+  console.log(`\n🛑 Received ${signal}, initiating graceful shutdown...`);
+  
+  logger.info("Graceful shutdown initiated", {
+    extra: {
+      footprint: null,
+      batch_uuid: null,
+      user_id: null,
+      event_id: shutdownEventId,
+      action: "graceful_shutdown",
+      event: "start",
+      signal
     }
   });
-
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok', uptime: process.uptime() });
-  });
-
-  app.listen(GRAFANA_WEBHOOK_PORT, '0.0.0.0', () => {
-    console.log(`📡 Grafana webhook listening on port ${GRAFANA_WEBHOOK_PORT} (all interfaces)`);
-    logger.info("Grafana webhook server started", {
+  
+  try {
+    // 1. Stop Grafana webhook server
+    console.log('🔌 Stopping Grafana webhook server...');
+    await stopGrafanaWebhookServer();
+    
+    // 2. Stop accepting new voice connections and cleanup all sessions
+    console.log('🔌 Disconnecting from voice channels...');
+    
+    // Get all active sessions and clean them up
+    const activeSessions = getActiveSessions();
+    for (const sessionId of activeSessions) {
+      try {
+        const guildId = getGuildFromSession(sessionId);
+        const connection = getVoiceConnection(guildId);
+        if (connection) {
+          connection.destroy();
+          console.log(`   ✅ Disconnected from guild ${guildId}`);
+        }
+        // Clean up session resources
+        cleanupSession(sessionId);
+      } catch (err) {
+        console.error(`   ⚠️ Error disconnecting session ${sessionId}:`, err.message);
+      }
+    }
+    
+    // 3. Wait for pending transcriptions (with timeout)
+    console.log('⏳ Waiting for pending transcriptions to complete (max 30s)...');
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Give 5 seconds grace period
+    
+    // 4. Clean up resources
+    console.log('🧹 Cleaning up resources...');
+    
+    // Clean up tiktoken encoder
+    cleanupTokenizer();
+    
+    // 5. Destroy Discord client
+    console.log('🤖 Destroying Discord client...');
+    client.destroy();
+    
+    const shutdownDuration = Date.now() - shutdownStartTime;
+    
+    logger.info("Graceful shutdown completed", {
       extra: {
         footprint: null,
         batch_uuid: null,
         user_id: null,
-        event_id: uuidv4(),
-        action: "grafana_webhook_start",
-        event: "start",
-        port: GRAFANA_WEBHOOK_PORT,
-        bind_address: '0.0.0.0'
+        event_id: shutdownEventId,
+        action: "graceful_shutdown",
+        event: "complete",
+        duration_ms: shutdownDuration
       }
     });
-  });
+    
+    console.log(`✅ Graceful shutdown completed in ${shutdownDuration}ms`);
+    
+  } catch (err) {
+    logger.error("Error during graceful shutdown", {
+      extra: {
+        footprint: null,
+        batch_uuid: null,
+        user_id: null,
+        event_id: shutdownEventId,
+        action: "graceful_shutdown",
+        event: "error",
+        error_message: err.message
+      }
+    });
+    console.error('❌ Error during shutdown:', err.message);
+  } finally {
+    // Force exit after cleanup
+    process.exit(signal === 'uncaughtException' ? 1 : 0);
+  }
 }
 
-// Global error handling
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error("Unhandled Promise Rejection", {
-    extra: {
-      footprint: null,
-      batch_uuid: null,
-      user_id: null,
-      event_id: uuidv4(),
-      action: "error_handling",
-      event: "error",
-      error_type: "UnhandledPromiseRejection"
-    }
-  }, reason);
-});
+// Register shutdown handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGHUP', () => gracefulShutdown('SIGHUP'));
 
-process.on('uncaughtException', (error) => {
-  logger.error("Uncaught Exception", {
-    extra: {
-      footprint: null,
-      batch_uuid: null,
-      user_id: null,
-      event_id: uuidv4(),
-      action: "error_handling",
-      event: "error",
-      error_type: "UncaughtException"
-    }
-  }, error);
-  process.exit(1);
-});
-
+// ---------- Start Bot ----------
 client.login(BOT_TOKEN);
