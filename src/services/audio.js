@@ -116,6 +116,8 @@ export async function captureUserAudio(connection, userId, username = 'Unknown')
 
   return new Promise((resolve, reject) => {
     let resolved = false;
+    let finalizing = false;
+    let finalizeForceKillTimeout = null;
     
     /**
      * Cleanup function to properly release all resources
@@ -138,8 +140,71 @@ export async function captureUserAudio(connection, userId, username = 'Unknown')
     const safeResolve = (result) => {
       if (resolved) return;
       resolved = true;
+      if (finalizeForceKillTimeout) {
+        clearTimeout(finalizeForceKillTimeout);
+        finalizeForceKillTimeout = null;
+      }
       cleanup();
       resolve(result);
+    };
+
+    /**
+     * Gracefully stop capture and let ffmpeg flush whatever audio has already arrived.
+     * This preserves partial recordings instead of discarding them on timeout/stream issues.
+     */
+    const finalizePartialCapture = (reason) => {
+      if (resolved || finalizing) return;
+      finalizing = true;
+
+      console.log(`🛑 Finalizing partial capture for ${username} (${reason})`);
+
+      try {
+        opusStream.unpipe(decoder);
+      } catch (e) {
+        // Ignore unpipe errors
+      }
+
+      try {
+        decoder.unpipe(ff.stdin);
+      } catch (e) {
+        // Ignore unpipe errors
+      }
+
+      try {
+        opusStream.destroy();
+      } catch (e) {
+        // Ignore stream shutdown errors
+      }
+
+      try {
+        decoder.end();
+      } catch (e) {
+        // Ignore decoder shutdown errors
+      }
+
+      try {
+        ff.stdin.end();
+      } catch (e) {
+        // Ignore stdin close errors
+      }
+
+      finalizeForceKillTimeout = setTimeout(() => {
+        if (resolved) return;
+
+        try {
+          ff.kill('SIGTERM');
+        } catch (e) {
+          // Ignore kill errors
+        }
+
+        safeResolve({
+          wavPath: null,
+          entryId: null,
+          fileSize: 0,
+          tooSmall: false,
+          error: `Capture finalization timeout (${reason})`
+        });
+      }, 5000);
     };
 
     // Handle stream errors - ensure ff.kill() is called
@@ -156,14 +221,19 @@ export async function captureUserAudio(connection, userId, username = 'Unknown')
           error_message: error.message
         }
       });
-      
-      // Kill ffmpeg process on stream error
+
+      if (receivedAnyData || opusPacketCount > 0) {
+        finalizePartialCapture(`stream error: ${error.message}`);
+        return;
+      }
+
+      // Kill ffmpeg process on stream error when there is nothing to salvage
       try {
         ff.kill('SIGTERM');
       } catch (e) {
         // Ignore kill errors
       }
-      
+
       safeResolve({
         wavPath: null,
         entryId: null,
@@ -348,16 +418,24 @@ export async function captureUserAudio(connection, userId, username = 'Unknown')
             event_id: captureEventId,
             action: "audio_capture",
             event: "timeout",
-            duration_ms: calculateDurationMs(startTime)
+            duration_ms: calculateDurationMs(startTime),
+            received_any_data: receivedAnyData,
+            opus_packet_count: opusPacketCount,
+            decode_error_count: decodeErrorCount
           }
         });
-        
+
+        if (receivedAnyData || opusPacketCount > 0) {
+          finalizePartialCapture('capture timeout');
+          return;
+        }
+
         try {
           ff.kill('SIGTERM');
         } catch (e) {
           // Ignore kill errors
         }
-        
+
         safeResolve({
           wavPath: null,
           entryId: null,

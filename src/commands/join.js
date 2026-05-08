@@ -2,17 +2,32 @@ import {
   joinVoiceChannel,
   VoiceConnectionStatus,
   entersState,
-  getVoiceConnection
+  getVoiceConnection,
+  generateDependencyReport
 } from '@discordjs/voice';
+import { once } from 'node:events';
+import { PermissionFlagsBits } from 'discord.js';
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../logger.js';
+import { BOT_TOKEN, VOICE_BACKEND } from '../config.js';
 import { captureUserAudio } from '../services/audio.js';
 import { transcribeAudio } from '../services/transcription.js';
-import { withSessionConcurrency, clearSessionConcurrency } from '../utils/index.js';
+import { pendingTranscriptions } from '../services/voiceCapturePipeline.js';
+import {
+  ensureVoiceWorkerReady,
+  isVoiceWorkerHealthy,
+  startVoiceWorkerSession,
+  stopVoiceWorkerSession
+} from '../services/voiceWorkerClient.js';
+import {
+  withSessionConcurrency,
+  clearSessionConcurrency,
+  safeDeferReply,
+  safeRespond
+} from '../utils/index.js';
 
 // Storage for session data
 export const sessionLogs = new Map();
-export const pendingTranscriptions = new Map();
 const captureInProgress = new Set();
 
 // Track active connections for reconnection
@@ -35,6 +50,664 @@ const USER_RATE_LIMIT = 1000;
 const USER_RATE_LIMIT_WINDOW = 60 * 1000;
 // Rate limit cleanup interval (5 minutes)
 const RATE_LIMIT_CLEANUP_INTERVAL = 5 * 60 * 1000;
+// Audio issue diagnostics entry expiry (10 minutes)
+const AUDIO_ISSUE_EXPIRY_MS = 10 * 60 * 1000;
+// Voice connection ready timeout (configurable for slow networks/regions)
+const VOICE_READY_TIMEOUT_MS = Number(process.env.VOICE_READY_TIMEOUT_MS || 30000);
+const VOICE_READY_GRACE_TIMEOUT_MS = Number(process.env.VOICE_READY_GRACE_TIMEOUT_MS || 30000);
+// Voice connection retries for initial join/rejoin
+const VOICE_CONNECT_MAX_ATTEMPTS = Math.max(1, Number(process.env.VOICE_CONNECT_MAX_ATTEMPTS || 3));
+const VOICE_CONNECT_RETRY_DELAY_MS = Number(process.env.VOICE_CONNECT_RETRY_DELAY_MS || 1500);
+const VOICE_SIGNAL_RECOVERY_TIMEOUT_MS = Number(process.env.VOICE_SIGNAL_RECOVERY_TIMEOUT_MS || 5000);
+const DISCORD_SESSION_REFRESH_COOLDOWN_MS = Number(process.env.DISCORD_SESSION_REFRESH_COOLDOWN_MS || 60000);
+const VOICE_NETWORK_CLOSE_CODE_DAVE_REQUIRED = 4017;
+// Keep existing behavior by default (self-muted bot)
+const BOT_SELF_MUTE = process.env.DISCORD_BOT_SELF_MUTE !== 'false';
+const VOICE_CONNECT_FALLBACK_UNMUTE = process.env.VOICE_CONNECT_FALLBACK_UNMUTE !== 'false';
+const STALE_REMOTE_VOICE_RESET_DELAY_MS = Number(process.env.STALE_REMOTE_VOICE_RESET_DELAY_MS || 1500);
+
+let opusDependencyStatus = null;
+let voiceDependencyReport = null;
+let discordSessionRefreshPromise = null;
+let lastDiscordSessionRefreshAt = 0;
+const VOICE_ENCRYPTION_LIBRARIES = [
+  'sodium-native',
+  'sodium',
+  'libsodium-wrappers',
+  '@stablelib/xchacha20poly1305',
+  '@noble/ciphers'
+];
+
+function hasDependencyInstalled(report, dependencyName) {
+  const escaped = dependencyName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const installedPattern = new RegExp(`- ${escaped}:\\s+(?!not found$).+`, 'm');
+  return installedPattern.test(report);
+}
+
+function getVoiceDependencyReport() {
+  if (!voiceDependencyReport) {
+    voiceDependencyReport = generateDependencyReport();
+  }
+  return voiceDependencyReport;
+}
+
+function hasSupportedEncryptionLibrary(report) {
+  return VOICE_ENCRYPTION_LIBRARIES.some(dep => hasDependencyInstalled(report, dep));
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function createVoiceJoinError(message, code, extra = {}) {
+  const error = new Error(message);
+  error.code = code;
+  Object.assign(error, extra);
+  return error;
+}
+
+function getVoiceJoinStrategy(attempt) {
+  const useUnmutedFallback = VOICE_CONNECT_FALLBACK_UNMUTE && attempt > 1;
+
+  return {
+    label: useUnmutedFallback ? 'unmuted-fallback' : 'default',
+    selfDeaf: false,
+    selfMute: useUnmutedFallback ? false : BOT_SELF_MUTE,
+    readyTimeoutMs: VOICE_READY_TIMEOUT_MS,
+    readyGraceTimeoutMs: VOICE_READY_GRACE_TIMEOUT_MS,
+  };
+}
+
+function formatVoiceDebugTail(messages, limit = 8) {
+  if (!messages.length) {
+    return null;
+  }
+
+  return messages.slice(-limit).join(' || ');
+}
+
+async function refreshDiscordGatewaySession(client, { sessionId, action, reason }) {
+  const now = Date.now();
+
+  if (discordSessionRefreshPromise) {
+    return discordSessionRefreshPromise;
+  }
+
+  if (now - lastDiscordSessionRefreshAt < DISCORD_SESSION_REFRESH_COOLDOWN_MS) {
+    logger.warn("Skipping Discord client session refresh due to cooldown", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: uuidv4(),
+        action,
+        event: "gateway_refresh_skipped",
+        reason,
+        cooldown_ms: DISCORD_SESSION_REFRESH_COOLDOWN_MS
+      }
+    });
+    return false;
+  }
+
+  discordSessionRefreshPromise = (async () => {
+    logger.warn("Refreshing Discord client session after voice join failures", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: uuidv4(),
+        action,
+        event: "gateway_refresh_start",
+        reason
+      }
+    });
+
+    try {
+      const readyPromise = once(client, 'ready');
+      client.destroy();
+      await client.login(BOT_TOKEN);
+      await readyPromise;
+      lastDiscordSessionRefreshAt = Date.now();
+
+      logger.info("Discord client session refreshed", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: null,
+          event_id: uuidv4(),
+          action,
+          event: "gateway_refresh_complete",
+          reason
+        }
+      });
+      return true;
+    } catch (error) {
+      lastDiscordSessionRefreshAt = Date.now();
+      logger.error("Discord client session refresh failed", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: null,
+          event_id: uuidv4(),
+          action,
+          event: "gateway_refresh_error",
+          reason,
+          error_message: error?.message
+        }
+      });
+      return false;
+    } finally {
+      discordSessionRefreshPromise = null;
+    }
+  })();
+
+  return discordSessionRefreshPromise;
+}
+
+async function waitForVoiceReady(connection, { attempt, sessionId, action, strategy }) {
+  const transitions = [];
+  const debugMessages = [];
+  let signallingRecoveryTimer = null;
+  let rejectOnRegression;
+  let observedNetworking = null;
+  let detachNetworkingCloseListener = null;
+  let networkingCloseCode = null;
+
+  const clearSignallingRecoveryTimer = () => {
+    if (signallingRecoveryTimer) {
+      clearTimeout(signallingRecoveryTimer);
+      signallingRecoveryTimer = null;
+    }
+  };
+
+  const regressionPromise = new Promise((_, reject) => {
+    rejectOnRegression = reject;
+  });
+
+  const readyAbortController = new AbortController();
+
+  const stateChangeHandler = (oldState, newState) => {
+    const transition = `${oldState.status}->${newState.status}`;
+    transitions.push(transition);
+    logger.info("Voice connection state changed", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: uuidv4(),
+        action,
+        event: "state_change",
+        attempt,
+        strategy: strategy.label,
+        from_status: oldState.status,
+        to_status: newState.status
+      }
+    });
+
+    attachNetworkingCloseListener(newState.networking);
+
+    if (newState.status !== VoiceConnectionStatus.Signalling) {
+      clearSignallingRecoveryTimer();
+      return;
+    }
+
+    if (oldState.status === VoiceConnectionStatus.Connecting) {
+      clearSignallingRecoveryTimer();
+      signallingRecoveryTimer = setTimeout(() => {
+        signallingRecoveryTimer = null;
+
+        if (connection.state?.status !== VoiceConnectionStatus.Signalling) {
+          return;
+        }
+
+        const error = createVoiceJoinError(
+          'Voice connection regressed to signalling and did not recover',
+          'VOICE_SIGNALLING_REGRESSION',
+          {
+            finalStatus: connection.state?.status,
+            transitions: [...transitions],
+            debugTail: formatVoiceDebugTail(debugMessages)
+          }
+        );
+
+        readyAbortController.abort();
+        rejectOnRegression(error);
+      }, VOICE_SIGNAL_RECOVERY_TIMEOUT_MS);
+
+      logger.warn("Voice connection regressed to signalling before reaching Ready", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: null,
+          event_id: uuidv4(),
+          action,
+          event: "signalling_regression",
+          attempt,
+          strategy: strategy.label,
+          recovery_timeout_ms: VOICE_SIGNAL_RECOVERY_TIMEOUT_MS
+        }
+      });
+    }
+  };
+
+  const debugHandler = (message) => {
+    debugMessages.push(message);
+    if (debugMessages.length > 25) {
+      debugMessages.shift();
+    }
+  };
+
+  const errorHandler = (error) => {
+    debugMessages.push(`connection-error: ${error?.message || 'unknown error'}`);
+    if (debugMessages.length > 25) {
+      debugMessages.shift();
+    }
+  };
+
+  const attachNetworkingCloseListener = (networking) => {
+    if (!networking || networking === observedNetworking) {
+      return;
+    }
+
+    if (detachNetworkingCloseListener) {
+      detachNetworkingCloseListener();
+    }
+
+    const closeHandler = (code) => {
+      networkingCloseCode = code;
+      debugMessages.push(`networking-close: ${code}`);
+      if (debugMessages.length > 25) {
+        debugMessages.shift();
+      }
+
+      logger.warn("Voice networking closed before Ready", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: null,
+          event_id: uuidv4(),
+          action,
+          event: "networking_close",
+          attempt,
+          strategy: strategy.label,
+          close_code: code
+        }
+      });
+    };
+
+    networking.once('close', closeHandler);
+    detachNetworkingCloseListener = () => {
+      networking.off?.('close', closeHandler);
+    };
+    observedNetworking = networking;
+  };
+
+  connection.on('stateChange', stateChangeHandler);
+  connection.on('debug', debugHandler);
+  connection.on('error', errorHandler);
+  attachNetworkingCloseListener(connection.state?.networking);
+
+  try {
+    await Promise.race([
+      entersState(connection, VoiceConnectionStatus.Ready, readyAbortController.signal),
+      regressionPromise,
+      sleep(strategy.readyTimeoutMs).then(() => {
+        throw createVoiceJoinError(
+          'Voice connection ready wait timed out',
+          'VOICE_READY_TIMEOUT',
+          {
+            finalStatus: connection.state?.status,
+            transitions: [...transitions],
+            debugTail: formatVoiceDebugTail(debugMessages)
+          }
+        );
+      })
+    ]);
+    return;
+  } catch (error) {
+    const finalStatus = connection.state?.status;
+    const sawProgress = transitions.some(transition =>
+      transition.includes(VoiceConnectionStatus.Signalling) ||
+      transition.includes(VoiceConnectionStatus.Connecting)
+    );
+    const regressedToSignalling = transitions.includes(
+      `${VoiceConnectionStatus.Connecting}->${VoiceConnectionStatus.Signalling}`
+    );
+    const debugTail = formatVoiceDebugTail(debugMessages);
+
+    if (networkingCloseCode === VOICE_NETWORK_CLOSE_CODE_DAVE_REQUIRED) {
+      throw createVoiceJoinError(
+        'Discord rejected the voice join with close code 4017 (DAVE E2EE required)',
+        'VOICE_DAVE_REQUIRED',
+        {
+          closeCode: networkingCloseCode,
+          finalStatus,
+          transitions: [...transitions],
+          debugTail
+        }
+      );
+    }
+
+    logger.warn("Voice connection did not reach Ready", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: uuidv4(),
+        action,
+        event: "ready_timeout",
+        attempt,
+        strategy: strategy.label,
+        final_status: finalStatus,
+        saw_progress: sawProgress,
+        regressed_to_signalling: regressedToSignalling,
+        transitions: transitions.join(' | '),
+        debug_tail: debugTail
+      }
+    });
+
+    if (regressedToSignalling || finalStatus === VoiceConnectionStatus.Signalling) {
+      throw createVoiceJoinError(
+        error?.message || 'Voice connection regressed to signalling',
+        error?.code || 'VOICE_SIGNALLING_REGRESSION',
+        {
+          finalStatus,
+          transitions: [...transitions],
+          debugTail
+        }
+      );
+    }
+
+    if (
+      sawProgress ||
+      finalStatus === VoiceConnectionStatus.Connecting
+    ) {
+      logger.info("Extending voice connection wait due to observed progress", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: null,
+          event_id: uuidv4(),
+          action,
+          event: "ready_grace_period",
+          attempt,
+          strategy: strategy.label,
+          grace_timeout_ms: strategy.readyGraceTimeoutMs,
+          debug_tail: debugTail
+        }
+      });
+
+      await entersState(connection, VoiceConnectionStatus.Ready, strategy.readyGraceTimeoutMs);
+      return;
+    }
+
+    throw error;
+  } finally {
+    readyAbortController.abort();
+    clearSignallingRecoveryTimer();
+    detachNetworkingCloseListener?.();
+    connection.off('stateChange', stateChangeHandler);
+    connection.off('debug', debugHandler);
+    connection.off('error', errorHandler);
+  }
+}
+
+/**
+ * Detect available Opus engine at runtime for voice reliability diagnostics
+ * @returns {Promise<{available: boolean, engine: string}>}
+ */
+async function ensureOpusDependency() {
+  if (opusDependencyStatus) {
+    return opusDependencyStatus;
+  }
+
+  try {
+    await import('@discordjs/opus');
+    opusDependencyStatus = { available: true, engine: '@discordjs/opus' };
+    logger.info("Opus runtime ready", {
+      extra: {
+        footprint: null,
+        batch_uuid: null,
+        user_id: null,
+        event_id: uuidv4(),
+        action: "voice_runtime",
+        event: "ready",
+        opus_engine: '@discordjs/opus'
+      }
+    });
+    return opusDependencyStatus;
+  } catch (nativeErr) {
+    try {
+      await import('opusscript');
+      opusDependencyStatus = { available: true, engine: 'opusscript' };
+      logger.warn("Using opusscript fallback for Opus (slower than @discordjs/opus)", {
+        extra: {
+          footprint: null,
+          batch_uuid: null,
+          user_id: null,
+          event_id: uuidv4(),
+          action: "voice_runtime",
+          event: "warning",
+          opus_engine: 'opusscript'
+        }
+      });
+      return opusDependencyStatus;
+    } catch (scriptErr) {
+      opusDependencyStatus = { available: false, engine: 'none' };
+      logger.error("No Opus dependency available - voice capture cannot start", {
+        extra: {
+          footprint: null,
+          batch_uuid: null,
+          user_id: null,
+          event_id: uuidv4(),
+          action: "voice_runtime",
+          event: "error",
+          native_error: nativeErr?.message,
+          fallback_error: scriptErr?.message
+        }
+      });
+      return opusDependencyStatus;
+    }
+  }
+}
+
+/**
+ * Validate runtime dependencies required for Discord voice encryption/transport
+ * @returns {Promise<{available: boolean, reason?: string}>}
+ */
+async function ensureVoiceRuntimeDependencies() {
+  const opusStatus = await ensureOpusDependency();
+  if (!opusStatus.available) {
+    return { available: false, reason: 'missing_opus' };
+  }
+
+  const dependencyReport = getVoiceDependencyReport();
+  if (!hasSupportedEncryptionLibrary(dependencyReport)) {
+    logger.error("No supported Discord voice encryption library found", {
+      extra: {
+        footprint: null,
+        batch_uuid: null,
+        user_id: null,
+        event_id: uuidv4(),
+        action: "voice_runtime",
+        event: "error",
+        reason: "missing_encryption_dependency",
+        dependency_report: dependencyReport
+      }
+    });
+    return { available: false, reason: 'missing_encryption' };
+  }
+
+  return { available: true };
+}
+
+/**
+ * Establish voice connection with bounded retries to reduce transient AbortError failures
+ * @param {Object} params - Connection parameters
+ * @returns {Promise<import('@discordjs/voice').VoiceConnection>}
+ */
+async function resetRemoteBotVoiceState(guild, { sessionId, action, attempt, targetChannelId, reason }) {
+  const botMember = await guild.members.fetchMe().catch(() => guild.members.me);
+  if (!botMember) {
+    return false;
+  }
+
+  const remoteChannelId = botMember?.voice?.channelId ?? null;
+
+  if (!remoteChannelId) {
+    return false;
+  }
+
+  logger.warn("Resetting remote bot voice state", {
+    extra: {
+      footprint: null,
+      batch_uuid: sessionId,
+      user_id: null,
+      event_id: uuidv4(),
+      action,
+      event: "remote_voice_state_reset_start",
+      attempt,
+      reason,
+      remote_channel_id: remoteChannelId,
+      target_channel_id: targetChannelId
+    }
+  });
+
+  try {
+    await botMember.voice.disconnect(reason);
+    await sleep(STALE_REMOTE_VOICE_RESET_DELAY_MS);
+
+    logger.info("Remote bot voice state reset completed", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: uuidv4(),
+        action,
+        event: "remote_voice_state_reset_complete",
+        attempt,
+        reason,
+        remote_channel_id: remoteChannelId
+      }
+    });
+    return true;
+  } catch (error) {
+    logger.warn("Failed to reset remote bot voice state", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: uuidv4(),
+        action,
+        event: "remote_voice_state_reset_failed",
+        attempt,
+        reason,
+        remote_channel_id: remoteChannelId,
+        error_message: error?.message
+      }
+    });
+    return false;
+  }
+}
+
+async function connectToVoiceWithRetry({ channelId, guildId, adapterCreator, guild, sessionId, action = 'voice_join' }) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= VOICE_CONNECT_MAX_ATTEMPTS; attempt++) {
+    const strategy = getVoiceJoinStrategy(attempt);
+
+    logger.info("Starting voice connection attempt", {
+      extra: {
+        footprint: null,
+        batch_uuid: sessionId,
+        user_id: null,
+        event_id: uuidv4(),
+        action,
+        event: "attempt_start",
+        attempt,
+        max_attempts: VOICE_CONNECT_MAX_ATTEMPTS,
+        strategy: strategy.label,
+        self_deaf: strategy.selfDeaf,
+        self_mute: strategy.selfMute,
+        timeout_ms: strategy.readyTimeoutMs,
+        grace_timeout_ms: strategy.readyGraceTimeoutMs
+      }
+    });
+
+    if (attempt > 1 && guild) {
+      await resetRemoteBotVoiceState(guild, {
+        sessionId,
+        action,
+        attempt,
+        targetChannelId: channelId,
+        reason: 'Reset bot voice state before retry'
+      });
+    }
+
+    const connection = joinVoiceChannel({
+      channelId,
+      guildId,
+      adapterCreator,
+      selfDeaf: strategy.selfDeaf,
+      selfMute: strategy.selfMute,
+      debug: true,
+    });
+
+    try {
+      await waitForVoiceReady(connection, { attempt, sessionId, action, strategy });
+      return connection;
+    } catch (error) {
+      lastError = error;
+
+      logger.warn("Voice connection attempt failed", {
+        extra: {
+          footprint: null,
+          batch_uuid: sessionId,
+          user_id: null,
+          event_id: uuidv4(),
+          action,
+          event: "retry",
+          attempt,
+          max_attempts: VOICE_CONNECT_MAX_ATTEMPTS,
+          strategy: strategy.label,
+          timeout_ms: strategy.readyTimeoutMs,
+          grace_timeout_ms: strategy.readyGraceTimeoutMs,
+          final_status: connection.state?.status,
+          error_code: error?.code,
+          error_message: error?.message,
+          debug_tail: error?.debugTail || null
+        }
+      });
+
+      try {
+        connection.destroy();
+      } catch (destroyErr) {
+        // Ignore connection destroy errors while retrying
+      }
+
+      if (error?.code === 'VOICE_DAVE_REQUIRED') {
+        throw error;
+      }
+
+      if (attempt < VOICE_CONNECT_MAX_ATTEMPTS) {
+        if (guild) {
+          await resetRemoteBotVoiceState(guild, {
+            sessionId,
+            action,
+            attempt,
+            targetChannelId: channelId,
+            reason: 'Reset bot voice state after failed join'
+          });
+        }
+
+        const delay = VOICE_CONNECT_RETRY_DELAY_MS * attempt;
+        await sleep(delay);
+      }
+    }
+  }
+
+  throw lastError || new Error('Voice connection failed');
+}
 
 /**
  * Clean up expired rate limit entries to prevent memory leak
@@ -43,6 +716,7 @@ const RATE_LIMIT_CLEANUP_INTERVAL = 5 * 60 * 1000;
 function cleanupExpiredRateLimits() {
   const now = Date.now();
   let cleanedCount = 0;
+  let cleanedAudioIssues = 0;
   
   for (const [userId, limit] of userRateLimits) {
     if (now - limit.windowStart > USER_RATE_LIMIT_WINDOW * 2) {
@@ -50,8 +724,15 @@ function cleanupExpiredRateLimits() {
       cleanedCount++;
     }
   }
+
+  for (const [userId, issue] of userAudioIssues) {
+    if (now - issue.lastSeen > AUDIO_ISSUE_EXPIRY_MS) {
+      userAudioIssues.delete(userId);
+      cleanedAudioIssues++;
+    }
+  }
   
-  if (cleanedCount > 0) {
+  if (cleanedCount > 0 || cleanedAudioIssues > 0) {
     logger.debug("Cleaned up expired rate limits", {
       extra: {
         footprint: null,
@@ -61,6 +742,7 @@ function cleanupExpiredRateLimits() {
         action: "rate_limit_cleanup",
         event: "complete",
         cleaned_count: cleanedCount,
+        cleaned_audio_issues: cleanedAudioIssues,
         remaining_count: userRateLimits.size
       }
     });
@@ -68,7 +750,8 @@ function cleanupExpiredRateLimits() {
 }
 
 // Schedule periodic rate limit cleanup to prevent memory leak
-setInterval(cleanupExpiredRateLimits, RATE_LIMIT_CLEANUP_INTERVAL);
+const rateLimitCleanupIntervalId = setInterval(cleanupExpiredRateLimits, RATE_LIMIT_CLEANUP_INTERVAL);
+rateLimitCleanupIntervalId.unref?.();
 
 // Track users with persistent audio issues (for diagnostics only - no pausing)
 const userAudioIssues = new Map();
@@ -152,7 +835,12 @@ function setupConnectionHandlers(connection, connectionInfo) {
 
         console.log(`🔄 Reconnection attempt ${reconnectInfo.attempts}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms...`);
 
-        setTimeout(() => {
+        if (reconnectInfo.reconnectTimeoutId) {
+          clearTimeout(reconnectInfo.reconnectTimeoutId);
+        }
+
+        reconnectInfo.reconnectTimeoutId = setTimeout(() => {
+          reconnectInfo.reconnectTimeoutId = null;
           attemptReconnection(connectionInfo);
         }, delay);
       } else {
@@ -171,6 +859,10 @@ function setupConnectionHandlers(connection, connectionInfo) {
     const reconnectInfo = activeConnections.get(sessionId);
     if (reconnectInfo) {
       reconnectInfo.attempts = 0;
+      if (reconnectInfo.reconnectTimeoutId) {
+        clearTimeout(reconnectInfo.reconnectTimeoutId);
+        reconnectInfo.reconnectTimeoutId = null;
+      }
     }
 
     logger.info("Voice connection ready", {
@@ -188,6 +880,13 @@ function setupConnectionHandlers(connection, connectionInfo) {
   // Handle destroyed connection
   connection.on(VoiceConnectionStatus.Destroyed, () => {
     console.log(`🗑️ Voice connection destroyed for session ${sessionId}`);
+
+    const reconnectInfo = activeConnections.get(sessionId);
+    if (reconnectInfo?.reconnectTimeoutId) {
+      clearTimeout(reconnectInfo.reconnectTimeoutId);
+      reconnectInfo.reconnectTimeoutId = null;
+    }
+
     activeConnections.delete(sessionId);
 
     // Clean up any pending transcriptions
@@ -219,7 +918,8 @@ function setupConnectionHandlers(connection, connectionInfo) {
   activeConnections.set(sessionId, {
     connectionInfo,
     attempts: 0,
-    lastActivity: Date.now()
+    lastActivity: Date.now(),
+    reconnectTimeoutId: null
   });
 }
 
@@ -241,16 +941,13 @@ async function attemptReconnection(connectionInfo) {
 
     console.log(`🔄 Rejoining voice channel ${channelId}...`);
 
-    const newConnection = joinVoiceChannel({
+    const newConnection = await connectToVoiceWithRetry({
       channelId,
       guildId,
       adapterCreator,
-      selfDeaf: false,
-      selfMute: true,
+      sessionId,
+      action: 'voice_reconnection'
     });
-
-    // Wait for the connection to be ready
-    await entersState(newConnection, VoiceConnectionStatus.Ready, 20_000);
 
     console.log('✅ Successfully reconnected to voice channel');
 
@@ -293,7 +990,12 @@ async function attemptReconnection(connectionInfo) {
       const delay = RECONNECT_DELAY_BASE * Math.pow(2, reconnectInfo.attempts - 1);
       console.log(`🔄 Will retry reconnection in ${delay}ms (attempt ${reconnectInfo.attempts}/${MAX_RECONNECT_ATTEMPTS})`);
 
-      setTimeout(() => {
+      if (reconnectInfo.reconnectTimeoutId) {
+        clearTimeout(reconnectInfo.reconnectTimeoutId);
+      }
+
+      reconnectInfo.reconnectTimeoutId = setTimeout(() => {
+        reconnectInfo.reconnectTimeoutId = null;
         attemptReconnection(connectionInfo);
       }, delay);
     } else {
@@ -524,10 +1226,27 @@ function startIdleTimeoutChecker(sessionId, connectionInfo) {
         }
       });
       
-      // Destroy connection and cleanup
-      const connection = getVoiceConnection(connectionInfo.guildId);
-      if (connection) {
-        connection.destroy();
+      if (connectionInfo.backend === 'python') {
+        try {
+          await stopVoiceWorkerSession(sessionId);
+        } catch (error) {
+          logger.warn("Failed to stop python voice worker session during idle timeout", {
+            extra: {
+              footprint: null,
+              batch_uuid: sessionId,
+              user_id: null,
+              event_id: uuidv4(),
+              action: "session_timeout",
+              event: "worker_stop_failed",
+              error_message: error?.message
+            }
+          });
+        }
+      } else {
+        const connection = getVoiceConnection(connectionInfo.guildId);
+        if (connection) {
+          connection.destroy();
+        }
       }
       cleanupSession(sessionId);
       
@@ -610,6 +1329,10 @@ function startHealthCheck(sessionId) {
  */
 export async function handleJoin(interaction, writeTranscript) {
   const interactionEventId = uuidv4();
+  const responseContext = {
+    batch_uuid: interactionEventId,
+    user_id: interaction.user?.id
+  };
 
   const channel = interaction.member.voice?.channel;
   if (!channel) {
@@ -623,28 +1346,44 @@ export async function handleJoin(interaction, writeTranscript) {
         event: "error"
       }
     });
-    return interaction.reply({ content: 'Jump into a voice channel first!', ephemeral: true });
+    await safeRespond(
+      interaction,
+      { content: 'Jump into a voice channel first!', ephemeral: true },
+      { logger, context: responseContext }
+    );
+    return;
   }
 
   // Validate bot permissions for the voice channel
-  const botMember = interaction.guild.members.me;
+  const botMember = await interaction.guild.members.fetchMe().catch(() => interaction.guild.members.me);
   const permissions = channel.permissionsFor(botMember);
+  const sessionId = `${channel.guild.id}:${channel.id}`;
   
-  if (!permissions.has('ViewChannel')) {
-    return interaction.reply({
-      content: '❌ I cannot see this voice channel. Please check my permissions.',
-      ephemeral: true
-    });
+  if (!permissions.has(PermissionFlagsBits.ViewChannel)) {
+    await safeRespond(
+      interaction,
+      {
+        content: '❌ I cannot see this voice channel. Please check my permissions.',
+        ephemeral: true
+      },
+      { logger, context: responseContext }
+    );
+    return;
   }
   
-  if (!permissions.has('Connect')) {
-    return interaction.reply({
-      content: '❌ I don\'t have permission to connect to this voice channel.',
-      ephemeral: true
-    });
+  if (!permissions.has(PermissionFlagsBits.Connect)) {
+    await safeRespond(
+      interaction,
+      {
+        content: '❌ I don\'t have permission to connect to this voice channel.',
+        ephemeral: true
+      },
+      { logger, context: responseContext }
+    );
+    return;
   }
   
-  if (!permissions.has('Speak')) {
+  if (!permissions.has(PermissionFlagsBits.Speak)) {
     logger.warn("Bot missing Speak permission - audio capture may fail", {
       extra: {
         footprint: null,
@@ -660,38 +1399,248 @@ export async function handleJoin(interaction, writeTranscript) {
 
   // Check for existing connection
   const existingConnection = getVoiceConnection(channel.guild.id);
-  if (existingConnection && existingConnection.state.status !== VoiceConnectionStatus.Destroyed) {
-    return interaction.reply({
-      content: '🎙️ Already connected to a voice channel. Use `/leave` first to disconnect.',
-      ephemeral: true
-    });
+  if (
+    (existingConnection && existingConnection.state.status !== VoiceConnectionStatus.Destroyed)
+    || hasActiveSessionForGuild(channel.guild.id)
+  ) {
+    await safeRespond(
+      interaction,
+      {
+        content: '🎙️ Already connected to a voice channel. Use `/leave` first to disconnect.',
+        ephemeral: true
+      },
+      { logger, context: responseContext }
+    );
+    return;
   }
 
-  try {
-    const connection = joinVoiceChannel({
-      channelId: channel.id,
-      guildId: channel.guild.id,
-      adapterCreator: channel.guild.voiceAdapterCreator,
-      selfDeaf: false,
-      selfMute: true,
+  const remoteBotVoiceChannelId = botMember?.voice?.channelId ?? null;
+  if (remoteBotVoiceChannelId) {
+    logger.warn("Bot has remote voice state without a local connection", {
+      extra: {
+        footprint: null,
+        batch_uuid: interactionEventId,
+        user_id: interaction.user.id,
+        event_id: uuidv4(),
+        action: "voice_join",
+        event: "stale_remote_voice_state",
+        remote_channel_id: remoteBotVoiceChannelId,
+        target_channel_id: channel.id
+      }
     });
 
-    // Wait for the connection to be ready (with timeout)
+    const staleResetSucceeded = await resetRemoteBotVoiceState(channel.guild, {
+      sessionId: interactionEventId,
+      action: 'voice_join',
+      attempt: 0,
+      targetChannelId: channel.id,
+      reason: 'Reset stale bot voice state before reconnect'
+    });
+
+    if (staleResetSucceeded) {
+      logger.info("Stale remote bot voice state cleared", {
+        extra: {
+          footprint: null,
+          batch_uuid: interactionEventId,
+          user_id: interaction.user.id,
+          event_id: uuidv4(),
+          action: "voice_join",
+          event: "stale_remote_voice_state_cleared",
+          remote_channel_id: remoteBotVoiceChannelId
+        }
+      });
+    } else {
+      const movePermissionAvailable = permissions.has(PermissionFlagsBits.MoveMembers);
+      logger.warn("Failed to clear stale remote bot voice state", {
+        extra: {
+          footprint: null,
+          batch_uuid: interactionEventId,
+          user_id: interaction.user.id,
+          event_id: uuidv4(),
+          action: "voice_join",
+          event: "stale_remote_voice_state_clear_failed",
+          remote_channel_id: remoteBotVoiceChannelId,
+          error_message: movePermissionAvailable ? 'Unknown reset failure' : 'Missing Move Members permission',
+          move_members_permission: movePermissionAvailable
+        }
+      });
+    }
+  }
+
+  logger.info("Received voice join request", {
+    extra: {
+      footprint: null,
+      batch_uuid: interactionEventId,
+      user_id: interaction.user.id,
+      event_id: uuidv4(),
+      action: "voice_join",
+      event: "request",
+      target_channel_id: channel.id,
+      target_channel_name: channel.name,
+      target_rtc_region: channel.rtcRegion ?? 'auto',
+      bot_remote_voice_channel_id: remoteBotVoiceChannelId,
+      bot_self_mute_default: BOT_SELF_MUTE
+    }
+  });
+
+  try {
+    const didDefer = await safeDeferReply(interaction, {}, { logger, context: responseContext });
+    if (!didDefer) {
+      return;
+    }
+
+    if (VOICE_BACKEND === 'python') {
+      const workerReady = isVoiceWorkerHealthy() || await ensureVoiceWorkerReady();
+      if (!workerReady) {
+        await safeRespond(
+          interaction,
+          {
+            content: '❌ Python voice worker is not ready. Check the worker startup logs and `VOICE_WORKER_PYTHON`.',
+            ephemeral: true
+          },
+          { logger, context: responseContext }
+        );
+        return;
+      }
+
+      await startVoiceWorkerSession({
+        sessionId,
+        guildId: channel.guild.id,
+        channelId: channel.id
+      });
+
+      const connectionInfo = {
+        channelId: channel.id,
+        guildId: channel.guild.id,
+        adapterCreator: channel.guild.voiceAdapterCreator,
+        interaction,
+        writeTranscript,
+        backend: 'python'
+      };
+
+      activeConnections.set(sessionId, {
+        backend: 'python',
+        connectionInfo,
+        attempts: 0,
+        lastActivity: Date.now(),
+        reconnectTimeoutId: null,
+        idleTimeoutId: null,
+        healthCheckInterval: null
+      });
+
+      startIdleTimeoutChecker(sessionId, connectionInfo);
+
+      logger.info("Joined voice channel via python worker", {
+        extra: {
+          footprint: null,
+          batch_uuid: interactionEventId,
+          user_id: interaction.user.id,
+          event_id: uuidv4(),
+          action: "voice_join",
+          event: "complete",
+          backend: "python",
+          channel_name: channel.name,
+          channel_id: channel.id
+        }
+      });
+
+      await safeRespond(
+        interaction,
+        `🎙️ **Transkription gestartet** in **${channel.name}**\n📝 Sprechen Sie - ich erstelle automatisch ein Protokoll!\n\n_DAVE voice capture läuft über den Python-Worker._`,
+        { logger, context: responseContext }
+      );
+      return;
+    }
+
+    const voiceRuntimeStatus = await ensureVoiceRuntimeDependencies();
+    if (!voiceRuntimeStatus.available) {
+      const runtimeMessage = voiceRuntimeStatus.reason === 'missing_encryption'
+        ? '❌ Voice runtime nicht verfügbar: Verschlüsselungsbibliothek fehlt. Bitte `npm i @noble/ciphers` ausführen und Bot neu starten.'
+        : '❌ Audio runtime nicht verfügbar (Opus dependency fehlt). Bitte @discordjs/opus oder opusscript installieren.';
+
+      await safeRespond(
+        interaction,
+        {
+          content: runtimeMessage,
+          ephemeral: true
+        },
+        { logger, context: responseContext }
+      );
+      return;
+    }
+
+    let activeGuild = channel.guild;
+    let activeChannel = channel;
+    let connection;
+
     try {
-      await entersState(connection, VoiceConnectionStatus.Ready, 20_000);
+      connection = await connectToVoiceWithRetry({
+        channelId: activeChannel.id,
+        guildId: activeGuild.id,
+        adapterCreator: activeGuild.voiceAdapterCreator,
+        guild: activeGuild,
+        sessionId,
+        action: 'voice_join'
+      });
     } catch (error) {
-      console.error('Failed to establish voice connection:', error);
-      connection.destroy();
-      return interaction.reply({
-        content: '❌ Failed to connect to voice channel. Please try again.',
-        ephemeral: true
+      if (error?.code !== 'VOICE_SIGNALLING_REGRESSION') {
+        throw error;
+      }
+
+      const sessionRefreshed = await refreshDiscordGatewaySession(interaction.client, {
+        sessionId,
+        action: 'voice_join',
+        reason: 'voice_signalling_regression'
+      });
+
+      if (!sessionRefreshed) {
+        throw error;
+      }
+
+      let refreshedGuild = interaction.client.guilds.cache.get(channel.guild.id) ?? null;
+      if (!refreshedGuild) {
+        refreshedGuild = await interaction.client.guilds.fetch(channel.guild.id).catch(() => null);
+      }
+
+      let refreshedChannel = refreshedGuild?.channels?.cache.get(channel.id) ?? null;
+      if (!refreshedChannel && refreshedGuild) {
+        refreshedChannel = await refreshedGuild.channels.fetch(channel.id).catch(() => null);
+      }
+
+      if (!refreshedGuild || !refreshedChannel?.isVoiceBased?.()) {
+        throw error;
+      }
+
+      activeGuild = refreshedGuild;
+      activeChannel = refreshedChannel;
+
+      logger.info("Retrying voice join after Discord client session refresh", {
+        extra: {
+          footprint: null,
+          batch_uuid: interactionEventId,
+          user_id: interaction.user.id,
+          event_id: uuidv4(),
+          action: "voice_join",
+          event: "gateway_refresh_retry",
+          target_channel_id: activeChannel.id,
+          target_channel_name: activeChannel.name
+        }
+      });
+
+      connection = await connectToVoiceWithRetry({
+        channelId: activeChannel.id,
+        guildId: activeGuild.id,
+        adapterCreator: activeGuild.voiceAdapterCreator,
+        guild: activeGuild,
+        sessionId,
+        action: 'voice_join_after_gateway_refresh'
       });
     }
 
     const connectionInfo = {
-      channelId: channel.id,
-      guildId: channel.guild.id,
-      adapterCreator: channel.guild.voiceAdapterCreator,
+      channelId: activeChannel.id,
+      guildId: activeGuild.id,
+      adapterCreator: activeGuild.voiceAdapterCreator,
       interaction,
       writeTranscript
     };
@@ -703,7 +1652,6 @@ export async function handleJoin(interaction, writeTranscript) {
     setupSpeakingListener(connection, interaction, writeTranscript);
 
     // Start health check
-    const sessionId = `${channel.guild.id}:${channel.id}`;
     startHealthCheck(sessionId);
     
     // Also start initial idle timeout check
@@ -717,14 +1665,22 @@ export async function handleJoin(interaction, writeTranscript) {
         event_id: uuidv4(),
         action: "voice_join",
         event: "complete",
-        channel_name: channel.name,
-        channel_id: channel.id
+        channel_name: activeChannel.name,
+        channel_id: activeChannel.id
       }
     });
 
-    interaction.reply(`🎙️ **Transkription gestartet** in **${channel.name}**\n📝 Sprechen Sie - ich erstelle automatisch ein Protokoll!\n\n_Verbindung wird automatisch wiederhergestellt falls nötig._`);
+    await safeRespond(
+      interaction,
+      `🎙️ **Transkription gestartet** in **${activeChannel.name}**\n📝 Sprechen Sie - ich erstelle automatisch ein Protokoll!\n\n_Verbindung wird automatisch wiederhergestellt falls nötig._`,
+      { logger, context: responseContext }
+    );
 
   } catch (error) {
+    const joinErrorMessage = error?.code === 'VOICE_DAVE_REQUIRED'
+      ? '❌ Discord rejected this voice channel with close code 4017. Since March 2, 2026, non-Stage voice channels require DAVE end-to-end encryption, and the current bot voice stack cannot join them.'
+      : `❌ Error joining voice channel: ${error.message}`;
+
     logger.error("Failed to join voice channel", {
       extra: {
         footprint: null,
@@ -737,10 +1693,15 @@ export async function handleJoin(interaction, writeTranscript) {
       }
     });
 
-    return interaction.reply({
-      content: `❌ Error joining voice channel: ${error.message}`,
-      ephemeral: true
-    });
+    await safeRespond(
+      interaction,
+      {
+        content: joinErrorMessage,
+        ephemeral: true
+      },
+      { logger, context: responseContext }
+    );
+    return;
   }
 }
 
@@ -834,6 +1795,10 @@ export function cleanupSession(sessionId) {
     if (reconnectInfo.idleTimeoutId) {
       clearTimeout(reconnectInfo.idleTimeoutId);
     }
+    // Clear any delayed reconnection attempt
+    if (reconnectInfo.reconnectTimeoutId) {
+      clearTimeout(reconnectInfo.reconnectTimeoutId);
+    }
     activeConnections.delete(sessionId);
   }
   
@@ -863,12 +1828,45 @@ export function cleanupSession(sessionId) {
 }
 
 /**
+ * Cleanup module-level resources used by /join command handlers
+ * Called during bot shutdown to avoid timer leaks in long-running processes
+ */
+export function cleanupJoinCommandResources() {
+  clearInterval(rateLimitCleanupIntervalId);
+
+  for (const sessionId of Array.from(activeConnections.keys())) {
+    cleanupSession(sessionId);
+  }
+
+  userRateLimits.clear();
+  userAudioIssues.clear();
+}
+
+/**
  * Get all active session IDs
  * Used for graceful shutdown to disconnect all voice connections
  * @returns {string[]} Array of active session IDs
  */
 export function getActiveSessions() {
   return Array.from(activeConnections.keys());
+}
+
+export function getActiveSessionInfo(sessionId) {
+  return activeConnections.get(sessionId) || null;
+}
+
+export function getActiveSessionIdForGuild(guildId) {
+  for (const [sessionId, sessionInfo] of activeConnections.entries()) {
+    if (sessionInfo?.connectionInfo?.guildId === guildId) {
+      return sessionId;
+    }
+  }
+
+  return null;
+}
+
+export function hasActiveSessionForGuild(guildId) {
+  return Boolean(getActiveSessionIdForGuild(guildId));
 }
 
 /**

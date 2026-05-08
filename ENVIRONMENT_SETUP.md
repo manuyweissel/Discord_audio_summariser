@@ -1,161 +1,209 @@
 # Environment Variables Setup
 
-This document describes all environment variables required for the Discord voice bot.
+This document describes the environment variables used by the Python-first Discord summariser bot.
 
 ## Required Variables
 
-### DISCORD_TOKEN
-**Required**: Yes  
-**Description**: Your Discord bot token from the Discord Developer Portal.  
-**Example**: `DISCORD_TOKEN=your_discord_bot_token_here`
+### `DISCORD_TOKEN`
+- Required: yes
+- Description: Discord bot token from the Discord Developer Portal.
 
-### OPENAI_API_KEY
-**Required**: Yes  
-**Description**: Your OpenAI API key for Whisper transcription and GPT-4 summarization.  
-**Example**: `OPENAI_API_KEY=sk-...`
+### `OPENAI_API_KEY`
+- Required: yes
+- Description: OpenAI API key used for Whisper transcription and summary generation.
 
-## Optional Variables
+## Core Optional Variables
 
-### WEEKLY_MEETING_CHANNEL_ID
-**Required**: No  
-**Description**: Discord channel ID for weekly meeting reminders. The bot will post a reminder every Thursday at 09:00 (Europe/Berlin timezone).  
-**How to get**: Right-click on the channel > Copy ID (requires Developer Mode enabled in Discord settings)  
-**Example**: `WEEKLY_MEETING_CHANNEL_ID=1234567890123456789`
+### `TIMEZONE`
+- Required: no
+- Default: `Europe/Berlin`
+- Description: Timezone used for timestamps and operational logs.
 
-**Note**: If not set, weekly reminders will be disabled.
+### `VOICE_CAPTURE_AUDIO_DIR`
+- Required: no
+- Default: `audios/`
+- Description: Directory for persisted WAV segments.
 
-### INCIDENTS_CHANNEL_ID
-**Required**: No  
-**Description**: Discord channel ID for Grafana alerts. The bot will create one thread per day for all alerts.  
-**How to get**: Right-click on the channel > Copy ID (requires Developer Mode enabled in Discord settings)  
-**Example**: `INCIDENTS_CHANNEL_ID=1234567890123456789`
+### `TRANSCRIPT_DIR`
+- Required: no
+- Default: `transcripts/`
+- Description: Directory for transcript log files.
 
-**Note**: If not set, Grafana alerts will be disabled.
+### `SUMMARY_DIR`
+- Required: no
+- Default: `summaries/`
+- Description: Directory for generated `.docx` meeting summaries.
 
-### TIMEZONE
-**Required**: No  
-**Description**: Timezone for cron scheduling (affects weekly reminder timing).  
-**Default**: `Europe/Berlin`  
-**Example**: `TIMEZONE=America/New_York`
+### `DATA_DIR`
+- Required: no
+- Default: `data/`
+- Description: Root data directory used for the manifest and spool.
 
-### GRAFANA_WEBHOOK_PORT
-**Required**: No  
-**Description**: Port number for the Grafana webhook HTTP server.  
-**Default**: `3000`  
-**Example**: `GRAFANA_WEBHOOK_PORT=3000`
+### `VOICE_CAPTURE_SPOOL_DIR`
+- Required: no
+- Default: `data/voice_capture_spool/`
+- Description: Directory for crash-safe pending segment JSON records.
 
-### GRAFANA_WEBHOOK_SECRET
-**Required**: No (but strongly recommended for production)  
-**Description**: Secret token for authenticating Grafana webhook requests. When set, incoming requests must include this value in the `x-webhook-secret` header.  
-**Security Note**: Always set this in production to prevent unauthorized alerts!  
-**Example**: `GRAFANA_WEBHOOK_SECRET=your_secure_random_string_here`
+### `MANIFEST_PATH`
+- Required: no
+- Default: `data/audio_manifest.json`
+- Description: Path to the persisted audio/session manifest.
 
-### CIRCUIT_BREAKER_THRESHOLD
-**Required**: No  
-**Description**: Number of consecutive API failures before the circuit breaker opens and temporarily blocks further requests.  
-**Default**: `5`  
-**Example**: `CIRCUIT_BREAKER_THRESHOLD=5`
+### `VOICE_HELPER_PATH`
+- Required: no
+- Default: unset
+- Description: Python interpreter used to launch `voice_helper.main`. Leave unset when you start the bot from the same virtual environment that has the helper dependencies installed.
 
-### CIRCUIT_BREAKER_TIMEOUT
-**Required**: No  
-**Description**: Time in milliseconds to wait before the circuit breaker allows requests again after opening.  
-**Default**: `60000` (1 minute)  
-**Example**: `CIRCUIT_BREAKER_TIMEOUT=60000`
+### `VOICE_HELPER_STARTUP_TIMEOUT_MS`
+- Required: no
+- Default: `30000`
+- Description: Maximum time to wait for the helper subprocess to announce readiness.
+
+### `VOICE_SEGMENT_SILENCE_MS`
+- Required: no
+- Default: `2000`
+- Description: Silence threshold before a speaker segment is flushed.
+
+### `VOICE_MAX_SEGMENT_MS`
+- Required: no
+- Default: `30000`
+- Description: Maximum duration for a single speaker segment before it is forced to flush.
+
+### `HEALTH_PORT`
+- Required: no
+- Default: `3002`
+- Description: Port used by the shared aiohttp ops server for both `/health` and `/grafana-alert`.
+
+### `GRAFANA_WEBHOOK_PORT`
+- Required: no
+- Default: falls back to `3002`
+- Description: Backward-compatible alias for `HEALTH_PORT`. The Python runtime listens on one shared port for both `/health` and `/grafana-alert`.
+
+### `GRAFANA_WEBHOOK_SECRET`
+- Required: no
+- Default: unset
+- Description: Shared secret for `POST /grafana-alert`. When set, requests must include `x-webhook-secret` or `x-grafana-secret`.
+
+### `RECOVERY_INTERVAL_MS`
+- Required: no
+- Default: `1800000`
+- Description: Interval between background recovery passes for pending spool and manifest work.
+
+### `STALE_SESSION_HOURS`
+- Required: no
+- Default: `2`
+- Description: Age after which an unfinished session is marked for recovery on restart.
+
+### `CIRCUIT_BREAKER_THRESHOLD`
+- Required: no
+- Default: `5`
+- Description: Number of consecutive summary-generation failures before the circuit breaker opens temporarily.
+
+### `CIRCUIT_BREAKER_TIMEOUT`
+- Required: no
+- Default: `60000`
+- Description: Time in milliseconds before the summary circuit breaker allows requests again.
+
+### `WEEKLY_MEETING_CHANNEL_ID`
+- Required: no
+- Default: unset
+- Description: Discord text-channel ID that receives the Thursday 09:00 weekly prep reminder.
+
+### `INCIDENTS_CHANNEL_ID`
+- Required: no
+- Default: unset
+- Description: Discord text-channel ID where Grafana alert threads are created.
+
+## Deprecated Compatibility Variables
+
+These are still accepted for compatibility with the previous split Node/Python worker rollout:
+
+### `VOICE_WORKER_PYTHON`
+- Alias for `VOICE_HELPER_PATH`.
+
+### `VOICE_WORKER_SEGMENT_SILENCE_MS`
+- Alias for `VOICE_SEGMENT_SILENCE_MS`.
+
+### `VOICE_WORKER_MAX_SEGMENT_MS`
+- Alias for `VOICE_MAX_SEGMENT_MS`.
+
+### `VOICE_BACKEND`
+- Ignored by the Python runtime.
+- Still used only by the legacy Node implementation in `src/`.
+
+## Legacy Node-Only Variables
+
+These variables belong to the old Node runtime and are not active in the Python-first bot:
+
+- `VOICE_READY_TIMEOUT_MS`
+- `VOICE_READY_GRACE_TIMEOUT_MS`
+- `VOICE_CONNECT_MAX_ATTEMPTS`
+- `VOICE_CONNECT_RETRY_DELAY_MS`
+- `VOICE_SIGNAL_RECOVERY_TIMEOUT_MS`
+- `DISCORD_SESSION_REFRESH_COOLDOWN_MS`
+- `VOICE_CONNECT_FALLBACK_UNMUTE`
+- `DISCORD_BOT_SELF_MUTE`
+- `STALE_REMOTE_VOICE_RESET_DELAY_MS`
 
 ## Setup Instructions
 
-1. Create a `.env` file in the project root directory
-2. Copy the variables you need from the examples above
-3. Replace the placeholder values with your actual values
-4. Restart the bot
+1. Create the dedicated virtual environment:
 
-## Example .env File
+```bash
+python3 -m venv .voice-worker-venv
+./.voice-worker-venv/bin/pip install -r requirements.txt
+```
+
+2. Create `.env` in the repository root:
 
 ```env
-# Required
 DISCORD_TOKEN=your_discord_bot_token_here
 OPENAI_API_KEY=sk-your-openai-key-here
-
-# Optional - Weekly Meeting Reminders
-WEEKLY_MEETING_CHANNEL_ID=1234567890123456789
 TIMEZONE=Europe/Berlin
-
-# Optional - Grafana Integration
+WEEKLY_MEETING_CHANNEL_ID=1234567890123456789
 INCIDENTS_CHANNEL_ID=9876543210987654321
-GRAFANA_WEBHOOK_PORT=3000
 GRAFANA_WEBHOOK_SECRET=your_secure_random_string_here
-
-# Optional - Circuit Breaker Settings
-CIRCUIT_BREAKER_THRESHOLD=5
-CIRCUIT_BREAKER_TIMEOUT=60000
+VOICE_SEGMENT_SILENCE_MS=2000
+VOICE_MAX_SEGMENT_MS=30000
+HEALTH_PORT=3002
 ```
 
-## Features Enabled by Optional Variables
+3. Start the bot:
 
-### Weekly Meeting Reminders
-When `WEEKLY_MEETING_CHANNEL_ID` is set, the bot will:
-- Post a reminder every Thursday at 09:00 (in the configured timezone)
-- Include a link to the shared Google Doc for agenda items
-- Log all reminder activities
-
-### Grafana Integration
-When `INCIDENTS_CHANNEL_ID` is set, the bot will:
-- Start an HTTP server on the configured port (default: 3000)
-- Accept webhook POST requests at `/grafana-alert`
-- Create one thread per day (named "Grafana alerts – YYYY-MM-DD")
-- Post all alerts for that day into the same thread
-- Provide a `/health` endpoint for monitoring
-
-## Grafana Configuration
-
-To send alerts from Grafana to Discord:
-
-1. In Grafana, create a **Contact point** of type **Webhook**
-2. Set the URL to: `http://your-server:3000/grafana-alert`
-3. Attach this contact point to your alerting rules
-4. Alerts will automatically appear in the configured Discord channel
-
-## Testing
-
-### Test Weekly Reminder
-Temporarily change the cron schedule in the code to test:
-```javascript
-// Change from '0 9 * * 4' to '* * * * *' (every minute)
-cron.schedule('* * * * *', async () => { ... });
-```
-
-### Test Grafana Webhook
-Send a manual test request (include secret header if GRAFANA_WEBHOOK_SECRET is set):
 ```bash
-curl -X POST http://localhost:3000/grafana-alert \
+./.voice-worker-venv/bin/python -m summarise_bot
+```
+
+## Ops Endpoints
+
+The Python runtime exposes both health and Grafana endpoints:
+
+```bash
+curl http://localhost:3002/health
+```
+
+```bash
+curl -X POST http://localhost:3002/grafana-alert \
   -H "Content-Type: application/json" \
   -H "x-webhook-secret: your_secret_here" \
   -d '{"ruleName":"Test rule","state":"firing","message":"Something is wrong"}'
 ```
 
-### Check Health Endpoint
-```bash
-curl http://localhost:3000/health
-```
-
 ## Troubleshooting
 
-### Missing Channel IDs
-If you see warnings about missing channel IDs:
-1. Enable Developer Mode in Discord (User Settings > Advanced > Developer Mode)
-2. Right-click on the desired channel
-3. Select "Copy ID"
-4. Add the ID to your `.env` file
+### Helper startup fails immediately
 
-### Grafana Alerts Not Working
-1. Check that `INCIDENTS_CHANNEL_ID` is set
-2. Verify the webhook URL is accessible from Grafana
-3. Check the bot logs for error messages
-4. Ensure the bot has permissions to create threads in the channel
+- Verify the virtual environment exists.
+- Reinstall dependencies with `./.voice-worker-venv/bin/pip install -r requirements.txt`.
+- If you use `VOICE_HELPER_PATH`, verify it points to a real Python interpreter.
 
-### Weekly Reminders Not Working
-1. Check that `WEEKLY_MEETING_CHANNEL_ID` is set
-2. Verify the timezone is correct
-3. Check bot logs for scheduler initialization
-4. Test with a more frequent cron schedule
+### `/join` responds but capture does not start
 
+- Check `discord-bot.log` for `voice_join` or `voice_helper` errors.
+- Confirm the bot has permission to join the target voice channel.
+- Confirm the helper can start standalone:
+
+```bash
+printf '%s\n%s\n' '{"requestId":"1","type":"ready_check","payload":{}}' '{"requestId":"2","type":"shutdown","payload":{}}' \
+  | ./.voice-worker-venv/bin/python -m voice_helper.main
+```

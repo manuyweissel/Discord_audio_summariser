@@ -13,3 +13,8 @@ export {
   getSessionConcurrencyState,
   getAllConcurrencySessions
 } from './concurrency.js';
+export {
+  safeDeferReply,
+  safeRespond,
+  isNonFatalInteractionError
+} from './interaction.js';

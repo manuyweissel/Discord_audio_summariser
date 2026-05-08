@@ -236,7 +236,7 @@ export function getOrCreateSession(sessionId, guildId, channelId) {
 /**
  * Add an audio entry to the manifest
  */
-export function addAudioEntry(sessionId, audioPath, userId, username, fileSize) {
+export function addAudioEntry(sessionId, audioPath, userId, username, fileSize, options = {}) {
   const manifest = getManifest();
   const entryId = uuidv4();
   const [guildId, channelId] = sessionId.split(':');
@@ -247,6 +247,7 @@ export function addAudioEntry(sessionId, audioPath, userId, username, fileSize) 
   // Estimate duration based on file size (24kHz mono 16-bit = 48000 bytes/sec)
   const estimatedDuration = fileSize / 48000;
 
+  const createdAt = options.createdAt || new Date().toISOString();
   const entry = {
     id: entryId,
     sessionId,
@@ -259,10 +260,14 @@ export function addAudioEntry(sessionId, audioPath, userId, username, fileSize) 
     transcribedText: null,
     errorMessage: null,
     retryCount: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt,
+    updatedAt: createdAt,
     fileSize,
-    duration: estimatedDuration
+    duration: options.duration ?? estimatedDuration,
+    captureSource: options.captureSource || null,
+    captureEventId: options.captureEventId || null,
+    startedAt: options.startedAt || null,
+    endedAt: options.endedAt || null
   };
 
   manifest.audioEntries[entryId] = entry;
@@ -272,6 +277,20 @@ export function addAudioEntry(sessionId, audioPath, userId, username, fileSize) 
   console.log(`📋 Added audio entry ${entryId.substr(0, 8)}... to manifest (${(fileSize / 1024).toFixed(1)} KB)`);
 
   return entry;
+}
+
+/**
+ * Find a manifest audio entry by capture event ID
+ * @param {string} captureEventId - Worker-generated capture event ID
+ * @returns {Object|null}
+ */
+export function findAudioEntryByCaptureEventId(captureEventId) {
+  if (!captureEventId) {
+    return null;
+  }
+
+  const manifest = getManifest();
+  return Object.values(manifest.audioEntries).find(entry => entry.captureEventId === captureEventId) || null;
 }
 
 /**

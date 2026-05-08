@@ -4,3 +4,7 @@ audios/
 summaries/
 transcripts/
 .venv/
+.voice-worker-venv/
+__pycache__/
+*.pyc
+.pytest_cache/

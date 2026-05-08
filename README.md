@@ -1,172 +1,120 @@
-# Discord Voice Summarizer Bot 📝🎙️
+# Discord Voice Summariser Bot
 
-_A lightweight Discord bot that turns spontaneous voice chats into structured German **Meeting‑Protokolle**._
+A Python-first Discord bot that joins a voice channel, captures speaker audio through a DAVE-capable helper process, transcribes the captured WAV segments with OpenAI, and produces a German meeting summary as a `.docx` file on `/leave`.
 
----
+## Architecture
 
-## 📚 Table of Contents
-1. [Features](#features)
-2. [Requirements](#requirements)
-3. [Project Setup](#project-setup)
-   1. [Install Dependencies](#install-dependencies)
-   2. [Create a .env File](#create-a-env-file)
-   3. [Configure OAuth2 & Invite](#configure-oauth2--invite)
-   4. [Run the Bot](#run-the-bot)
-4. [How It Works](#how-it-works)
-   1. [Voice Capture](#voice-capture)
-   2. [Transcription](#transcription)
-   3. [Storing Transcripts](#storing-transcripts)
-   4. [Summary Generation](#summary-generation)
-5. [Local Files](#local-files)
-6. [Usage](#usage)
-   1. [Join a Voice Channel](#join-a-voice-channel)
-   2. [Leave](#leave)
-7. [FAQ](#faq)
-8. [Contributing](#contributing)
-9. [License](#license)
+- `summarise_bot/`
+  Python control plane for Discord slash commands, transcript writing, manifest/recovery, OpenAI transcription and summary generation, weekly reminders, and the shared ops server for `/health` plus `/grafana-alert`.
+- `voice_helper/`
+  Dedicated helper subprocess for Discord voice transport, DAVE session handling, Opus decode, speaker segmentation, WAV writing, and crash-safe spool creation.
+- `src/`
+  Archived Node implementation kept only as reference material while the Python runtime replaces it.
 
----
+## Core Behavior
 
-## ✨ Features
+- `/join`
+  The bot joins the caller's voice channel, opens a Discord voice session, and starts the helper-backed capture pipeline.
+- `/leave`
+  The bot flushes pending audio, waits for remaining transcriptions, builds a transcript if needed, generates a German meeting summary, and uploads a `.docx`.
+- Crash-safe capture
+  Each finished audio segment is written to `audios/` and mirrored to `data/voice_capture_spool/` before ingestion, so already-flushed audio survives restarts.
+- Operational endpoints
+  The Python runtime serves both `GET /health` and `POST /grafana-alert` on the same aiohttp server.
+- Weekly reminder
+  The bot posts the weekly prep reminder every Thursday at 09:00 in the configured timezone.
 
-| Capability | Description |
-|------------|-------------|
-| **Voice→Text** | Captures voice‑channel audio → resamples to **16 kHz mono WAV** with FFmpeg → sends to **OpenAI Whisper** for transcription. |
-| **Transcript Logging** | Per‑session log of _who_ said _what_ with timestamps. |
-| **Automatic Summaries** | On `/leave`, calls **GPT** to produce a bullet‑point German “Meeting Protokoll” (with timestamps). |
-| **Local Storage** | Saves raw audio, transcripts, and summaries to `audios/`, `transcripts/`, and `summaries/`. |
+## Output Paths
 
----
+- `audios/`
+  Captured WAV segments.
+- `transcripts/`
+  Session transcript logs in `[ISO_TIMESTAMP] DisplayName: text` format.
+- `summaries/`
+  Final meeting minutes as `.docx`.
+- `data/audio_manifest.json`
+  Session and audio-entry state.
+- `data/voice_capture_spool/`
+  Pending segment records waiting to be ingested.
 
-## 📦 Requirements
+## Requirements
 
-1. **Node.js ≥ 18** (ESM support & modern libs)
-2. **FFmpeg**
-   * **Windows** – [Download builds](https://ffmpeg.org/download.html)
-   * **macOS** – `brew install ffmpeg`
-   * **Linux** – `sudo apt install ffmpeg`
-3. **Discord Bot Token** (⁠Create in [Developer Portal](https://discord.com/developers/applications) & enable **Message Content** + **Server Members** intents.)
-4. **OpenAI API Key** (with Whisper + Chat models access)
+- Python 3.12 or newer
+- A Discord bot token with `applications.commands`, `Connect`, `Speak`, and `View Channels`
+- An OpenAI API key with Whisper and chat-model access
+- A working Opus runtime on the host
 
-> **Tip:** Keep secret keys out of version control — store them in `.env`.
+## Setup
 
----
+1. Create the dedicated virtual environment:
 
-## 🚀 Project Setup
-
-### 1️⃣ Install Dependencies
 ```bash
-npm install
+python3 -m venv .voice-worker-venv
+./.voice-worker-venv/bin/pip install -r requirements.txt
 ```
 
-### 2️⃣ Create a `.env` File
-```bash
-DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN
-OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+2. Create `.env` in the project root:
+
+```env
+DISCORD_TOKEN=your_discord_bot_token
+OPENAI_API_KEY=your_openai_api_key
+TIMEZONE=Europe/Berlin
+WEEKLY_MEETING_CHANNEL_ID=1234567890123456789
+INCIDENTS_CHANNEL_ID=987654321098765432
+GRAFANA_WEBHOOK_SECRET=your_shared_secret
 ```
 
-### 3️⃣ Create & Configure the Discord Application
+Optional when you want the bot to launch the helper with another interpreter:
 
-1. **Create the Application & Bot**
-   ```text
-   Discord Developer Portal → New Application → “Voice‑Transcriber”
-   Bot tab → Add Bot
-   ```
+```env
+VOICE_HELPER_PATH=/absolute/path/to/python
+```
 
-2. **Enable Intents**
-   * Privileged Gateway Intents → ✔️ **Message Content**
-   * ✔️ **Guild Voice States** _(mandatory for voice receive)_
+3. Start the Python runtime:
 
-3. **Copy the Bot Token**
-   Paste it into your `.env` as `DISCORD_TOKEN`.
+```bash
+./.voice-worker-venv/bin/python -m summarise_bot
+```
 
-4. **Generate the Invite URL**
-   Developer Portal → **OAuth2 → URL Generator**
+For convenience, `npm start` now launches the same Python entrypoint:
 
-   * **Scopes** → `bot`, `applications.commands`
-   * **Bot Permissions** → `View Channels`, `Send Messages`, `Connect`, `Speak`, `Use Embedded Activities`, `Attach Files`, `Read Message History`
-
-   Copy the URL, open it, choose your server and **Authorize**.
-
-### 4️⃣ Run the Bot Run the Bot
 ```bash
 npm start
 ```
-You should see:
-```text
-Logged in as YourBotName#1234
-✅ Slash commands registered
+
+## Commands
+
+- `/join`
+  Start a meeting capture session in the caller's current voice channel.
+- `/leave`
+  Stop capture, finish transcription, and post the generated meeting minutes file.
+
+## Testing
+
+Run the Python runtime and helper tests:
+
+```bash
+npm test
 ```
 
----
+Run only the Python tests:
 
-## ⚙️ How It Works
-
-### Voice Capture
-`/join` ➜ bot subscribes to the voice channel and captures raw opus packets.
-
-### Transcription
-Audio segments → FFmpeg (16 kHz mono) → **OpenAI Whisper** ➜ text.
-
-### Storing Transcripts
-Each user’s speech is appended to `transcripts/<guildId>-<channelId>-<timestamp>.log`.
-
-### Summary Generation
-On `/leave`, the bot feeds the full transcript to **Chat Completion** (e.g. `gpt‑4o`) → outputs a concise German bullet‑list with timestamps.
-
----
-
-## 🗂️ Local Files
-```
-audios/      # Intermediate 16 kHz WAVs
-transcripts/ # Full raw text logs
-summaries/   # Final Meeting‑Protokolle
+```bash
+./.voice-worker-venv/bin/python -m unittest discover -s tests_python -p 'test_*.py'
 ```
 
----
+## Runtime Surface
 
-## 🎮 Usage
+The Python rewrite now owns:
 
-### Join a Voice Channel
-1. Join the voice channel you want recorded.
-2. In any text channel, type `/join`.
-3. Bot enters & starts transcribing.
+- Discord login and slash commands
+- Voice join/leave orchestration
+- DAVE-capable voice helper supervision
+- Segment spool/replay recovery
+- Whisper transcription
+- German summary generation
+- DOCX export
+- `/health` and `/grafana-alert`
+- Weekly reminder scheduling
 
-### Leave
-1. Type `/leave`.
-2. Bot exits, auto‑summarizes, posts the summary, and stores it in `summaries/`.
-
----
-
-## ❓ FAQ
-
-<details>
-<summary>Where do audio & logs go?</summary>
-By default: `audios/`, `transcripts/`, `summaries/`.
-</details>
-
-<details>
-<summary>Why German summaries?</summary>
-The default system prompt is German. Tweak it for any language or style.
-</details>
-
-<details>
-<summary>“Whisper failed” errors?</summary>
-Check your OpenAI key, Whisper quota, or rate limits.
-</details>
-
-<details>
-<summary>Can I use GPT‑3.5 or GPT‑4?</summary>
-Absolutely — replace `gpt‑4o` with the model available to you.
-</details>
-
----
-
-## 🤝 Contributing
-Pull requests are welcome! For major changes, open an issue first to discuss the proposal.
-
----
-
-## 📝 License
-Released under the **MIT License** — happy hacking!
-
+The old Node runtime is no longer the supported implementation path.

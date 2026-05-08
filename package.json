@@ -4,17 +4,21 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node src/bot.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+    "start": ".voice-worker-venv/bin/python -m summarise_bot",
+    "start:python": ".voice-worker-venv/bin/python -m summarise_bot",
+    "test": "npm run test:python",
+    "test:python": ".voice-worker-venv/bin/python -m unittest discover -s tests_python -p 'test_*.py'",
+    "test:coverage": "npm run test:python"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "Discord Voice Summarizer Bot - Records, transcribes, and summarizes voice channel meetings",
   "dependencies": {
+    "@discordjs/opus": "^0.10.0",
     "@discordjs/rest": "^2.4.3",
     "@discordjs/voice": "^0.18.0",
+    "@noble/ciphers": "^2.2.0",
     "bull": "^4.12.0",
     "discord.js": "^14.18.0",
     "docx": "^8.2.2",

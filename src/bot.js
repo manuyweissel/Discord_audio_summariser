@@ -3,16 +3,33 @@ import { getVoiceConnection } from '@discordjs/voice';
 import { v4 as uuidv4 } from 'uuid';
 
 // Import modules
-import { BOT_TOKEN, validateConfig } from './config.js';
+import { BOT_TOKEN, VOICE_BACKEND, validateConfig } from './config.js';
 import logger from './logger.js';
 import { validateOpenAIKey } from './services/transcription.js';
 import { runRecovery, schedulePeriodicRecovery, getRecoveryStatus } from './services/recovery.js';
 import { markStaleSessions, cleanupOldSessions } from './services/manifest.js';
-import { commands, handleInteraction } from './commands/index.js';
-import { getActiveSessions, getGuildFromSession, cleanupSession } from './commands/join.js';
+import { commands, handleInteraction, writeTranscript } from './commands/index.js';
+import {
+  getActiveSessions,
+  getActiveSessionInfo,
+  getGuildFromSession,
+  cleanupSession,
+  cleanupJoinCommandResources
+} from './commands/join.js';
+import {
+  configureVoiceCapturePipeline,
+  ingestVoiceCaptureRecord,
+  replayPendingVoiceCaptureSpool,
+  waitForPendingVoiceProcessing
+} from './services/voiceCapturePipeline.js';
+import {
+  shutdownVoiceWorker,
+  startVoiceWorker,
+  stopVoiceWorkerSession
+} from './services/voiceWorkerClient.js';
 import { startGrafanaWebhookServer, stopGrafanaWebhookServer } from './integrations/grafana.js';
 import { scheduleWeeklyMeetingReminder } from './integrations/weekly-reminder.js';
-import { cleanupTokenizer } from './utils/index.js';
+import { cleanupTokenizer, isNonFatalInteractionError } from './utils/index.js';
 
 // Cleanup interval (24 hours)
 const SESSION_CLEANUP_INTERVAL = 24 * 60 * 60 * 1000;
@@ -47,6 +64,11 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
   ],
+});
+
+configureVoiceCapturePipeline({
+  client,
+  writeTranscript
 });
 
 // ---------- Ready Event ----------
@@ -118,6 +140,31 @@ client.once('ready', async () => {
     }, err);
   }
 
+  if (VOICE_BACKEND === 'python') {
+    try {
+      await startVoiceWorker({
+        onSegmentReady: async (record) => {
+          await ingestVoiceCaptureRecord(record);
+          return record;
+        }
+      });
+      console.log('🐍 Python voice worker ready');
+    } catch (error) {
+      logger.error("Python voice worker failed to start", {
+        extra: {
+          footprint: null,
+          batch_uuid: startupEventId,
+          user_id: null,
+          event_id: uuidv4(),
+          action: "voice_worker",
+          event: "start_error",
+          error_message: error.message
+        }
+      });
+      console.error(`❌ Python voice worker failed to start: ${error.message}`);
+    }
+  }
+
   // Schedule weekly meeting reminder
   scheduleWeeklyMeetingReminder(client);
 
@@ -150,6 +197,27 @@ client.once('ready', async () => {
   console.log('📅 Scheduled daily cleanup of old sessions (7+ days)');
 
   // ---------- Audio Recovery System ----------
+  if (VOICE_BACKEND === 'python') {
+    const replayResult = await replayPendingVoiceCaptureSpool().catch(error => {
+      logger.error("Voice capture spool replay failed", {
+        extra: {
+          footprint: null,
+          batch_uuid: startupEventId,
+          user_id: null,
+          event_id: uuidv4(),
+          action: "voice_capture_spool",
+          event: "replay_error",
+          error_message: error.message
+        }
+      });
+      return { replayed: 0, failed: 0 };
+    });
+
+    if (replayResult.replayed > 0 || replayResult.failed > 0) {
+      console.log(`🧵 Replayed ${replayResult.replayed} pending voice segment(s) (${replayResult.failed} failed)`);
+    }
+  }
+
   // First, mark any stale "active" sessions (older than 2 hours) for recovery
   // This handles cases where the bot crashed without calling /leave
   const staleCount = markStaleSessions(2);
@@ -212,6 +280,23 @@ process.on('unhandledRejection', (reason) => {
 process.on('uncaughtException', (error) => {
   // Log the actual error to console for debugging
   console.error('❌ Uncaught Exception:', error);
+
+  if (isNonFatalInteractionError(error)) {
+    logger.warn(`Non-fatal uncaught interaction error ignored: ${error.message}`, {
+      extra: {
+        footprint: null,
+        batch_uuid: null,
+        user_id: null,
+        event_id: uuidv4(),
+        action: "error_handling",
+        event: "non_fatal",
+        error_type: "UncaughtException",
+        error_message: error.message,
+        error_stack: error.stack
+      }
+    });
+    return;
+  }
   
   logger.error(`Uncaught Exception: ${error.message}`, {
     extra: {
@@ -265,30 +350,42 @@ async function gracefulShutdown(signal) {
     
     // 2. Stop accepting new voice connections and cleanup all sessions
     console.log('🔌 Disconnecting from voice channels...');
-    
-    // Get all active sessions and clean them up
+
     const activeSessions = getActiveSessions();
     for (const sessionId of activeSessions) {
       try {
+        const sessionInfo = getActiveSessionInfo(sessionId);
+        if (sessionInfo?.backend === 'python') {
+          await stopVoiceWorkerSession(sessionId).catch(() => null);
+          await waitForPendingVoiceProcessing(sessionId, 30000).catch(() => false);
+          cleanupSession(sessionId);
+          console.log(`   ✅ Stopped python worker session ${sessionId}`);
+          continue;
+        }
+
         const guildId = getGuildFromSession(sessionId);
         const connection = getVoiceConnection(guildId);
         if (connection) {
           connection.destroy();
           console.log(`   ✅ Disconnected from guild ${guildId}`);
         }
-        // Clean up session resources
+        await waitForPendingVoiceProcessing(sessionId, 30000).catch(() => false);
         cleanupSession(sessionId);
       } catch (err) {
         console.error(`   ⚠️ Error disconnecting session ${sessionId}:`, err.message);
       }
     }
     
-    // 3. Wait for pending transcriptions (with timeout)
-    console.log('⏳ Waiting for pending transcriptions to complete (max 30s)...');
-    await new Promise(resolve => setTimeout(resolve, 5000)); // Give 5 seconds grace period
+    // 3. Wait for background voice worker to terminate
+    if (VOICE_BACKEND === 'python') {
+      await shutdownVoiceWorker();
+    }
     
     // 4. Clean up resources
     console.log('🧹 Cleaning up resources...');
+    
+    // Clean up join command module timers/maps
+    cleanupJoinCommandResources();
     
     // Clean up tiktoken encoder
     cleanupTokenizer();

@@ -1,0 +1,1 @@
+py-cord[voice]==2.7.2

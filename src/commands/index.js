@@ -6,6 +6,7 @@ import logger from '../logger.js';
 import { v4 as uuidv4 } from 'uuid';
 import { handleJoin, sessionLogs } from './join.js';
 import { handleLeave } from './leave.js';
+import { isNonFatalInteractionError, safeRespond } from '../utils/index.js';
 
 // Define slash commands
 export const commands = [
@@ -36,7 +37,7 @@ function makeLogFileName(guildId, channelId) {
  * @param {string} sessionId - Session identifier
  * @returns {Promise<void>}
  */
-async function writeTranscript(guildId, channelId, username, text, sessionId) {
+export async function writeTranscript(guildId, channelId, username, text, sessionId) {
   const key = sessionId || `${guildId}:${channelId}`;
   if (!sessionLogs.has(key)) {
     sessionLogs.set(key, makeLogFileName(guildId, channelId));
@@ -71,11 +72,47 @@ async function writeTranscript(guildId, channelId, username, text, sessionId) {
 export async function handleInteraction(interaction) {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === 'join') {
-    await handleJoin(interaction, writeTranscript);
-  }
+  const interactionEventId = uuidv4();
+  const responseContext = {
+    batch_uuid: interactionEventId,
+    user_id: interaction.user?.id
+  };
 
-  if (interaction.commandName === 'leave') {
-    await handleLeave(interaction);
+  try {
+    if (interaction.commandName === 'join') {
+      await handleJoin(interaction, writeTranscript);
+      return;
+    }
+
+    if (interaction.commandName === 'leave') {
+      await handleLeave(interaction);
+      return;
+    }
+  } catch (error) {
+    const nonFatal = isNonFatalInteractionError(error);
+    const logFn = nonFatal ? logger.warn : logger.error;
+
+    logFn("Interaction handler failed", {
+      extra: {
+        footprint: null,
+        batch_uuid: interactionEventId,
+        user_id: interaction.user?.id,
+        event_id: uuidv4(),
+        action: "interaction_handling",
+        event: nonFatal ? "non_fatal" : "error",
+        command: interaction.commandName,
+        error_code: error?.code,
+        error_message: error?.message
+      }
+    });
+
+    await safeRespond(
+      interaction,
+      {
+        content: '❌ Beim Verarbeiten des Befehls ist ein Fehler aufgetreten. Bitte versuche es erneut.',
+        ephemeral: true
+      },
+      { logger, context: responseContext }
+    );
   }
 }
