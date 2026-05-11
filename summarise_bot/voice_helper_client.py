@@ -5,6 +5,7 @@ import contextlib
 import json
 import os
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Awaitable, Callable
@@ -43,6 +44,8 @@ class VoiceHelperClient:
         self._ready = asyncio.Event()
         self._pending: dict[str, PendingRequest] = {}
         self._lock = asyncio.Lock()
+        self._session_metrics: dict[str, dict[str, object]] = {}
+        self._stderr_suppression: dict[str, dict[str, float | int]] = {}
 
     async def start(self) -> None:
         async with self._lock:
@@ -60,9 +63,18 @@ class VoiceHelperClient:
                 stderr=asyncio.subprocess.PIPE,
             )
             self._ready.clear()
+            self._session_metrics.clear()
             self._reader_task = asyncio.create_task(self._read_stdout())
             self._stderr_task = asyncio.create_task(self._read_stderr())
-        await self._wait_until_ready()
+        try:
+            await self._wait_until_ready()
+        except Exception:
+            await self.shutdown()
+            raise
+
+    @property
+    def is_ready(self) -> bool:
+        return self.process is not None and self.process.returncode is None and self._ready.is_set()
 
     async def ensure_ready(self) -> None:
         if self.process is None or self.process.returncode is not None:
@@ -103,6 +115,8 @@ class VoiceHelperClient:
             msg_type = message.get("type")
             if msg_type == "ready":
                 self._ready.set()
+            elif msg_type in {"session_started", "session_stats", "session_stopped"}:
+                self._merge_session_payload(message.get("payload") or {})
             elif msg_type == "response":
                 request_id = str(message.get("requestId"))
                 pending = self._pending.pop(request_id, None)
@@ -121,6 +135,7 @@ class VoiceHelperClient:
                         extra={"action": "voice_helper", "event": "segment_ingest_error", "error_message": str(error)},
                     )
             elif msg_type == "session_error":
+                self._merge_session_payload((message.get("payload") or {}).get("stats") or {})
                 if self.on_session_error is not None:
                     try:
                         await self.on_session_error(message.get("payload") or {})
@@ -134,6 +149,7 @@ class VoiceHelperClient:
                     extra={"action": "voice_helper", "event": "session_error", **session_error_payload},
                 )
         self._ready.clear()
+        self._flush_rate_limited_stderr(force=True)
         for request_id, pending in list(self._pending.items()):
             pending.timeout_handle.cancel()
             pending.future.set_exception(RuntimeError("Voice helper exited"))
@@ -145,10 +161,93 @@ class VoiceHelperClient:
             line = await self.process.stderr.readline()
             if not line:
                 break
+            decoded = line.decode("utf-8", "ignore").rstrip()
+            if "decryption failed:" in decoded.lower():
+                self._record_rate_limited_stderr(decoded)
+                continue
+            self._flush_rate_limited_stderr(force=True)
             logger.info(
                 "Voice helper stderr",
-                extra={"action": "voice_helper", "event": "stderr", "stderr_line": line.decode('utf-8', 'ignore').rstrip()},
+                extra={"action": "voice_helper", "event": "stderr", "stderr_line": decoded},
             )
+        self._flush_rate_limited_stderr(force=True)
+
+    def _merge_session_payload(self, payload: dict[str, object]) -> None:
+        session_id = str(payload.get("sessionId") or "")
+        if not session_id:
+            return
+        merged = dict(self._session_metrics.get(session_id) or {})
+        merged.update(payload)
+        stats = payload.get("stats")
+        if isinstance(stats, dict):
+            merged.update(stats)
+        if "running" not in merged:
+            merged["running"] = True
+        if payload.get("stopped") is True:
+            merged["running"] = False
+        self._session_metrics[session_id] = merged
+
+    def _session_log_context(self) -> dict[str, object]:
+        for session_id, metrics in self._session_metrics.items():
+            if metrics.get("running", True):
+                return {
+                    "session_id": session_id,
+                    "phase": metrics.get("phase"),
+                    "packets_received": metrics.get("packetsReceived"),
+                    "media_decrypt_drops": metrics.get("mediaDecryptDrops"),
+                    "pending_packets": metrics.get("pendingPackets"),
+                }
+        return {}
+
+    def _record_rate_limited_stderr(self, line: str) -> None:
+        now = time.monotonic()
+        entry = self._stderr_suppression.setdefault(
+            line,
+            {"count": 0, "first_seen": now, "last_emitted": 0.0},
+        )
+        entry["count"] = int(entry["count"]) + 1
+        if now - float(entry["last_emitted"]) >= 5.0:
+            self._flush_rate_limited_stderr(line=line)
+
+    def _flush_rate_limited_stderr(self, *, line: str | None = None, force: bool = False) -> None:
+        now = time.monotonic()
+        keys = [line] if line is not None else list(self._stderr_suppression.keys())
+        for key in keys:
+            entry = self._stderr_suppression.get(key)
+            if entry is None:
+                continue
+            if not force and (now - float(entry["last_emitted"])) < 5.0:
+                continue
+            count = int(entry["count"])
+            if count <= 0:
+                continue
+            entry["last_emitted"] = now
+            entry["count"] = 0
+            logger.warning(
+                "Voice helper stderr suppressed",
+                extra={
+                    "action": "voice_helper",
+                    "event": "stderr_rate_limited",
+                    "stderr_line": key,
+                    "suppressed_count": count,
+                    **self._session_log_context(),
+                },
+            )
+
+    def get_session_metrics(self, session_id: str) -> dict[str, object]:
+        return dict(self._session_metrics.get(session_id) or {})
+
+    def get_state(self) -> dict[str, object]:
+        running = {
+            session_id: dict(metrics)
+            for session_id, metrics in self._session_metrics.items()
+            if metrics.get("running", True)
+        }
+        return {
+            "ready": self.is_ready,
+            "activeSessionCount": len(running),
+            "sessions": running,
+        }
 
     async def request(self, request_type: str, payload: dict[str, object], timeout: float = 30.0) -> dict[str, object]:
         await self.ensure_ready()
@@ -202,3 +301,5 @@ class VoiceHelperClient:
             self._reader_task = None
             self._stderr_task = None
             self._ready.clear()
+            self._flush_rate_limited_stderr(force=True)
+            self._stderr_suppression.clear()

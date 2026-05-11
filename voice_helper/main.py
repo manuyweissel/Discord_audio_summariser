@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections import deque
 from dataclasses import dataclass
 import json
 import logging
@@ -30,6 +31,10 @@ VOICE_CAPTURE_AUDIO_DIR = os.environ.get("VOICE_CAPTURE_AUDIO_DIR", str(ROOT_DIR
 VOICE_CAPTURE_SPOOL_DIR = os.environ.get("VOICE_CAPTURE_SPOOL_DIR", str(ROOT_DIR / "data" / "voice_capture_spool"))
 VOICE_SEGMENT_SILENCE_MS = int(os.environ.get("VOICE_SEGMENT_SILENCE_MS", os.environ.get("VOICE_WORKER_SEGMENT_SILENCE_MS", "2000")))
 VOICE_MAX_SEGMENT_MS = int(os.environ.get("VOICE_MAX_SEGMENT_MS", os.environ.get("VOICE_WORKER_MAX_SEGMENT_MS", "30000")))
+VOICE_PACKET_QUEUE_LIMIT = int(os.environ.get("VOICE_PACKET_QUEUE_LIMIT", "256"))
+VOICE_MEDIA_PAUSE_MS = int(os.environ.get("VOICE_MEDIA_PAUSE_MS", "750"))
+VOICE_STATS_EMIT_INTERVAL_MS = int(os.environ.get("VOICE_STATS_EMIT_INTERVAL_MS", "5000"))
+VOICE_HELPER_DEBUG_TRACE_SESSION_ID = os.environ.get("VOICE_HELPER_DEBUG_TRACE_SESSION_ID", "").strip()
 
 
 class VoiceOpcode:
@@ -71,6 +76,41 @@ class PendingPacket:
     timestamp: int
     received_at: float
     frame: bytes
+    attempts: int = 0
+
+
+@dataclass(slots=True)
+class SessionCounters:
+    packets_received: int = 0
+    unknown_ssrc_queued: int = 0
+    missing_decryptor_queued: int = 0
+    pending_queue_drops: int = 0
+    transport_decrypt_drops: int = 0
+    media_decrypt_drops: int = 0
+    decode_failures: int = 0
+    pcm_frames_accepted: int = 0
+    segments_flushed: int = 0
+    spool_writes: int = 0
+
+
+@dataclass(slots=True)
+class DecryptorAggregateStats:
+    decrypt_attempts: int = 0
+    decrypt_success_count: int = 0
+    decrypt_failure_count: int = 0
+    decrypt_missing_key_count: int = 0
+    decrypt_invalid_nonce_count: int = 0
+    passthrough_count: int = 0
+    decrypt_duration: float = 0.0
+
+    def merge(self, stats: dave.DecryptorStats) -> None:
+        self.decrypt_attempts += int(stats.decrypt_attempts)
+        self.decrypt_success_count += int(stats.decrypt_success_count)
+        self.decrypt_failure_count += int(stats.decrypt_failure_count)
+        self.decrypt_missing_key_count += int(stats.decrypt_missing_key_count)
+        self.decrypt_invalid_nonce_count += int(stats.decrypt_invalid_nonce_count)
+        self.passthrough_count += int(stats.passthrough_count)
+        self.decrypt_duration += float(stats.decrypt_duration)
 
 
 class DaveReceiveState:
@@ -87,6 +127,7 @@ class DaveReceiveState:
         self.transient_keys: dict[int, dave.SignatureKeyPair] = {}
         self.decryptors: dict[int, dave.Decryptor] = {}
         self.protocol_version = 0
+        self.user_pause_until: dict[int, float] = {}
 
     def _on_mls_failure(self, source: str, reason: str) -> None:
         LOGGER.error("MLS failure in %s: %s", source, reason)
@@ -108,6 +149,7 @@ class DaveReceiveState:
             return
         self.recognized_users.discard(user_id)
         self.decryptors.pop(user_id, None)
+        self.user_pause_until.pop(user_id, None)
 
     async def reinit_state(self, version: int) -> None:
         if version > self.MAX_SUPPORTED_VERSION:
@@ -121,6 +163,7 @@ class DaveReceiveState:
         if epoch != self.NEW_MLS_GROUP_EPOCH:
             return
         self.protocol_version = version
+        self.defer_all_users()
         self.mls_session.init(
             version,
             self.session.channel_id,
@@ -132,6 +175,7 @@ class DaveReceiveState:
 
     async def prepare_transition(self, transition_id: int, version: int) -> None:
         self.prepared_transitions[transition_id] = version
+        self.defer_all_users()
         if transition_id == self.INIT_TRANSITION_ID:
             self.execute_transition(transition_id)
         else:
@@ -142,6 +186,7 @@ class DaveReceiveState:
         if version is None:
             return
         self.protocol_version = version
+        self.defer_all_users()
         if version == self.DISABLED_VERSION:
             self.mls_session.reset()
             for decryptor in self.decryptors.values():
@@ -163,6 +208,31 @@ class DaveReceiveState:
             self.decryptors[user_id] = decryptor
         decryptor.transition_to_key_ratchet(ratchet, 5.0)
 
+    def defer_user(self, user_id: int, pause_seconds: float | None = None) -> None:
+        if user_id == self.session.bot_user_id:
+            return
+        pause_seconds = pause_seconds if pause_seconds is not None else (VOICE_MEDIA_PAUSE_MS / 1000)
+        until = time.monotonic() + max(0.05, pause_seconds)
+        self.user_pause_until[user_id] = max(self.user_pause_until.get(user_id, 0.0), until)
+
+    def defer_all_users(self, pause_seconds: float | None = None) -> None:
+        for user_id in list(self.recognized_users):
+            self.defer_user(user_id, pause_seconds)
+
+    def can_decrypt_user(self, user_id: int, *, now_monotonic: float | None = None) -> tuple[bool, str]:
+        if self.protocol_version == self.DISABLED_VERSION:
+            return True, "passthrough"
+        now_monotonic = now_monotonic if now_monotonic is not None else time.monotonic()
+        if now_monotonic < self.user_pause_until.get(user_id, 0.0):
+            return False, "transition_pause"
+        decryptor = self.decryptors.get(user_id)
+        if decryptor is None:
+            self._refresh_decryptor(user_id)
+            decryptor = self.decryptors.get(user_id)
+        if decryptor is None:
+            return False, "missing_decryptor"
+        return True, "ready"
+
     def decrypt_frame(self, user_id: int, frame: bytes) -> bytes | None:
         if self.protocol_version == self.DISABLED_VERSION:
             return frame
@@ -174,6 +244,12 @@ class DaveReceiveState:
             return None
         return decryptor.decrypt(dave.MediaType.audio, frame)
 
+    def get_aggregate_stats(self) -> DecryptorAggregateStats:
+        aggregate = DecryptorAggregateStats()
+        for decryptor in self.decryptors.values():
+            aggregate.merge(decryptor.get_stats(dave.MediaType.audio))
+        return aggregate
+
     def handle_mls_external_sender(self, data: bytes) -> None:
         self.mls_session.set_external_sender(data)
 
@@ -181,6 +257,7 @@ class DaveReceiveState:
         recognized = {str(user_id) for user_id in self.recognized_users}
         commit_welcome = self.mls_session.process_proposals(data, recognized)
         if commit_welcome is not None:
+            self.defer_all_users()
             await self.session.send_binary(struct.pack(">B", VoiceOpcode.DAVE_MLS_COMMIT_WELCOME) + commit_welcome)
 
     async def handle_mls_announce_commit_transition(self, transition_id: int, data: bytes) -> None:
@@ -193,6 +270,7 @@ class DaveReceiveState:
             )
             await self.reinit_state(self.mls_session.get_protocol_version())
             return
+        self.defer_all_users()
         await self.prepare_transition(transition_id, self.mls_session.get_protocol_version())
 
     async def handle_mls_welcome(self, transition_id: int, data: bytes) -> None:
@@ -204,6 +282,7 @@ class DaveReceiveState:
             )
             await self.reinit_state(self.mls_session.get_protocol_version())
             return
+        self.defer_all_users()
         await self.prepare_transition(transition_id, self.mls_session.get_protocol_version())
 
 
@@ -255,19 +334,27 @@ class VoiceReceiveSession:
         self.flush_task: asyncio.Task | None = None
         self.watch_task: asyncio.Task | None = None
         self.ssrc_map: dict[int, dict[str, int]] = {}
-        self.pending_packets: dict[int, list[PendingPacket]] = {}
+        self.pending_packets: dict[int, deque[PendingPacket]] = {}
         self.decoders: dict[int, discord.opus.Decoder] = {}
         self.dave_state = DaveReceiveState(self)
+        self.counters = SessionCounters()
         self.phase = "initialized"
         self.phase_history: list[str] = [self.phase]
         self.last_voice_opcode: int | None = None
         self.last_close_code: int | None = None
+        self._stats_dirty = True
+        self._last_stats_emit_at = 0.0
+        self._debug_trace_enabled = (
+            VOICE_HELPER_DEBUG_TRACE_SESSION_ID == "*"
+            or VOICE_HELPER_DEBUG_TRACE_SESSION_ID == self.session_id
+        )
 
     def _set_phase(self, phase: str) -> None:
         if self.phase == phase:
             return
         self.phase = phase
         self.phase_history.append(phase)
+        self._stats_dirty = True
         LOGGER.info("Session %s phase -> %s", self.session_id, phase)
 
     def _diagnostics(self) -> str:
@@ -281,6 +368,50 @@ class VoiceReceiveSession:
     @property
     def dave_max_version(self) -> int:
         return min(self.dave_state.MAX_SUPPORTED_VERSION, dave.get_max_supported_protocol_version())
+
+    def build_stats_snapshot(self) -> dict[str, object]:
+        decrypt_stats = self.dave_state.get_aggregate_stats()
+        pending_packets = sum(len(queue) for queue in self.pending_packets.values())
+        return {
+            "sessionId": self.session_id,
+            "guildId": str(self.guild_id),
+            "channelId": str(self.channel_id),
+            "running": not self.stop_event.is_set(),
+            "phase": self.phase,
+            "phaseHistory": self.phase_history[-8:],
+            "lastVoiceOpcode": self.last_voice_opcode,
+            "lastCloseCode": self.last_close_code,
+            "packetsReceived": self.counters.packets_received,
+            "unknownSsrcQueued": self.counters.unknown_ssrc_queued,
+            "missingDecryptorQueued": self.counters.missing_decryptor_queued,
+            "pendingQueueDrops": self.counters.pending_queue_drops,
+            "transportDecryptDrops": self.counters.transport_decrypt_drops,
+            "mediaDecryptDrops": self.counters.media_decrypt_drops,
+            "decodeFailures": self.counters.decode_failures,
+            "pcmFramesAccepted": self.counters.pcm_frames_accepted,
+            "segmentsFlushed": self.counters.segments_flushed,
+            "spoolWrites": self.counters.spool_writes,
+            "pendingSsrcs": len(self.pending_packets),
+            "pendingPackets": pending_packets,
+            "daveDecryptAttempts": decrypt_stats.decrypt_attempts,
+            "daveDecryptSuccesses": decrypt_stats.decrypt_success_count,
+            "daveDecryptFailures": decrypt_stats.decrypt_failure_count,
+            "daveMissingKeyFailures": decrypt_stats.decrypt_missing_key_count,
+            "daveInvalidNonceFailures": decrypt_stats.decrypt_invalid_nonce_count,
+            "davePassthroughFrames": decrypt_stats.passthrough_count,
+        }
+
+    async def _emit_stats(self, *, reason: str, force: bool = False) -> None:
+        now = time.monotonic()
+        if not force and (not self._stats_dirty or (now - self._last_stats_emit_at) < (VOICE_STATS_EMIT_INTERVAL_MS / 1000)):
+            return
+        payload = self.build_stats_snapshot()
+        payload["reason"] = reason
+        await self.emit({"type": "session_stats", "payload": payload})
+        self._stats_dirty = False
+        self._last_stats_emit_at = now
+        if self._debug_trace_enabled:
+            LOGGER.info("Session %s stats -> %s", self.session_id, json.dumps(payload, ensure_ascii=True, sort_keys=True))
 
     async def start(self) -> None:
         self._set_phase("creating_http_session")
@@ -313,6 +444,7 @@ class VoiceReceiveSession:
             self.flush_task = asyncio.create_task(self._flush_loop())
             self.watch_task = asyncio.create_task(self._watch_tasks())
             self._set_phase("session_running")
+            await self._emit_stats(reason="session_started", force=True)
         except Exception:
             await self.stop()
             raise
@@ -333,6 +465,7 @@ class VoiceReceiveSession:
             await self.http_session.close()
         if self.udp_socket is not None:
             self.udp_socket.close()
+        await self._emit_stats(reason="session_stopped", force=True)
 
     async def send_json(self, payload: dict[str, object]) -> None:
         assert self.voice_ws is not None
@@ -397,22 +530,30 @@ class VoiceReceiveSession:
             self.ssrc_map[ssrc] = {"user_id": user_id, "speaking": int(data.get("speaking", 0))}
             self.dave_state.add_recognized_user(user_id)
             await self._drain_pending_packets(ssrc)
+            await self._emit_stats(reason="speaker_mapping")
             return
         if op == VoiceOpcode.CLIENTS_CONNECT:
             for user_id in map(int, data.get("user_ids", [])):
                 self.dave_state.add_recognized_user(user_id)
+            await self._drain_all_pending_packets()
+            await self._emit_stats(reason="clients_connect")
             return
         if op == VoiceOpcode.CLIENT_DISCONNECT:
             self.dave_state.remove_recognized_user(int(data["user_id"]))
+            self._stats_dirty = True
             return
         if op == VoiceOpcode.DAVE_PREPARE_TRANSITION:
             await self.dave_state.prepare_transition(int(data["transition_id"]), int(data["protocol_version"]))
+            await self._emit_stats(reason="dave_prepare_transition")
             return
         if op == VoiceOpcode.DAVE_EXECUTE_TRANSITION:
             self.dave_state.execute_transition(int(data["transition_id"]))
+            await self._drain_all_pending_packets()
+            await self._emit_stats(reason="dave_execute_transition")
             return
         if op == VoiceOpcode.DAVE_MLS_PREPARE_EPOCH:
             await self.dave_state.prepare_epoch(int(data["epoch"]), int(data["protocol_version"]))
+            await self._emit_stats(reason="dave_prepare_epoch")
 
     async def _handle_ws_binary(self, message: bytes) -> None:
         if len(message) < 3:
@@ -423,17 +564,22 @@ class VoiceReceiveSession:
         if op == VoiceOpcode.DAVE_MLS_EXTERNAL_SENDER:
             self._set_phase("dave_external_sender")
             self.dave_state.handle_mls_external_sender(message[3:])
+            await self._emit_stats(reason="dave_external_sender")
         elif op == VoiceOpcode.DAVE_MLS_PROPOSALS:
             self._set_phase("dave_proposals")
             await self.dave_state.handle_mls_proposals(message[3:])
+            await self._emit_stats(reason="dave_proposals")
         elif op == VoiceOpcode.DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION:
             self._set_phase("dave_commit_transition")
             transition_id = int.from_bytes(message[3:5], "big", signed=False)
             await self.dave_state.handle_mls_announce_commit_transition(transition_id, message[5:])
+            await self._emit_stats(reason="dave_commit_transition")
         elif op == VoiceOpcode.DAVE_MLS_WELCOME:
             self._set_phase("dave_welcome")
             transition_id = int.from_bytes(message[3:5], "big", signed=False)
             await self.dave_state.handle_mls_welcome(transition_id, message[5:])
+            await self._drain_all_pending_packets()
+            await self._emit_stats(reason="dave_welcome")
 
     async def _perform_ip_discovery(self, data: dict[str, Any]) -> None:
         assert self.udp_socket is not None
@@ -492,31 +638,75 @@ class VoiceReceiveSession:
             return
         if packet[1] & 0x78 != 0x78:
             return
+        self.counters.packets_received += 1
+        self._stats_dirty = True
         header, payload = self._split_rtp_packet(packet)
         ssrc = struct.unpack_from(">I", packet, 8)[0]
         timestamp = struct.unpack_from(">I", packet, 4)[0]
         decrypted_transport = self._decrypt_transport(header, payload)
         if decrypted_transport is None:
+            self.counters.transport_decrypt_drops += 1
+            self._stats_dirty = True
             return
         user_info = self.ssrc_map.get(ssrc)
         pending = PendingPacket(ssrc=ssrc, timestamp=timestamp, received_at=time.monotonic(), frame=decrypted_transport)
         if user_info is None:
-            self.pending_packets.setdefault(ssrc, []).append(pending)
+            self._queue_pending_packet(pending, reason="unknown_ssrc")
             return
-        await self._process_pending_packet(pending, int(user_info["user_id"]))
+        await self._route_pending_packet(pending, int(user_info["user_id"]))
 
     async def _drain_pending_packets(self, ssrc: int) -> None:
         user_info = self.ssrc_map.get(ssrc)
         if user_info is None:
             return
-        queued = self.pending_packets.pop(ssrc, [])
-        for pending in queued:
-            await self._process_pending_packet(pending, int(user_info["user_id"]))
+        queued = self.pending_packets.get(ssrc)
+        if queued is None:
+            return
+        user_id = int(user_info["user_id"])
+        while queued:
+            ready, reason = self.dave_state.can_decrypt_user(user_id, now_monotonic=queued[0].received_at)
+            if not ready:
+                if reason != "transition_pause":
+                    self._stats_dirty = True
+                break
+            pending = queued.popleft()
+            processed = await self._process_pending_packet(pending, user_id)
+            if not processed:
+                break
+        if not queued:
+            self.pending_packets.pop(ssrc, None)
 
-    async def _process_pending_packet(self, pending: PendingPacket, user_id: int) -> None:
+    async def _drain_all_pending_packets(self) -> None:
+        for ssrc in list(self.pending_packets.keys()):
+            await self._drain_pending_packets(ssrc)
+
+    async def _route_pending_packet(self, pending: PendingPacket, user_id: int) -> None:
+        ready, _reason = self.dave_state.can_decrypt_user(user_id, now_monotonic=pending.received_at)
+        if not ready:
+            self._queue_pending_packet(pending, reason="missing_decryptor")
+            return
+        await self._process_pending_packet(pending, user_id)
+
+    def _queue_pending_packet(self, pending: PendingPacket, *, reason: str) -> None:
+        queue = self.pending_packets.setdefault(pending.ssrc, deque())
+        if len(queue) >= VOICE_PACKET_QUEUE_LIMIT:
+            queue.popleft()
+            self.counters.pending_queue_drops += 1
+        queue.append(pending)
+        if reason == "unknown_ssrc":
+            self.counters.unknown_ssrc_queued += 1
+        else:
+            self.counters.missing_decryptor_queued += 1
+        self._stats_dirty = True
+
+    async def _process_pending_packet(self, pending: PendingPacket, user_id: int) -> bool:
         frame = self.dave_state.decrypt_frame(user_id, pending.frame)
         if frame in (None, b"\xf8\xff\xfe"):
-            return
+            self.counters.media_decrypt_drops += 1
+            self.dave_state.defer_user(user_id)
+            self._stats_dirty = True
+            await self._emit_stats(reason="media_decrypt_drop")
+            return False
         decoder = self.decoders.get(pending.ssrc)
         if decoder is None:
             decoder = discord.opus.Decoder()
@@ -524,18 +714,26 @@ class VoiceReceiveSession:
         try:
             pcm_bytes = decoder.decode(frame)
         except Exception:
+            self.counters.decode_failures += 1
+            self._stats_dirty = True
             LOGGER.exception("Failed to decode opus frame for user %s", user_id)
-            return
+            await self._emit_stats(reason="decode_failure")
+            return True
+        self.counters.pcm_frames_accepted += 1
+        self._stats_dirty = True
         flushed = self.segmenter.append_pcm(user_id, pcm_bytes, now_monotonic=pending.received_at, now_dt=utc_now())
         for chunk in flushed:
             await self._persist_chunk(chunk)
+        return True
 
     async def _flush_loop(self) -> None:
         while not self.stop_event.is_set():
             await asyncio.sleep(max(0.5, VOICE_SEGMENT_SILENCE_MS / 2000))
+            await self._drain_all_pending_packets()
             flushed = self.segmenter.flush_inactive(now_monotonic=time.monotonic(), now_dt=utc_now())
             for chunk in flushed:
                 await self._persist_chunk(chunk)
+            await self._emit_stats(reason="periodic")
 
     async def _watch_tasks(self) -> None:
         tasks = [task for task in (self.ws_task, self.udp_task) if task is not None]
@@ -555,6 +753,8 @@ class VoiceReceiveSession:
     async def _persist_chunk(self, chunk: PCMChunk) -> None:
         if not chunk.pcm_bytes:
             return
+        self.counters.segments_flushed += 1
+        self._stats_dirty = True
         record = self.spool_writer.write_segment(
             session_id=self.session_id,
             guild_id=str(self.guild_id),
@@ -567,7 +767,10 @@ class VoiceReceiveSession:
             channels=discord.opus.Decoder.CHANNELS,
             sample_width=2,
         ).to_dict()
+        self.counters.spool_writes += 1
+        self._stats_dirty = True
         await self.emit({"type": "segment_ready", "payload": record})
+        await self._emit_stats(reason="segment_ready")
 
     def _split_rtp_packet(self, data: bytes) -> tuple[bytes, bytes]:
         if self.transport_mode.endswith("_rtpsize"):
@@ -651,7 +854,13 @@ class HelperRuntime:
         session_id = str(payload["sessionId"])
         if session_id in self.sessions:
             session = self.sessions[session_id]
-            return {"sessionId": session_id, "guildId": str(session.guild_id), "channelId": str(session.channel_id), "alreadyRunning": True}
+            return {
+                "sessionId": session_id,
+                "guildId": str(session.guild_id),
+                "channelId": str(session.channel_id),
+                "alreadyRunning": True,
+                "stats": session.build_stats_snapshot(),
+            }
         session = VoiceReceiveSession(
             emit=self.emit,
             session_id=session_id,
@@ -679,16 +888,28 @@ class HelperRuntime:
             session.watch_task.add_done_callback(
                 lambda task, session_id=session_id: asyncio.create_task(self._handle_session_task(session_id, task))
             )
-        await self.emit({"type": "session_started", "payload": {"sessionId": session_id, "guildId": str(session.guild_id), "channelId": str(session.channel_id)}})
-        return {"sessionId": session_id, "guildId": str(session.guild_id), "channelId": str(session.channel_id)}
+        stats = session.build_stats_snapshot()
+        await self.emit(
+            {
+                "type": "session_started",
+                "payload": {
+                    "sessionId": session_id,
+                    "guildId": str(session.guild_id),
+                    "channelId": str(session.channel_id),
+                    "stats": stats,
+                },
+            }
+        )
+        return {"sessionId": session_id, "guildId": str(session.guild_id), "channelId": str(session.channel_id), "stats": stats}
 
     async def stop_session(self, session_id: str) -> dict[str, object]:
         session = self.sessions.pop(session_id, None)
         if session is None:
             return {"sessionId": session_id, "stopped": False}
         await session.stop()
-        await self.emit({"type": "session_stopped", "payload": {"sessionId": session_id, "stopped": True}})
-        return {"sessionId": session_id, "stopped": True}
+        stats = session.build_stats_snapshot()
+        await self.emit({"type": "session_stopped", "payload": {"sessionId": session_id, "stopped": True, "stats": stats}})
+        return {"sessionId": session_id, "stopped": True, "stats": stats}
 
     async def shutdown(self) -> None:
         if self.shutdown_requested:
@@ -710,6 +931,7 @@ class HelperRuntime:
             session = self.sessions.pop(session_id, None)
             phase = session.phase if session is not None else "unknown"
             close_code = session.last_close_code if session is not None else None
+            stats = session.build_stats_snapshot() if session is not None else {}
             await self.emit(
                 {
                     "type": "session_error",
@@ -719,6 +941,7 @@ class HelperRuntime:
                         "message": str(error),
                         "phase": phase,
                         "closeCode": close_code,
+                        "stats": stats,
                     },
                 }
             )

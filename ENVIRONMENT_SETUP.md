@@ -69,6 +69,26 @@ This document describes the environment variables used by the Python-first Disco
 - Default: `30000`
 - Description: Maximum duration for a single speaker segment before it is forced to flush.
 
+### `VOICE_PACKET_QUEUE_LIMIT`
+- Required: no
+- Default: `256`
+- Description: Maximum number of RTP frames buffered per SSRC while waiting for speaker mapping or DAVE decryptor readiness.
+
+### `VOICE_MEDIA_PAUSE_MS`
+- Required: no
+- Default: `750`
+- Description: Short backoff window used after DAVE transition/decrypt failures before queued frames are retried.
+
+### `VOICE_STATS_EMIT_INTERVAL_MS`
+- Required: no
+- Default: `5000`
+- Description: Interval for helper session metric snapshots that feed `/health` and leave-session summaries.
+
+### `VOICE_HELPER_DEBUG_TRACE_SESSION_ID`
+- Required: no
+- Default: unset
+- Description: Set to a specific session id, or `*`, to emit verbose helper stats snapshots for live debugging.
+
 ### `HEALTH_PORT`
 - Required: no
 - Default: `3002`

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -13,15 +14,34 @@ from .transcript import TranscriptStore
 from .transcription import transcribe_with_retry
 
 
+@dataclass(slots=True)
+class PipelineSessionMetrics:
+    ingests_started: int = 0
+    segments_ingested: int = 0
+    duplicate_segments: int = 0
+    missing_wav_segments: int = 0
+    transcriptions_completed: int = 0
+    transcription_failures: int = 0
+
+
 class VoiceCapturePipeline:
     def __init__(self, bot: discord.Bot, transcript_store: TranscriptStore) -> None:
         self.bot = bot
         self.transcript_store = transcript_store
         self.pending: dict[str, set[str]] = {}
         self.ingest_in_flight: set[str] = set()
+        self.session_metrics: dict[str, PipelineSessionMetrics] = {}
 
     def _get_pending_set(self, session_id: str) -> set[str]:
         return self.pending.setdefault(session_id, set())
+
+    def _get_metrics(self, session_id: str) -> PipelineSessionMetrics:
+        return self.session_metrics.setdefault(session_id, PipelineSessionMetrics())
+
+    def get_session_metrics(self, session_id: str) -> dict[str, int]:
+        metrics = asdict(self._get_metrics(session_id))
+        metrics["pending_ingests"] = len(self.pending.get(session_id, set()))
+        return metrics
 
     async def resolve_username(self, guild_id: str, user_id: str) -> str:
         guild = self.bot.get_guild(int(guild_id))
@@ -58,11 +78,15 @@ class VoiceCapturePipeline:
 
         if event_id in self.ingest_in_flight:
             return {"skipped": True, "reason": "already_processing"}
+        metrics = self._get_metrics(session_id)
+        metrics.ingests_started += 1
         if find_audio_entry_by_capture_event_id(event_id):
+            metrics.duplicate_segments += 1
             if spool_path:
                 delete_spool_record(spool_path)
             return {"skipped": True, "reason": "already_ingested"}
         if not wav_path.exists():
+            metrics.missing_wav_segments += 1
             if spool_path:
                 delete_spool_record(spool_path)
             return {"skipped": True, "reason": "missing_wav"}
@@ -85,6 +109,7 @@ class VoiceCapturePipeline:
                 ended_at=str(record.get("endedAt") or ""),
                 duration=_duration(record),
             )
+            metrics.segments_ingested += 1
             transcription = await transcribe_with_retry(
                 str(wav_path),
                 session_id,
@@ -93,7 +118,10 @@ class VoiceCapturePipeline:
                 3,
             )
             if transcription.get("success") and transcription.get("text"):
+                metrics.transcriptions_completed += 1
                 await self.write_transcript_line(record, username, str(transcription["text"]))
+            elif not transcription.get("success"):
+                metrics.transcription_failures += 1
             if spool_path:
                 delete_spool_record(spool_path)
             return {"success": True, "entryId": entry["id"], "transcription": transcription}

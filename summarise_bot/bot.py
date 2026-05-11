@@ -177,8 +177,9 @@ class SummariseBotRuntime:
             return
 
         logger.info("Received voice leave request", extra={"action": "voice_leave", "event": "request", "session_id": active.session_id})
+        helper_stop_result: dict[str, object] = {}
         try:
-            await self.helper.stop_session(active.session_id)
+            helper_stop_result = await self.helper.stop_session(active.session_id)
         except Exception as error:
             logger.warning(
                 "Failed stopping voice helper session",
@@ -195,6 +196,7 @@ class SummariseBotRuntime:
 
         await ctx.followup.send("📝 Verarbeite noch offene Transkriptionen...")
         await self.pipeline.wait_for_pending(active.session_id, timeout=30.0)
+        self._log_session_summary(active.session_id, helper_stop_result.get("stats"))
 
         transcript_path = await self._ensure_transcript_path(active)
         summary_path: Path | None = None
@@ -265,12 +267,36 @@ class SummariseBotRuntime:
         return output_path
 
     def get_health_state(self) -> dict[str, Any]:
+        voice_sessions: dict[str, Any] = {}
+        for active in self.active_sessions.values():
+            helper_metrics = self.helper.get_session_metrics(active.session_id)
+            helper_metrics["pipeline"] = self.pipeline.get_session_metrics(active.session_id)
+            voice_sessions[active.session_id] = helper_metrics
         return {
             "status": "ok",
             "activeSessions": len(self.active_sessions),
-            "helperReady": self.helper.process is not None and self.helper.process.returncode is None,
+            "helperReady": self.helper.is_ready,
+            "voiceHelper": self.helper.get_state(),
+            "voiceSessions": voice_sessions,
             "recovery": self.recovery.get_status(),
         }
+
+    def _log_session_summary(self, session_id: str, helper_stats: object | None) -> None:
+        summary: dict[str, object] = {}
+        if isinstance(helper_stats, dict):
+            summary.update(helper_stats)
+        else:
+            summary.update(self.helper.get_session_metrics(session_id))
+        summary["pipeline"] = self.pipeline.get_session_metrics(session_id)
+        logger.info(
+            "Voice session summary",
+            extra={
+                "action": "voice_leave",
+                "event": "session_summary",
+                "session_id": session_id,
+                "voice_session": summary,
+            },
+        )
 
     async def shutdown(self) -> None:
         if self._shutting_down:

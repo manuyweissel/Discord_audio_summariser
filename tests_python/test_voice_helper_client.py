@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import os
+from pathlib import Path
+import tempfile
 import unittest
 
+from summarise_bot.config import SETTINGS
 from summarise_bot.voice_helper_client import VoiceHelperClient
 
 
@@ -21,10 +25,33 @@ class VoiceHelperClientTests(unittest.IsolatedAsyncioTestCase):
             await client.start()
             response = await client.request("ready_check", {})
             self.assertTrue(response["ready"])
+            self.assertTrue(client.is_ready)
+            self.assertTrue(client.get_state()["ready"])
             self.assertEqual(segments, [])
             self.assertEqual(session_errors, [])
         finally:
             await client.shutdown()
+
+    async def test_start_failure_cleans_up_process_and_tasks(self) -> None:
+        async def on_segment_ready(payload: dict[str, object]) -> None:
+            del payload
+
+        client = VoiceHelperClient(on_segment_ready)
+        original_helper_path = SETTINGS.helper_path
+        with tempfile.TemporaryDirectory() as tmpdir:
+            helper_path = Path(tmpdir) / "fake-helper.py"
+            helper_path.write_text("#!/usr/bin/env python3\nimport sys\nsys.exit(0)\n", encoding="utf-8")
+            os.chmod(helper_path, 0o755)
+            SETTINGS.helper_path = str(helper_path)
+            try:
+                with self.assertRaisesRegex(RuntimeError, "exited during startup"):
+                    await client.start()
+                self.assertIsNone(client.process)
+                self.assertIsNone(client._reader_task)
+                self.assertIsNone(client._stderr_task)
+                self.assertFalse(client.is_ready)
+            finally:
+                SETTINGS.helper_path = original_helper_path
 
 
 if __name__ == "__main__":

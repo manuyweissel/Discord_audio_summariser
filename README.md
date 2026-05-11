@@ -70,6 +70,15 @@ Optional when you want the bot to launch the helper with another interpreter:
 VOICE_HELPER_PATH=/absolute/path/to/python
 ```
 
+Optional when you need to tune the DAVE receive path during live debugging:
+
+```env
+VOICE_PACKET_QUEUE_LIMIT=256
+VOICE_MEDIA_PAUSE_MS=750
+VOICE_STATS_EMIT_INTERVAL_MS=5000
+VOICE_HELPER_DEBUG_TRACE_SESSION_ID=*
+```
+
 3. Start the Python runtime:
 
 ```bash

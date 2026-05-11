@@ -57,7 +57,20 @@ class OpsServerTests(unittest.IsolatedAsyncioTestCase):
         self.bot = FakeBot(incidents_channel_id, self.fake_channel)
         self.server = OpsServer(
             self.bot,
-            lambda: {"status": "ok", "activeSessions": 2, "helperReady": True, "recovery": {"isRecovering": False}},
+            lambda: {
+                "status": "ok",
+                "activeSessions": 2,
+                "helperReady": True,
+                "voiceHelper": {"ready": True, "activeSessionCount": 1},
+                "voiceSessions": {
+                    "guild:channel": {
+                        "phase": "session_running",
+                        "packetsReceived": 12,
+                        "pipeline": {"transcriptions_completed": 1},
+                    }
+                },
+                "recovery": {"isRecovering": False},
+            },
         )
 
     def tearDown(self) -> None:
@@ -97,6 +110,8 @@ class OpsServerTests(unittest.IsolatedAsyncioTestCase):
         state = self.server.build_health_state()
         self.assertEqual(state["activeSessions"], 2)
         self.assertTrue(state["helperReady"])
+        self.assertEqual(state["voiceHelper"]["activeSessionCount"], 1)
+        self.assertEqual(state["voiceSessions"]["guild:channel"]["packetsReceived"], 12)
         self.assertEqual(state["grafana"]["enabled"], True)
         self.assertEqual(state["grafana"]["dailyThreadsTracked"], 1)
         self.assertIn("memory", state)
