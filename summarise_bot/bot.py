@@ -36,6 +36,16 @@ from .voice_helper_client import VoiceHelperClient
 from .voice_protocol import GatewayVoiceStateProtocol
 
 
+# Voice close codes that retrying cannot fix: 4017 (E2EE/DAVE required) and 4004
+# (authentication failed). Anything else is treated as a transient drop worth retrying.
+VOICE_FATAL_CLOSE_CODES = (4004, 4017)
+# Bounded connection attempts so a flaky voice server can't kill a join, and a crashing
+# session can't reconnect forever.
+VOICE_CONNECT_ATTEMPTS = 3
+VOICE_RECONNECT_ATTEMPTS = 2
+VOICE_MAX_RECONNECTS = 3
+
+
 @dataclass(slots=True)
 class ActiveSession:
     session_id: str
@@ -58,6 +68,8 @@ class SummariseBotRuntime:
         self.health = OpsServer(self.bot, self.get_health_state)
         self.reminders = WeeklyReminderScheduler(self.bot)
         self.active_sessions: dict[int, ActiveSession] = {}
+        self._reconnecting: set[str] = set()
+        self._reconnect_counts: dict[str, int] = {}
         self._started = False
         self._periodic_recovery_task: asyncio.Task | None = None
         self._background_tasks: set[asyncio.Task] = set()
@@ -93,7 +105,16 @@ class SummariseBotRuntime:
             )
             print(f"❌ Voice helper failed to start: {error}")
 
-        await self.health.start()
+        try:
+            await self.health.start()
+        except Exception as error:
+            # A bind failure (e.g. port already in use) must not abort the rest of startup
+            # (reminders, recovery, spool replay). The ops/health endpoint is optional.
+            logger.warning(
+                "Ops/health server failed to start; continuing without it",
+                extra={"action": "ops_server", "event": "start_error", "error_message": str(error)},
+            )
+            print(f"⚠️ Ops/health server not started: {error}")
         await self.reminders.start()
         cleanup_old_sessions(7)
         stale = mark_stale_sessions(SETTINGS.stale_session_hours)
@@ -144,30 +165,64 @@ class SummariseBotRuntime:
             return
 
         logger.info("Received voice join request", extra={"action": "voice_join", "event": "request"})
-        protocol = await voice_state.channel.connect(cls=GatewayVoiceStateProtocol, reconnect=False, timeout=30.0)
-        assert isinstance(protocol, GatewayVoiceStateProtocol)
         try:
-            session_payload = protocol.export_session(self.bot.user.id)
-            await self.helper.start_session(session_payload)
+            active = await self._connect_and_start(voice_state.channel, attempts=VOICE_CONNECT_ATTEMPTS)
         except Exception as error:
             logger.error(
                 "Voice session start failed",
                 extra={"action": "voice_join", "event": "error", "error_message": str(error)},
             )
-            with contextlib.suppress(Exception):
-                await protocol.disconnect(force=True)
-            await ctx.followup.send(f"❌ Sprachaufnahme konnte nicht gestartet werden: {error}")
+            if "close_code=4017" in str(error):
+                await ctx.followup.send(
+                    "❌ Sprachaufnahme konnte nicht gestartet werden: Discord verlangt "
+                    "DAVE-Ende-zu-Ende-Verschlüsselung (close 4017). Bitte den Bot neu starten/aktualisieren."
+                )
+            else:
+                await ctx.followup.send(f"❌ Sprachaufnahme konnte nicht gestartet werden: {error}")
             return
 
-        active = ActiveSession(
-            session_id=str(session_payload["sessionId"]),
-            guild_id=int(session_payload["guildId"]),
-            channel_id=int(session_payload["channelId"]),
-            protocol=protocol,
-        )
         self.active_sessions[ctx.guild_id] = active
+        self._reconnect_counts.pop(active.session_id, None)
         logger.info("Voice session started", extra={"action": "voice_join", "event": "complete", "session_id": active.session_id})
         await ctx.followup.send(f"🎙️ Aufnahme gestartet in <#{active.channel_id}>.")
+
+    @staticmethod
+    def _is_fatal_close(error: Exception) -> bool:
+        message = str(error)
+        return any(f"close_code={code}" in message for code in VOICE_FATAL_CLOSE_CODES)
+
+    async def _connect_and_start(self, channel: discord.abc.Connectable, *, attempts: int) -> ActiveSession:
+        """Connect the gateway voice state and start the helper session, retrying transient
+        failures with backoff. Raises the last error on a fatal close or once attempts run out."""
+        last_error: Exception | None = None
+        for attempt in range(1, attempts + 1):
+            protocol: GatewayVoiceStateProtocol | None = None
+            try:
+                protocol = await channel.connect(cls=GatewayVoiceStateProtocol, reconnect=False, timeout=30.0)
+                assert isinstance(protocol, GatewayVoiceStateProtocol)
+                session_payload = protocol.export_session(self.bot.user.id)
+                await self.helper.start_session(session_payload)
+                return ActiveSession(
+                    session_id=str(session_payload["sessionId"]),
+                    guild_id=int(session_payload["guildId"]),
+                    channel_id=int(session_payload["channelId"]),
+                    protocol=protocol,
+                )
+            except Exception as error:
+                last_error = error
+                if protocol is not None:
+                    with contextlib.suppress(Exception):
+                        await protocol.disconnect(force=True)
+                if self._is_fatal_close(error):
+                    raise
+                logger.warning(
+                    "Voice connect attempt failed; retrying",
+                    extra={"action": "voice_join", "event": "retry", "attempt": attempt, "error_message": str(error)},
+                )
+                if attempt < attempts:
+                    await asyncio.sleep(min(4.0, 2 ** (attempt - 1)))
+        assert last_error is not None
+        raise last_error
 
     async def handle_leave(self, ctx: discord.ApplicationContext) -> None:
         await ctx.defer()
@@ -207,6 +262,7 @@ class SummariseBotRuntime:
 
         self.transcript_store.release(active.session_id)
         self.active_sessions.pop(ctx.guild_id, None)
+        self._reconnect_counts.pop(active.session_id, None)
         if summary_path is None or not summary_path.exists():
             await ctx.followup.send("❌ Verbindung getrennt. Kein Transkript gefunden oder nichts zu erstellen.")
             return
@@ -221,14 +277,72 @@ class SummariseBotRuntime:
 
     async def handle_session_error(self, payload: dict[str, object]) -> None:
         session_id = str(payload.get("sessionId") or "")
-        if session_id:
-            mark_session_pending_recovery(session_id)
-            for guild_id, active in list(self.active_sessions.items()):
-                if active.session_id == session_id:
-                    self.active_sessions.pop(guild_id, None)
-                    with contextlib.suppress(Exception):
-                        await active.protocol.disconnect(force=True)
-                    break
+        if not session_id:
+            return
+        entry = next(
+            ((guild_id, active) for guild_id, active in self.active_sessions.items() if active.session_id == session_id),
+            None,
+        )
+        close_code = payload.get("closeCode")
+        fatal = close_code in VOICE_FATAL_CLOSE_CODES
+        # A still-active session that dropped on a transient close: try to resume capture
+        # before giving up. Bounded by VOICE_MAX_RECONNECTS so a persistently-crashing
+        # session can't loop forever.
+        if (
+            entry is not None
+            and not fatal
+            and session_id not in self._reconnecting
+            and self._reconnect_counts.get(session_id, 0) < VOICE_MAX_RECONNECTS
+        ):
+            if await self._try_reconnect_session(*entry):
+                return
+
+        mark_session_pending_recovery(session_id)
+        if entry is not None:
+            self.active_sessions.pop(entry[0], None)
+            self._reconnect_counts.pop(session_id, None)
+            with contextlib.suppress(Exception):
+                await entry[1].protocol.disconnect(force=True)
+
+    async def _try_reconnect_session(self, guild_id: int, active: ActiveSession) -> bool:
+        session_id = active.session_id
+        self._reconnecting.add(session_id)
+        self._reconnect_counts[session_id] = self._reconnect_counts.get(session_id, 0) + 1
+        try:
+            with contextlib.suppress(Exception):
+                await active.protocol.disconnect(force=True)
+            channel = self.bot.get_channel(active.channel_id)
+            if channel is None or guild_id not in self.active_sessions:
+                return False
+            logger.info(
+                "Reconnecting voice session",
+                extra={"action": "voice_session", "event": "reconnect", "session_id": session_id,
+                       "attempt": self._reconnect_counts[session_id]},
+            )
+            try:
+                resumed = await self._connect_and_start(channel, attempts=VOICE_RECONNECT_ATTEMPTS)
+            except Exception as error:
+                logger.warning(
+                    "Voice session reconnect failed",
+                    extra={"action": "voice_session", "event": "reconnect_failed", "session_id": session_id,
+                           "error_message": str(error)},
+                )
+                return False
+            if guild_id not in self.active_sessions:
+                # User left during the reconnect — undo the resumed session.
+                with contextlib.suppress(Exception):
+                    await self.helper.stop_session(resumed.session_id)
+                with contextlib.suppress(Exception):
+                    await resumed.protocol.disconnect(force=True)
+                return False
+            self.active_sessions[guild_id] = resumed
+            logger.info(
+                "Voice session reconnected",
+                extra={"action": "voice_session", "event": "reconnected", "session_id": session_id},
+            )
+            return True
+        finally:
+            self._reconnecting.discard(session_id)
 
     async def _ensure_transcript_path(self, active: ActiveSession) -> Path | None:
         released = self.transcript_store.session_logs.get(active.session_id)

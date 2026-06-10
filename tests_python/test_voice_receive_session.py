@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from voice_helper.main import VoiceReceiveSession
+from voice_helper.main import PendingPacket, VoiceReceiveSession
 from voice_helper.spool import SpoolWriter
 
 
@@ -13,10 +13,15 @@ class FakeDaveState:
     def __init__(self, ready: bool = True) -> None:
         self.ready = ready
         self.deferred_users: list[int] = []
+        self.decrypt_result: bytes | None = b""
 
     def can_decrypt_user(self, user_id: int, *, now_monotonic: float | None = None) -> tuple[bool, str]:
         del user_id, now_monotonic
         return (True, "ready") if self.ready else (False, "missing_decryptor")
+
+    def decrypt_frame(self, user_id: int, frame: bytes) -> bytes | None:
+        del user_id, frame
+        return self.decrypt_result
 
     def defer_user(self, user_id: int, pause_seconds: float | None = None) -> None:
         del pause_seconds
@@ -103,6 +108,53 @@ class VoiceReceiveSessionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(timestamps, [101, 102])
         self.assertEqual(session.counters.missing_decryptor_queued, 3)
         self.assertEqual(session.counters.pending_queue_drops, 1)
+
+    async def test_silence_frame_skipped_without_deferring(self) -> None:
+        session = self._build_session()
+        dave_state = FakeDaveState(ready=True)
+        dave_state.decrypt_result = b"\xf8\xff\xfe"  # Opus silence/DTX frame
+        session.dave_state = dave_state
+
+        pending = PendingPacket(ssrc=42, timestamp=100, received_at=0.0, frame=b"frame")
+        processed = await session._process_pending_packet(pending, user_id=77)
+
+        self.assertTrue(processed)  # keeps the drain going
+        self.assertEqual(dave_state.deferred_users, [])  # silence must not pause the user
+        self.assertEqual(session.counters.media_decrypt_drops, 0)
+        self.assertEqual(session.counters.pcm_frames_accepted, 0)
+
+    async def test_missed_frame_dropped_without_deferring(self) -> None:
+        session = self._build_session()
+        dave_state = FakeDaveState(ready=True)
+        dave_state.decrypt_result = None  # transient decrypt miss
+        session.dave_state = dave_state
+
+        pending = PendingPacket(ssrc=42, timestamp=100, received_at=0.0, frame=b"frame")
+        processed = await session._process_pending_packet(pending, user_id=77)
+
+        self.assertTrue(processed)  # drop one frame but keep draining
+        self.assertEqual(dave_state.deferred_users, [])  # an isolated miss must not pause the user
+        self.assertEqual(session.counters.media_decrypt_drops, 1)
+
+    async def test_decoded_frame_is_accepted(self) -> None:
+        session = self._build_session()
+        dave_state = FakeDaveState(ready=True)
+        dave_state.decrypt_result = b"opus-payload"
+        session.dave_state = dave_state
+
+        class FakeDecoder:
+            def decode(self, frame: bytes) -> bytes:
+                del frame
+                return b"\x00\x00" * 960
+
+        session.decoders[42] = FakeDecoder()  # type: ignore[assignment]
+
+        pending = PendingPacket(ssrc=42, timestamp=100, received_at=0.0, frame=b"frame")
+        processed = await session._process_pending_packet(pending, user_id=77)
+
+        self.assertTrue(processed)
+        self.assertEqual(session.counters.pcm_frames_accepted, 1)
+        self.assertEqual(dave_state.deferred_users, [])
 
 
 if __name__ == "__main__":

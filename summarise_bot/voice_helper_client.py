@@ -4,12 +4,18 @@ import asyncio
 import contextlib
 import json
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 from uuid import uuid4
+
+
+# Strips the helper's "<asctime> [<LEVEL>] " log prefix so repeated messages that differ
+# only by their timestamp (e.g. "decryption failed: 1") collapse to one rate-limit bucket.
+_STDERR_PREFIX_RE = re.compile(r"^\d{4}-\d{2}-\d{2}[ T][\d:,.]+ \[[A-Z]+\] ")
 
 from .config import ROOT_DIR, SETTINGS
 from .logger import logger
@@ -201,13 +207,16 @@ class VoiceHelperClient:
 
     def _record_rate_limited_stderr(self, line: str) -> None:
         now = time.monotonic()
+        # Dedup on the message without its timestamp so a burst of identical errors
+        # collapses into a single rate-limited entry instead of one log line each.
+        key = _STDERR_PREFIX_RE.sub("", line)
         entry = self._stderr_suppression.setdefault(
-            line,
+            key,
             {"count": 0, "first_seen": now, "last_emitted": 0.0},
         )
         entry["count"] = int(entry["count"]) + 1
         if now - float(entry["last_emitted"]) >= 5.0:
-            self._flush_rate_limited_stderr(line=line)
+            self._flush_rate_limited_stderr(line=key)
 
     def _flush_rate_limited_stderr(self, *, line: str | None = None, force: bool = False) -> None:
         now = time.monotonic()
@@ -223,7 +232,10 @@ class VoiceHelperClient:
                 continue
             entry["last_emitted"] = now
             entry["count"] = 0
-            logger.warning(
+            # Only benign, expected helper stderr (DAVE per-frame decrypt misses) is routed
+            # here, and the failure totals are already in the session stats / health endpoint,
+            # so keep this at debug to avoid cluttering normal operation.
+            logger.debug(
                 "Voice helper stderr suppressed",
                 extra={
                     "action": "voice_helper",

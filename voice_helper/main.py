@@ -436,10 +436,24 @@ class VoiceReceiveSession:
                 }
             )
             self._set_phase("identify_sent")
+            # Wait for readiness, but wake immediately if the websocket loop exits first
+            # (e.g. Discord closes with 4017). Otherwise an early close would block here
+            # for the full timeout and surface as a misleading "timed out".
+            ready_task = asyncio.create_task(self.ws_ready.wait())
             try:
-                await asyncio.wait_for(self.ws_ready.wait(), timeout=30)
-            except asyncio.TimeoutError as error:
-                raise RuntimeError(f"Timed out waiting for voice session readiness; {self._diagnostics()}") from error
+                done, _pending = await asyncio.wait(
+                    {ready_task, self.ws_task},
+                    timeout=30,
+                    return_when=asyncio.FIRST_COMPLETED,
+                )
+            finally:
+                ready_task.cancel()
+            if not self.ws_ready.is_set():
+                if self.ws_task in done:
+                    raise RuntimeError(
+                        f"Voice websocket closed before session was ready; {self._diagnostics()}"
+                    ) from self.ws_task.exception()
+                raise RuntimeError(f"Timed out waiting for voice session readiness; {self._diagnostics()}")
             self.udp_task = asyncio.create_task(self._udp_loop())
             self.flush_task = asyncio.create_task(self._flush_loop())
             self.watch_task = asyncio.create_task(self._watch_tasks())
@@ -701,12 +715,18 @@ class VoiceReceiveSession:
 
     async def _process_pending_packet(self, pending: PendingPacket, user_id: int) -> bool:
         frame = self.dave_state.decrypt_frame(user_id, pending.frame)
-        if frame in (None, b"\xf8\xff\xfe"):
+        if frame == b"\xf8\xff\xfe":
+            # Opus silence/DTX frame: DAVE decryption succeeded, there is just no
+            # audio to decode. Skip it and keep draining — do NOT defer the user.
+            return True
+        if frame is None:
+            # Transient media-decrypt miss (e.g. a frame straddling a key rotation).
+            # Drop just this frame and keep going; deferring the whole user here was
+            # pausing capture for VOICE_MEDIA_PAUSE_MS on every miss and overflowing
+            # the pending queue (~33% of packets were lost this way).
             self.counters.media_decrypt_drops += 1
-            self.dave_state.defer_user(user_id)
             self._stats_dirty = True
-            await self._emit_stats(reason="media_decrypt_drop")
-            return False
+            return True
         decoder = self.decoders.get(pending.ssrc)
         if decoder is None:
             decoder = discord.opus.Decoder()
