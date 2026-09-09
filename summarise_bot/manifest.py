@@ -122,7 +122,9 @@ def add_audio_entry(
             "createdAt": created_at,
             "updatedAt": created_at,
             "fileSize": file_size,
-            "duration": duration if duration is not None else file_size / 48000,
+            # 48 kHz stereo 16-bit = 192000 bytes/s; dividing by the sample rate alone
+            # overstated every fallback duration by 4x.
+            "duration": duration if duration is not None else file_size / 192000,
             "captureSource": capture_source,
             "captureEventId": capture_event_id,
             "startedAt": started_at,
@@ -268,6 +270,35 @@ def build_transcript_from_manifest(session_id: str) -> str:
     return "\n".join(lines) + ("\n" if lines else "")
 
 
+def get_session_entry_span(session_id: str) -> tuple[datetime | None, datetime | None]:
+    """Oldest and newest speech timestamp across a session's entries.
+
+    sessionId is "guild:channel", so one session accumulates every meeting ever held in that
+    channel. Callers that treat a session as a single meeting must check this span first.
+    """
+    with _lock:
+        manifest = _load()
+        session = manifest["sessions"].get(session_id)
+        if not session:
+            return None, None
+        stamps: list[datetime] = []
+        for entry_id in session.get("audioEntries", []):
+            entry = manifest["audioEntries"].get(entry_id)
+            if not entry:
+                continue
+            raw = entry.get("startedAt") or entry.get("createdAt")
+            if not raw:
+                continue
+            try:
+                parsed = datetime.fromisoformat(str(raw))
+            except (TypeError, ValueError):
+                continue
+            stamps.append(parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc))
+    if not stamps:
+        return None, None
+    return min(stamps), max(stamps)
+
+
 def get_sessions_needing_recovery() -> list[dict[str, Any]]:
     manifest = get_manifest()
     result = []
@@ -337,6 +368,64 @@ def cleanup_old_sessions(days: int) -> tuple[int, int]:
         if to_delete:
             _save()
     return removed_sessions, removed_entries
+
+
+def purge_transcribed_audio(days: int) -> tuple[int, int]:
+    """Delete WAVs whose segment is already transcribed and older than ``days``.
+
+    Disabled by default (AUDIO_RETENTION_DAYS=0) so enabling it is a deliberate act — the
+    existing archive is several gigabytes and is not swept without opting in. Only entries in a
+    terminal state are touched, and the manifest keeps the row so the segment is never
+    re-ingested; only the audio goes.
+    """
+    if days <= 0:
+        return 0, 0
+    cutoff = _utc_now() - timedelta(days=days)
+    removed = 0
+    freed = 0
+    with _lock:
+        manifest = _load()
+        changed = False
+        for entry in manifest["audioEntries"].values():
+            if entry.get("status") not in (TranscriptionStatus.COMPLETED, TranscriptionStatus.SKIPPED):
+                continue
+            if entry.get("audioPurged"):
+                continue
+            raw = entry.get("startedAt") or entry.get("createdAt")
+            try:
+                stamp = datetime.fromisoformat(str(raw))
+            except (TypeError, ValueError):
+                continue
+            if not stamp.tzinfo:
+                stamp = stamp.replace(tzinfo=timezone.utc)
+            if stamp >= cutoff:
+                continue
+            path = Path(str(entry.get("audioPath") or ""))
+            if not path.is_file():
+                continue
+            try:
+                size = path.stat().st_size
+                path.unlink()
+            except OSError:
+                continue
+            entry["audioPurged"] = True
+            removed += 1
+            freed += size
+            changed = True
+        if changed:
+            _save()
+    if removed:
+        logger.info(
+            "Purged transcribed audio past retention",
+            extra={
+                "action": "audio_retention",
+                "event": "purged",
+                "files_removed": removed,
+                "bytes_freed": freed,
+                "retention_days": days,
+            },
+        )
+    return removed, freed
 
 
 def persist_transcript_path(session_id: str, transcript_path: str) -> None:

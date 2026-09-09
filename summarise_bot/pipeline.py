@@ -2,14 +2,23 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 import discord
 
+from .config import SETTINGS
 from .logger import logger
 from .manifest import add_audio_entry, find_audio_entry_by_capture_event_id
-from .spool import delete_spool_record, list_spool_files, log_malformed_spool_record, read_spool_record
+from .spool import (
+    delete_spool_record,
+    list_spool_files,
+    log_malformed_spool_record,
+    quarantine_spool_record,
+    read_spool_record,
+    spool_path_for_event,
+)
 from .transcript import TranscriptStore
 from .transcription import transcribe_with_retry
 
@@ -22,6 +31,17 @@ class PipelineSessionMetrics:
     missing_wav_segments: int = 0
     transcriptions_completed: int = 0
     transcription_failures: int = 0
+    gated_segments: int = 0
+
+
+def _parse_timestamp(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
 class VoiceCapturePipeline:
@@ -67,6 +87,7 @@ class VoiceCapturePipeline:
             session_id=str(record["sessionId"]),
             username=username,
             text=text.strip(),
+            timestamp=str(record.get("startedAt") or ""),
         )
 
     async def ingest_record(self, record: dict[str, Any], spool_path: Path | None = None) -> dict[str, Any]:
@@ -78,6 +99,10 @@ class VoiceCapturePipeline:
 
         if event_id in self.ingest_in_flight:
             return {"skipped": True, "reason": "already_processing"}
+        # The live path hands us the record over stdout with no path, so resolve it here.
+        # Otherwise the record is never cleaned up and a later replay re-transcribes it.
+        if spool_path is None:
+            spool_path = spool_path_for_event(event_id)
         metrics = self._get_metrics(session_id)
         metrics.ingests_started += 1
         if find_audio_entry_by_capture_event_id(event_id):
@@ -120,9 +145,15 @@ class VoiceCapturePipeline:
             if transcription.get("success") and transcription.get("text"):
                 metrics.transcriptions_completed += 1
                 await self.write_transcript_line(record, username, str(transcription["text"]))
+            elif transcription.get("gated"):
+                # Filtered as silence/hallucination — expected, not an operational failure.
+                metrics.gated_segments += 1
             elif not transcription.get("success"):
                 metrics.transcription_failures += 1
-            if spool_path:
+            # Retain the record only for retryable failures; the staleness cutoff in
+            # replay_spool bounds how long such a record can keep coming back.
+            retryable = not transcription.get("success") and not transcription.get("skipped")
+            if spool_path and not retryable:
                 delete_spool_record(spool_path)
             return {"success": True, "entryId": entry["id"], "transcription": transcription}
         finally:
@@ -134,17 +165,62 @@ class VoiceCapturePipeline:
                     self.pending.pop(session_id, None)
 
     async def replay_spool(self) -> dict[str, int]:
+        """Re-ingest spool records left behind by a crash.
+
+        Records older than ``spool_max_age_hours`` are quarantined rather than transcribed:
+        replaying a weeks-old backlog costs one API call per segment and appends those
+        segments, out of order and stamped with today's time, into the current transcript.
+        """
         replayed = 0
         failed = 0
+        quarantined = 0
+        cutoff = None
+        if SETTINGS.spool_max_age_hours > 0:
+            cutoff = datetime.now(timezone.utc) - timedelta(hours=SETTINGS.spool_max_age_hours)
+
+        pending: list[tuple[datetime | None, Path, dict[str, Any]]] = []
+        stale_span: list[datetime] = []
         for spool_path in list_spool_files():
             try:
                 record = read_spool_record(spool_path)
+            except Exception as error:
+                failed += 1
+                log_malformed_spool_record(spool_path, error)
+                continue
+            started_at = _parse_timestamp(record.get("startedAt"))
+            if cutoff is not None and started_at is not None and started_at < cutoff:
+                if quarantine_spool_record(spool_path):
+                    quarantined += 1
+                    stale_span.append(started_at)
+                continue
+            pending.append((started_at, spool_path, record))
+
+        # Chronological, so replayed lines land in the order they were spoken. Filenames are
+        # UUIDs, so the default sort is effectively random.
+        pending.sort(key=lambda item: (item[0] is None, item[0] or datetime.min.replace(tzinfo=timezone.utc)))
+
+        for _started_at, spool_path, record in pending:
+            try:
                 await self.ingest_record(record, spool_path=spool_path)
                 replayed += 1
             except Exception as error:
                 failed += 1
                 log_malformed_spool_record(spool_path, error)
-        return {"replayed": replayed, "failed": failed}
+
+        if quarantined:
+            logger.warning(
+                "Quarantined stale voice spool records instead of replaying them",
+                extra={
+                    "action": "voice_capture_spool",
+                    "event": "quarantined_stale",
+                    "count": quarantined,
+                    "max_age_hours": SETTINGS.spool_max_age_hours,
+                    "oldest": min(stale_span).isoformat() if stale_span else None,
+                    "newest": max(stale_span).isoformat() if stale_span else None,
+                    "quarantine_dir": str(SETTINGS.spool_stale_dir),
+                },
+            )
+        return {"replayed": replayed, "failed": failed, "quarantined": quarantined}
 
     async def wait_for_pending(self, session_id: str, timeout: float = 30.0) -> bool:
         end_time = asyncio.get_running_loop().time() + timeout

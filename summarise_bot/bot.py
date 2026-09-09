@@ -11,7 +11,7 @@ from typing import Any
 import discord
 
 from .config import SETTINGS
-from .document import convert_to_word_doc
+from .document import convert_to_word_doc, extract_meeting_title
 from .health import OpsServer
 from .logger import logger
 from .manifest import (
@@ -116,13 +116,21 @@ class SummariseBotRuntime:
             )
             print(f"⚠️ Ops/health server not started: {error}")
         await self.reminders.start()
-        cleanup_old_sessions(7)
         stale = mark_stale_sessions(SETTINGS.stale_session_hours)
         if stale:
             print(f"🔄 Found {stale} stale session(s) from previous runs")
+        # Replay before pruning the manifest. cleanup_old_sessions only drops ended sessions,
+        # but when one does age out it takes with it the audioEntries that let replay_spool
+        # recognise an already-transcribed segment, so pruning first can cause re-transcription.
         replay = await self.pipeline.replay_spool()
         if replay["replayed"] or replay["failed"]:
             print(f"🧵 Replayed {replay['replayed']} pending voice segment(s) ({replay['failed']} failed)")
+        if replay.get("quarantined"):
+            print(
+                f"🧹 Quarantined {replay['quarantined']} stale voice segment(s) "
+                f"older than {SETTINGS.spool_max_age_hours}h → {SETTINGS.spool_stale_dir}"
+            )
+        cleanup_old_sessions(7)
         if api_key_valid:
             self._track_task(asyncio.create_task(self.recovery.run(auto_summarize=True)))
         self._periodic_recovery_task = asyncio.create_task(self._periodic_recovery_loop())
@@ -256,7 +264,21 @@ class SummariseBotRuntime:
         transcript_path = await self._ensure_transcript_path(active)
         summary_path: Path | None = None
         if transcript_path is not None:
-            summary = await summarize_transcript(transcript_path)
+            try:
+                summary = await summarize_transcript(transcript_path)
+            except Exception as error:
+                # An API failure here used to propagate out of the command, leaving the session
+                # registered and the user with only the generic command-error message.
+                logger.error(
+                    "Summarization failed on leave",
+                    extra={
+                        "action": "voice_leave",
+                        "event": "summarization_failed",
+                        "session_id": active.session_id,
+                        "error_message": str(error),
+                    },
+                )
+                summary = None
             if summary:
                 summary_path = await self._write_summary_file(active.session_id, summary)
 
@@ -365,12 +387,7 @@ class SummariseBotRuntime:
         return transcript_path
 
     async def _write_summary_file(self, session_id: str, summary: str) -> Path | None:
-        title = "Meeting"
-        for line in summary.splitlines():
-            if line.startswith("## Meeting Topic"):
-                break
-            if line.startswith("# Meeting Minutes —"):
-                title = line.replace("# Meeting Minutes —", "").strip() or "Meeting"
+        title = extract_meeting_title(summary)
         buffer = convert_to_word_doc(summary, title)
         if buffer is None:
             return None
