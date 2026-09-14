@@ -184,3 +184,13 @@ def clean_transcript(text: str) -> tuple[str, CleaningReport]:
     report.kept = len(kept)
     rendered = unparsed + [line.raw for line in kept]
     return "\n".join(rendered), report
+
+
+def measure_substance(text: str) -> tuple[int, float]:
+    """(characters of speech, seconds from first to last line), measured after cleaning."""
+    cleaned, _ = clean_transcript(text)
+    lines, _ = parse_transcript(cleaned)
+    chars = sum(len(line.text) for line in lines)
+    stamps = [line.timestamp for line in lines if line.timestamp]
+    span = (max(stamps) - min(stamps)).total_seconds() if len(stamps) > 1 else 0.0
+    return chars, span

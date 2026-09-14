@@ -33,6 +33,11 @@ VOICE_SEGMENT_SILENCE_MS = int(os.environ.get("VOICE_SEGMENT_SILENCE_MS", os.env
 VOICE_MAX_SEGMENT_MS = int(os.environ.get("VOICE_MAX_SEGMENT_MS", os.environ.get("VOICE_WORKER_MAX_SEGMENT_MS", "30000")))
 VOICE_PACKET_QUEUE_LIMIT = int(os.environ.get("VOICE_PACKET_QUEUE_LIMIT", "256"))
 VOICE_MEDIA_PAUSE_MS = int(os.environ.get("VOICE_MEDIA_PAUSE_MS", "750"))
+# Drop diagnostics. A DAVE-encrypted frame ends in this magic marker, so a dropped frame without
+# it was sent unencrypted. Frames this small carry comfort noise, not speech.
+DAVE_MAGIC_MARKER = b"\xfa\xfa"
+SMALL_FRAME_BYTES = 10
+TRANSITION_WINDOW_SECONDS = 2.0
 VOICE_STATS_EMIT_INTERVAL_MS = int(os.environ.get("VOICE_STATS_EMIT_INTERVAL_MS", "5000"))
 VOICE_HELPER_DEBUG_TRACE_SESSION_ID = os.environ.get("VOICE_HELPER_DEBUG_TRACE_SESSION_ID", "").strip()
 
@@ -87,6 +92,13 @@ class SessionCounters:
     pending_queue_drops: int = 0
     transport_decrypt_drops: int = 0
     media_decrypt_drops: int = 0
+    # Breakdown of media_decrypt_drops: each drop lands in one cause and one size bucket.
+    media_drops_no_decryptor: int = 0
+    media_drops_encrypted: int = 0
+    media_drops_plaintext: int = 0
+    media_drops_small: int = 0
+    media_drops_voice_sized: int = 0
+    media_drops_near_transition: int = 0
     decode_failures: int = 0
     pcm_frames_accepted: int = 0
     segments_flushed: int = 0
@@ -123,6 +135,8 @@ class DaveReceiveState:
         self.session = session
         self.mls_session = dave.Session(self._on_mls_failure)
         self.recognized_users: set[int] = {session.bot_user_id}
+        # Monotonic time of the latest key change, to tell rotation losses from steady-state ones.
+        self.last_transition_at: float | None = None
         self.prepared_transitions: dict[int, int] = {}
         self.transient_keys: dict[int, dave.SignatureKeyPair] = {}
         self.decryptors: dict[int, dave.Decryptor] = {}
@@ -216,6 +230,8 @@ class DaveReceiveState:
         self.user_pause_until[user_id] = max(self.user_pause_until.get(user_id, 0.0), until)
 
     def defer_all_users(self, pause_seconds: float | None = None) -> None:
+        # Every DAVE key change passes through here, so it doubles as the transition clock.
+        self.last_transition_at = time.monotonic()
         for user_id in list(self.recognized_users):
             self.defer_user(user_id, pause_seconds)
 
@@ -387,6 +403,12 @@ class VoiceReceiveSession:
             "pendingQueueDrops": self.counters.pending_queue_drops,
             "transportDecryptDrops": self.counters.transport_decrypt_drops,
             "mediaDecryptDrops": self.counters.media_decrypt_drops,
+            "mediaDropsNoDecryptor": self.counters.media_drops_no_decryptor,
+            "mediaDropsEncrypted": self.counters.media_drops_encrypted,
+            "mediaDropsPlaintext": self.counters.media_drops_plaintext,
+            "mediaDropsSmall": self.counters.media_drops_small,
+            "mediaDropsVoiceSized": self.counters.media_drops_voice_sized,
+            "mediaDropsNearTransition": self.counters.media_drops_near_transition,
             "decodeFailures": self.counters.decode_failures,
             "pcmFramesAccepted": self.counters.pcm_frames_accepted,
             "segmentsFlushed": self.counters.segments_flushed,
@@ -713,6 +735,31 @@ class VoiceReceiveSession:
             self.counters.missing_decryptor_queued += 1
         self._stats_dirty = True
 
+    def _record_media_drop(self, user_id: int, pending: PendingPacket) -> None:
+        """Count a frame lost at media decryption, by cause and by size.
+
+        Sessions lose 3-5% of packets here and ~99% of those drops leave no libdave log line, so
+        these counters are the only way to tell lost speech (voice-sized, away from a key change)
+        from harmless loss (comfort-noise frames, or frames straddling a rotation).
+        """
+        counters = self.counters
+        counters.media_decrypt_drops += 1
+        frame = pending.frame
+        decryptors = getattr(self.dave_state, "decryptors", None)
+        if decryptors is not None and decryptors.get(user_id) is None:
+            counters.media_drops_no_decryptor += 1
+        elif frame.endswith(DAVE_MAGIC_MARKER):
+            counters.media_drops_encrypted += 1
+        else:
+            counters.media_drops_plaintext += 1
+        if len(frame) <= SMALL_FRAME_BYTES:
+            counters.media_drops_small += 1
+        else:
+            counters.media_drops_voice_sized += 1
+        last_transition = getattr(self.dave_state, "last_transition_at", None)
+        if last_transition is not None and abs(pending.received_at - last_transition) <= TRANSITION_WINDOW_SECONDS:
+            counters.media_drops_near_transition += 1
+
     async def _process_pending_packet(self, pending: PendingPacket, user_id: int) -> bool:
         frame = self.dave_state.decrypt_frame(user_id, pending.frame)
         if frame == b"\xf8\xff\xfe":
@@ -724,7 +771,7 @@ class VoiceReceiveSession:
             # Drop just this frame and keep going; deferring the whole user here was
             # pausing capture for VOICE_MEDIA_PAUSE_MS on every miss and overflowing
             # the pending queue (~33% of packets were lost this way).
-            self.counters.media_decrypt_drops += 1
+            self._record_media_drop(user_id, pending)
             self._stats_dirty = True
             return True
         decoder = self.decoders.get(pending.ssrc)

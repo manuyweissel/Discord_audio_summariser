@@ -26,6 +26,8 @@ from .manifest import (
 )
 from .pipeline import VoiceCapturePipeline
 from .recovery import RecoveryService
+from .auto_join import AutoJoinScheduler
+from .transcript_cleaning import measure_substance
 from .reminders import WeeklyReminderScheduler
 from .summarization import summarize_transcript
 from .summarization import close_client as close_summary_client
@@ -52,6 +54,15 @@ class ActiveSession:
     guild_id: int
     channel_id: int
     protocol: GatewayVoiceStateProtocol
+    # Window label for scheduler-started sessions; None for /join, which is never stopped at a
+    # window end.
+    auto_window: str | None = None
+    # Where the minutes go when the bot leaves on its own: the window's channel for scheduled
+    # sessions, the channel /join was run in for manual ones.
+    post_channel_id: int | None = None
+    # Set by claim_session() the moment any path starts tearing the session down, so /leave,
+    # the window end and the empty-room check can never finish the same session twice.
+    finishing: bool = False
 
 
 class SummariseBotRuntime:
@@ -67,6 +78,7 @@ class SummariseBotRuntime:
         self.helper = VoiceHelperClient(self.pipeline.ingest_record, self.handle_session_error)
         self.health = OpsServer(self.bot, self.get_health_state)
         self.reminders = WeeklyReminderScheduler(self.bot)
+        self.auto_join = AutoJoinScheduler(self)
         self.active_sessions: dict[int, ActiveSession] = {}
         self._reconnecting: set[str] = set()
         self._reconnect_counts: dict[str, int] = {}
@@ -116,6 +128,7 @@ class SummariseBotRuntime:
             )
             print(f"⚠️ Ops/health server not started: {error}")
         await self.reminders.start()
+        await self.auto_join.start()
         stale = mark_stale_sessions(SETTINGS.stale_session_hours)
         if stale:
             print(f"🔄 Found {stale} stale session(s) from previous runs")
@@ -189,6 +202,7 @@ class SummariseBotRuntime:
                 await ctx.followup.send(f"❌ Sprachaufnahme konnte nicht gestartet werden: {error}")
             return
 
+        active.post_channel_id = ctx.channel_id
         self.active_sessions[ctx.guild_id] = active
         self._reconnect_counts.pop(active.session_id, None)
         logger.info("Voice session started", extra={"action": "voice_join", "event": "complete", "session_id": active.session_id})
@@ -239,7 +253,75 @@ class SummariseBotRuntime:
             await ctx.followup.send("❌ Der Bot ist aktuell in keinem Sprachkanal aktiv.")
             return
 
+        if not self.claim_session(active):
+            await ctx.followup.send("⏳ Die Aufnahme wird bereits automatisch beendet – das Protokoll folgt gleich.")
+            return
+
         logger.info("Received voice leave request", extra={"action": "voice_leave", "event": "request", "session_id": active.session_id})
+        # An explicit /leave inside a scheduled window means "stop recording". Without this the
+        # scheduler sees people still in the room and rejoins on its next tick.
+        self.auto_join.suppress_active_window()
+        await ctx.followup.send("📝 Verarbeite noch offene Transkriptionen...")
+        summary_path = await self.finish_session(active)
+        if summary_path is None or not summary_path.exists():
+            await ctx.followup.send("❌ Verbindung getrennt. Kein Transkript gefunden oder nichts zu erstellen.")
+            return
+        try:
+            await ctx.followup.send(
+                content="📝 **Meeting-Protokoll erstellt!** 📄",
+                file=discord.File(str(summary_path), filename=summary_path.name),
+            )
+        except Exception:
+            await ctx.followup.send(f"📝 Meeting-Protokoll erstellt. Datei gespeichert: `{summary_path.name}`")
+
+    def claim_session(self, active: ActiveSession) -> bool:
+        """Mark a session as being finished. False if another path already claimed it.
+
+        Synchronous on purpose: with no await between the check and the set, two coroutines
+        cannot both win.
+        """
+        if active.finishing:
+            return False
+        active.finishing = True
+        return True
+
+    def _has_substance(self, active: ActiveSession, transcript_path: Path) -> bool:
+        """Whether a session the bot ended on its own is worth minutes.
+
+        On 2026-09-11 a colleague on holiday dropped in for 20 seconds of small talk just before
+        the standup window closed, and the bot posted that chat to #daily-standup as meeting
+        minutes. Automatically ended sessions are only summarised past a minimum of speech.
+        """
+        try:
+            chars, span = measure_substance(transcript_path.read_text(encoding="utf-8"))
+        except OSError:
+            return True  # cannot tell, so never silently drop minutes
+        # Character count alone separates the two: across 124 past transcripts every session under
+        # ~320 characters was a test or a drop-in, and real meetings start around 600. A minimum
+        # duration was dropped because older transcripts can stamp a whole meeting at one moment.
+        if chars >= SETTINGS.auto_post_min_chars:
+            return True
+        logger.info(
+            "Session too short for minutes; transcript kept, nothing posted",
+            extra={
+                "action": "auto_join",
+                "event": "too_short",
+                "session_id": active.session_id,
+                "speech_chars": chars,
+                "speech_seconds": round(span),
+                "min_chars": SETTINGS.auto_post_min_chars,
+            },
+        )
+        return False
+
+    async def finish_session(self, active: ActiveSession, *, require_substance: bool = False) -> Path | None:
+        """Stop recording, transcribe what is pending and render the minutes.
+
+        Shared by /leave and the auto-join scheduler so both produce identical output. Callers
+        claim the session first with claim_session(). The scheduler passes require_substance so
+        that a drop-in hello is not turned into minutes; an explicit /leave always is.
+        """
+        active.finishing = True
         helper_stop_result: dict[str, object] = {}
         try:
             helper_stop_result = await self.helper.stop_session(active.session_id)
@@ -257,11 +339,12 @@ class SummariseBotRuntime:
                 extra={"action": "voice_leave", "event": "protocol_disconnect_failed", "error_message": str(error), "session_id": active.session_id},
             )
 
-        await ctx.followup.send("📝 Verarbeite noch offene Transkriptionen...")
         await self.pipeline.wait_for_pending(active.session_id, timeout=30.0)
         self._log_session_summary(active.session_id, helper_stop_result.get("stats"))
 
         transcript_path = await self._ensure_transcript_path(active)
+        if transcript_path is not None and require_substance and not self._has_substance(active, transcript_path):
+            transcript_path = None  # the transcript stays on disk; it is just not turned into minutes
         summary_path: Path | None = None
         if transcript_path is not None:
             try:
@@ -283,19 +366,9 @@ class SummariseBotRuntime:
                 summary_path = await self._write_summary_file(active.session_id, summary)
 
         self.transcript_store.release(active.session_id)
-        self.active_sessions.pop(ctx.guild_id, None)
+        self.active_sessions.pop(active.guild_id, None)
         self._reconnect_counts.pop(active.session_id, None)
-        if summary_path is None or not summary_path.exists():
-            await ctx.followup.send("❌ Verbindung getrennt. Kein Transkript gefunden oder nichts zu erstellen.")
-            return
-
-        try:
-            await ctx.followup.send(
-                content="📝 **Meeting-Protokoll erstellt!** 📄",
-                file=discord.File(str(summary_path), filename=summary_path.name),
-            )
-        except Exception:
-            await ctx.followup.send(f"📝 Meeting-Protokoll erstellt. Datei gespeichert: `{summary_path.name}`")
+        return summary_path
 
     async def handle_session_error(self, payload: dict[str, object]) -> None:
         session_id = str(payload.get("sessionId") or "")
@@ -327,6 +400,8 @@ class SummariseBotRuntime:
                 await entry[1].protocol.disconnect(force=True)
 
     async def _try_reconnect_session(self, guild_id: int, active: ActiveSession) -> bool:
+        if active.finishing:
+            return False  # being torn down on purpose; do not resurrect it
         session_id = active.session_id
         self._reconnecting.add(session_id)
         self._reconnect_counts[session_id] = self._reconnect_counts.get(session_id, 0) + 1
@@ -350,13 +425,18 @@ class SummariseBotRuntime:
                            "error_message": str(error)},
                 )
                 return False
-            if guild_id not in self.active_sessions:
-                # User left during the reconnect — undo the resumed session.
+            if guild_id not in self.active_sessions or active.finishing:
+                # User left (or the room emptied) during the reconnect — undo the resumed session.
                 with contextlib.suppress(Exception):
                     await self.helper.stop_session(resumed.session_id)
                 with contextlib.suppress(Exception):
                     await resumed.protocol.disconnect(force=True)
                 return False
+            # Carry the scheduler's bookkeeping over. Without it a scheduled meeting that drops
+            # once becomes a "manual" session: never stopped at the window end, and its minutes
+            # never posted to the meeting's channel.
+            resumed.auto_window = active.auto_window
+            resumed.post_channel_id = active.post_channel_id
             self.active_sessions[guild_id] = resumed
             logger.info(
                 "Voice session reconnected",

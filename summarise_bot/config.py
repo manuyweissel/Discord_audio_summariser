@@ -18,6 +18,18 @@ MANIFEST_PATH = ROOT_DIR / "data" / "audio_manifest.json"
 # Seeds Whisper with domain vocabulary so proper nouns stop being mangled (LSEG has been
 # transcribed as "LSD", "LSG", "AOSD" and "SGE" in the same meeting). Whisper caps the prompt
 # at 224 tokens; keep additions short. Override wholesale with WHISPER_PROMPT.
+# Auto-join windows, local to SETTINGS.timezone. "<days> <start>-<end> -> <text channel id>",
+# where the channel is where that meeting's minutes get posted.
+#   team-meetings (voice)       1361316314999816252
+#   daily-standup               1364921683936284734
+#   biweekly-research-meeting   1473976066052984967
+#   weekly-meeting              1438825022377562122
+DEFAULT_AUTO_JOIN_SCHEDULE = (
+    "mon-fri 09:00-10:00 -> 1364921683936284734; "
+    "thu 11:00-12:00 -> 1473976066052984967; "
+    "thu 15:00-16:00 -> 1438825022377562122"
+)
+
 DEFAULT_WHISPER_PROMPT = (
     "Meeting at DataNXT about document intelligence and financial data. "
     "Terms: LSEG, Refinitiv, Bloomberg, Aareal Bank, DWS, Deutsche Bank, GDPR, MCP, CRM, ARR, "
@@ -31,6 +43,13 @@ def _env_int(name: str, default: int) -> int:
         return int(os.environ.get(name, default))
     except (TypeError, ValueError):
         return default
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _env_float(name: str, default: float) -> float:
@@ -81,6 +100,12 @@ class Settings:
     dedup_similarity: float
     dedup_window_seconds: float
     participant_min_chars: int
+    auto_join_enabled: bool
+    auto_join_voice_channel_id: str | None
+    auto_join_schedule: str
+    auto_join_poll_seconds: int
+    auto_leave_empty_seconds: int
+    auto_post_min_chars: int
 
     @classmethod
     def load(cls) -> "Settings":
@@ -146,6 +171,12 @@ class Settings:
             dedup_similarity=_env_float("TRANSCRIPT_DEDUP_SIMILARITY", 0.72),
             dedup_window_seconds=_env_float("TRANSCRIPT_DEDUP_WINDOW_SECONDS", 45.0),
             participant_min_chars=_env_int("PARTICIPANT_MIN_CHARS", 40),
+            auto_join_enabled=_env_bool("AUTO_JOIN_ENABLED", True),
+            auto_join_voice_channel_id=(os.environ.get("AUTO_JOIN_VOICE_CHANNEL_ID") or "1361316314999816252").strip() or None,
+            auto_join_schedule=os.environ.get("AUTO_JOIN_SCHEDULE", DEFAULT_AUTO_JOIN_SCHEDULE),
+            auto_join_poll_seconds=_env_int("AUTO_JOIN_POLL_SECONDS", 30),
+            auto_leave_empty_seconds=_env_int("AUTO_LEAVE_EMPTY_SECONDS", 120),
+            auto_post_min_chars=_env_int("AUTO_POST_MIN_CHARS", 500),
         )
 
     def validate(self) -> None:

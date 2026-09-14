@@ -1,0 +1,757 @@
+09:04:39 [INFO] Discord client ready | discord_ready:start
+09:04:40 [INFO] OpenAI API key validation successful | openai_validation:complete
+09:04:41 [INFO] Grafana webhook server started | grafana_webhook_start:start
+09:04:41 [INFO] Weekly meeting reminder scheduled | weekly_reminder:scheduled
+09:04:41 [INFO] Auto-join scheduler started | auto_join:started
+09:04:41 [WARNING] Skipping auto-summary for a session that spans more than one meeting | session_recovery:summary_skipped_span
+✅ Bot ready: Summarise Bot#0090
+🐍 Python voice helper ready
+📡 Grafana webhook listening on port 3002 (all interfaces)
+09:05:51 [INFO] Discord client ready | discord_ready:start
+09:05:52 [INFO] OpenAI API key validation successful | openai_validation:complete
+09:05:52 [INFO] Grafana webhook server started | grafana_webhook_start:start
+09:05:52 [INFO] Weekly meeting reminder scheduled | weekly_reminder:scheduled
+09:05:52 [INFO] Auto-join voice channel resolved | auto_join:channel_resolved
+09:05:52 [INFO] Auto-join scheduler started | auto_join:started
+09:05:52 [WARNING] Skipping auto-summary for a session that spans more than one meeting | session_recovery:summary_skipped_span
+09:09:32 [ERROR] Application command failed | interaction_handling:error
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:53,277 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:53,277 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:53,311 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:53,311 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:53,311 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:53,318 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_closed
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:53,318 [ERROR] Helper request failed: start_session
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | Traceback (most recent call last):
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 503, in _ws_loop
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |     raise RuntimeError(f"Voice websocket closed before session was ready; {self._diagnostics()}")
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | RuntimeError: Voice websocket closed before session was ready; session_id=1361291235549118507:1361316314999816252 phase=voice_websocket_closed last_opcode=8 close_code=1006 history=initialized > creating_http_session > connecting_voice_websocket > voice_websocket_connected > identify_sent > hello_received > voice_websocket_closed
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | The above exception was the direct cause of the following exception:
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | Traceback (most recent call last):
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 853, in handle_request
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |     result = await self.start_session(payload)
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 899, in start_session
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |     await session.start()
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 453, in start
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr |     raise RuntimeError(
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | RuntimeError: Voice websocket closed before session was ready; session_id=1361291235549118507:1361316314999816252 phase=voice_websocket_closed last_opcode=8 close_code=1006 history=initialized > creating_http_session > connecting_voice_websocket > voice_websocket_connected > identify_sent > hello_received > voice_websocket_closed
+09:09:53 [WARNING] Voice connect attempt failed; retrying | voice_join:retry
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,596 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,596 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,629 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,629 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,629 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,636 [INFO] Session 1361291235549118507:1361316314999816252 phase -> ready_received
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,637 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_ip_discovery
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,640 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_protocol_select
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,640 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,648 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_description_received
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,648 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_negotiation
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,650 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_session_ready
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,650 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_external_sender
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,651 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_running
+09:09:54 [INFO] Auto-join started recording | auto_join:recording_started
+09:09:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:09:54,674 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_welcome
+09:10:04 [INFO] Transcription successful | audio_transcription:complete
+09:10:06 [INFO] Transcription successful | audio_transcription:complete
+09:10:37 [INFO] Transcription successful | audio_transcription:complete
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,568 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_closed
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,568 [ERROR] Voice receive session crashed: 1361291235549118507:1361316314999816252
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | Traceback (most recent call last):
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 503, in _ws_loop
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr |     raise RuntimeError(f"Voice websocket closed before session was ready; {self._diagnostics()}")
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | RuntimeError: Voice websocket closed before session was ready; session_id=1361291235549118507:1361316314999816252 phase=voice_websocket_closed last_opcode=6 close_code=4006 history=speaker_mapping > session_description_received > dave_negotiation > voice_session_ready > dave_external_sender > session_running > dave_welcome > voice_websocket_closed
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | The above exception was the direct cause of the following exception:
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | Traceback (most recent call last):
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 948, in _handle_session_task
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr |     task.result()
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 766, in _watch_tasks
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr |     raise RuntimeError(f"Voice session background task failed; {self._diagnostics()}") from exc
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | RuntimeError: Voice session background task failed; session_id=1361291235549118507:1361316314999816252 phase=voice_websocket_closed last_opcode=6 close_code=4006 history=speaker_mapping > session_description_received > dave_negotiation > voice_session_ready > dave_external_sender > session_running > dave_welcome > voice_websocket_closed
+09:10:39 [INFO] Reconnecting voice session | voice_session:reconnect
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,910 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,910 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,942 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,942 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,942 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,947 [INFO] Session 1361291235549118507:1361316314999816252 phase -> ready_received
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,947 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_ip_discovery
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,951 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_protocol_select
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,951 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,957 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_description_received
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,957 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_negotiation
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,958 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_session_ready
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,958 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_external_sender
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,958 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_running
+09:10:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:10:39,981 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_welcome
+09:11:24 [WARNING] Voice connect attempt failed; retrying | voice_join:retry
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:25,039 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_closed
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:25,040 [ERROR] Voice receive session crashed: 1361291235549118507:1361316314999816252
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr | Traceback (most recent call last):
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 503, in _ws_loop
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr |     raise RuntimeError(f"Voice websocket closed before session was ready; {self._diagnostics()}")
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr | RuntimeError: Voice websocket closed before session was ready; session_id=1361291235549118507:1361316314999816252 phase=voice_websocket_closed last_opcode=6 close_code=4014 history=speaker_mapping > session_description_received > dave_negotiation > voice_session_ready > dave_external_sender > session_running > dave_welcome > voice_websocket_closed
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr | The above exception was the direct cause of the following exception:
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr | Traceback (most recent call last):
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 948, in _handle_session_task
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr |     task.result()
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr |   File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/voice_helper/main.py", line 766, in _watch_tasks
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr |     raise RuntimeError(f"Voice session background task failed; {self._diagnostics()}") from exc
+09:11:25 [INFO] Voice helper stderr | voice_helper:stderr | RuntimeError: Voice session background task failed; session_id=1361291235549118507:1361316314999816252 phase=voice_websocket_closed last_opcode=6 close_code=4014 history=speaker_mapping > session_description_received > dave_negotiation > voice_session_ready > dave_external_sender > session_running > dave_welcome > voice_websocket_closed
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,186 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,186 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,221 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,221 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,221 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,229 [INFO] Session 1361291235549118507:1361316314999816252 phase -> ready_received
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,229 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_ip_discovery
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,232 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_protocol_select
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,232 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,241 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_description_received
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,241 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_negotiation
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,243 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_session_ready
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,243 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_external_sender
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,243 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_running
+09:11:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:11:26,268 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_welcome
+09:43:17 [INFO] Discord client ready | discord_ready:start
+09:43:18 [INFO] OpenAI API key validation successful | openai_validation:complete
+09:43:18 [INFO] Grafana webhook server started | grafana_webhook_start:start
+09:43:18 [INFO] Weekly meeting reminder scheduled | weekly_reminder:scheduled
+09:43:18 [INFO] Auto-join voice channel resolved | auto_join:channel_resolved
+09:43:18 [INFO] Auto-join scheduler started | auto_join:started
+09:43:18 [INFO] Auto-leave enabled | auto_join:auto_leave_enabled
+09:43:18 [WARNING] Skipping auto-summary for a session that spans more than one meeting | session_recovery:summary_skipped_span
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,343 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,343 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,531 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,531 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,531 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,564 [INFO] Session 1361291235549118507:1361316314999816252 phase -> ready_received
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,564 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_ip_discovery
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,604 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_protocol_select
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,604 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,638 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_description_received
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,638 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_negotiation
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,640 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_session_ready
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,640 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_external_sender
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,640 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,642 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_running
+09:58:49 [INFO] Auto-join started recording | auto_join:recording_started
+09:58:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:58:49,673 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:59:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:59:51,519 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:59:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:59:51,553 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:59:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 09:59:55,198 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+10:00:03 [INFO] Transcription successful | audio_transcription:complete
+10:00:11 [INFO] Transcription successful | audio_transcription:complete
+10:00:19 [INFO] Auto-leave: finishing session | auto_join:window_ended
+10:00:21 [INFO] Transcription successful | audio_transcription:complete
+10:00:23 [INFO] Transcription successful | audio_transcription:complete
+10:00:23 [INFO] Voice session summary | voice_leave:session_summary
+10:00:23 [INFO] Transcript cleaned for summarization | transcript_summarization:cleaned
+10:00:29 [INFO] Auto-join posted minutes | auto_join:posted
+10:06:49 [INFO] Received voice join request | voice_join:request
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,401 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,401 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,707 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,708 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,708 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,746 [INFO] Session 1361291235549118507:1361316314999816252 phase -> ready_received
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,746 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_ip_discovery
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,786 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_protocol_select
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,787 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,825 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_description_received
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,825 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_negotiation
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,826 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_session_ready
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,826 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_external_sender
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,826 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_running
+10:06:49 [INFO] Voice session started | voice_join:complete
+10:06:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:49,910 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_welcome
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,144 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,422 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,426 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,459 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,461 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,492 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,496 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,534 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,932 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,937 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:51,988 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,731 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,738 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,745 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,780 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,851 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,852 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,852 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,854 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,858 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:57,897 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:58 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:58,808 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:58 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:58,813 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:58 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:58,826 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:58 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:58,945 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:58 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:58,981 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:59,026 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:59,026 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:59,028 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:06:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:06:59,061 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+10:07:24 [INFO] Transcription successful | audio_transcription:complete
+10:08:10 [INFO] Transcription successful | audio_transcription:complete
+10:08:24 [INFO] Transcription successful | audio_transcription:complete
+10:08:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:08:36,356 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+10:08:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:08:36,396 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+10:08:54 [INFO] Transcription successful | audio_transcription:complete
+10:08:59 [INFO] Transcription successful | audio_transcription:complete
+10:09:16 [INFO] Transcription successful | audio_transcription:complete
+10:09:25 [INFO] Transcription successful | audio_transcription:complete
+10:09:49 [INFO] Transcription successful | audio_transcription:complete
+10:10:21 [INFO] Transcription successful | audio_transcription:complete
+10:10:21 [INFO] Transcription successful | audio_transcription:complete
+10:10:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:10:42,322 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+10:10:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:10:42,361 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+10:10:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:10:42,780 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+10:10:50 [INFO] Transcription successful | audio_transcription:complete
+10:11:02 [INFO] Transcription successful | audio_transcription:complete
+10:11:21 [INFO] Transcription successful | audio_transcription:complete
+10:11:22 [INFO] Transcription successful | audio_transcription:complete
+10:11:26 [INFO] Transcription successful | audio_transcription:complete
+10:11:53 [INFO] Transcription successful | audio_transcription:complete
+10:11:55 [INFO] Transcription successful | audio_transcription:complete
+10:12:01 [INFO] Transcription successful | audio_transcription:complete
+10:12:09 [INFO] Transcription successful | audio_transcription:complete
+10:12:19 [INFO] Transcription successful | audio_transcription:complete
+10:12:21 [INFO] Transcription successful | audio_transcription:complete
+10:12:30 [INFO] Transcription successful | audio_transcription:complete
+10:12:40 [INFO] Transcription successful | audio_transcription:complete
+10:12:50 [INFO] Transcription successful | audio_transcription:complete
+10:12:57 [INFO] Transcription successful | audio_transcription:complete
+10:13:06 [INFO] Transcription successful | audio_transcription:complete
+10:13:07 [INFO] Transcription successful | audio_transcription:complete
+10:13:10 [INFO] Transcription successful | audio_transcription:complete
+10:13:11 [INFO] Transcription successful | audio_transcription:complete
+10:13:32 [INFO] Transcription successful | audio_transcription:complete
+10:14:01 [INFO] Transcription successful | audio_transcription:complete
+10:14:25 [INFO] Transcription successful | audio_transcription:complete
+10:14:30 [INFO] Transcription successful | audio_transcription:complete
+10:14:44 [INFO] Transcription successful | audio_transcription:complete
+10:15:11 [INFO] Transcription successful | audio_transcription:complete
+10:15:12 [INFO] Transcription successful | audio_transcription:complete
+10:15:23 [INFO] Transcription successful | audio_transcription:complete
+10:15:29 [INFO] Transcription successful | audio_transcription:complete
+10:15:46 [INFO] Transcription successful | audio_transcription:complete
+10:16:10 [INFO] Transcription successful | audio_transcription:complete
+10:16:17 [INFO] Transcription successful | audio_transcription:complete
+10:16:19 [INFO] Transcription successful | audio_transcription:complete
+10:16:45 [INFO] Transcription successful | audio_transcription:complete
+10:17:12 [INFO] Transcription successful | audio_transcription:complete
+10:17:19 [INFO] Transcription successful | audio_transcription:complete
+10:17:37 [INFO] Transcription successful | audio_transcription:complete
+10:17:49 [INFO] Transcription successful | audio_transcription:complete
+10:18:03 [INFO] Transcription successful | audio_transcription:complete
+10:18:22 [INFO] Transcription successful | audio_transcription:complete
+10:18:27 [INFO] Transcription successful | audio_transcription:complete
+10:18:51 [INFO] Transcription successful | audio_transcription:complete
+10:19:13 [INFO] Transcription successful | audio_transcription:complete
+10:19:31 [INFO] Transcription successful | audio_transcription:complete
+10:19:41 [INFO] Transcription successful | audio_transcription:complete
+10:20:08 [INFO] Transcription successful | audio_transcription:complete
+10:20:31 [INFO] Transcription successful | audio_transcription:complete
+10:21:01 [INFO] Transcription successful | audio_transcription:complete
+10:21:23 [INFO] Transcription successful | audio_transcription:complete
+10:21:28 [INFO] Transcription successful | audio_transcription:complete
+10:21:29 [INFO] Transcription successful | audio_transcription:complete
+10:21:32 [INFO] Transcription successful | audio_transcription:complete
+10:21:36 [INFO] Transcription successful | audio_transcription:complete
+10:21:47 [INFO] Transcription successful | audio_transcription:complete
+10:21:48 [INFO] Transcription successful | audio_transcription:complete
+10:21:53 [INFO] Transcription successful | audio_transcription:complete
+10:22:10 [INFO] Transcription successful | audio_transcription:complete
+10:22:19 [INFO] Transcription successful | audio_transcription:complete
+10:22:23 [INFO] Transcription successful | audio_transcription:complete
+10:22:26 [INFO] Transcription successful | audio_transcription:complete
+10:22:36 [INFO] Transcription successful | audio_transcription:complete
+10:22:47 [INFO] Transcription successful | audio_transcription:complete
+10:22:48 [INFO] Transcription successful | audio_transcription:complete
+10:22:55 [INFO] Transcription successful | audio_transcription:complete
+10:22:57 [INFO] Transcription successful | audio_transcription:complete
+10:23:02 [INFO] Transcription successful | audio_transcription:complete
+10:23:06 [INFO] Transcription successful | audio_transcription:complete
+10:23:19 [INFO] Transcription successful | audio_transcription:complete
+10:23:37 [INFO] Transcription successful | audio_transcription:complete
+10:23:44 [INFO] Transcription successful | audio_transcription:complete
+10:23:50 [INFO] Transcription successful | audio_transcription:complete
+10:23:52 [INFO] Transcription successful | audio_transcription:complete
+10:23:55 [INFO] Transcription successful | audio_transcription:complete
+10:23:59 [INFO] Transcription successful | audio_transcription:complete
+10:24:02 [INFO] Transcription successful | audio_transcription:complete
+10:24:08 [INFO] Transcription successful | audio_transcription:complete
+10:24:13 [INFO] Transcription successful | audio_transcription:complete
+10:24:20 [INFO] Transcription successful | audio_transcription:complete
+10:24:21 [INFO] Transcription successful | audio_transcription:complete
+10:24:32 [INFO] Transcription successful | audio_transcription:complete
+10:24:39 [INFO] Transcription successful | audio_transcription:complete
+10:24:51 [INFO] Transcription successful | audio_transcription:complete
+10:24:54 [INFO] Transcription successful | audio_transcription:complete
+10:25:01 [INFO] Transcription successful | audio_transcription:complete
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,228 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,268 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 180, plaintext frame size: 180, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 180, plaintext frame size: 180, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 190, plaintext frame size: 190, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 183, plaintext frame size: 183, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 171, plaintext frame size: 171, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 160, plaintext frame size: 160, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 158, plaintext frame size: 158, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 178, plaintext frame size: 178, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 178, plaintext frame size: 178, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 179, plaintext frame size: 179, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 177, plaintext frame size: 177, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 168, plaintext frame size: 168, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 169, plaintext frame size: 169, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 177, plaintext frame size: 177, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 169, plaintext frame size: 169, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 163, plaintext frame size: 163, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 168, plaintext frame size: 168, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 170, plaintext frame size: 170, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 168, plaintext frame size: 168, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 161, plaintext frame size: 161, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 181, plaintext frame size: 181, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 175, plaintext frame size: 175, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 174, plaintext frame size: 174, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 161, plaintext frame size: 161, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 159, plaintext frame size: 159, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 162, plaintext frame size: 162, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 174, plaintext frame size: 174, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 171, plaintext frame size: 171, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 173, plaintext frame size: 173, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 180, plaintext frame size: 180, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 185, plaintext frame size: 185, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 178, plaintext frame size: 178, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 170, plaintext frame size: 170, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 174, plaintext frame size: 174, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 174, plaintext frame size: 174, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 169, plaintext frame size: 169, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,397 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 176, plaintext frame size: 176, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 160, plaintext frame size: 160, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 145, plaintext frame size: 145, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 122, plaintext frame size: 122, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 160, plaintext frame size: 160, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 170, plaintext frame size: 170, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 148, plaintext frame size: 148, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 163, plaintext frame size: 163, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 168, plaintext frame size: 168, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 174, plaintext frame size: 174, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 167, plaintext frame size: 167, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 172, plaintext frame size: 172, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 171, plaintext frame size: 171, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 179, plaintext frame size: 179, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 178, plaintext frame size: 178, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 185, plaintext frame size: 185, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 173, plaintext frame size: 173, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 178, plaintext frame size: 178, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 173, plaintext frame size: 173, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 180, plaintext frame size: 180, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 170, plaintext frame size: 170, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 163, plaintext frame size: 163, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 170, plaintext frame size: 170, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 183, plaintext frame size: 183, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 185, plaintext frame size: 185, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 178, plaintext frame size: 178, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 162, plaintext frame size: 162, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 170, plaintext frame size: 170, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 173, plaintext frame size: 173, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 168, plaintext frame size: 168, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 171, plaintext frame size: 171, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 184, plaintext frame size: 184, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 194, plaintext frame size: 194, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 168, plaintext frame size: 168, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 164, plaintext frame size: 164, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 163, plaintext frame size: 163, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 165, plaintext frame size: 165, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 184, plaintext frame size: 184, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 167, plaintext frame size: 167, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 160, plaintext frame size: 160, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 165, plaintext frame size: 165, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 176, plaintext frame size: 176, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 181, plaintext frame size: 181, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,398 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 182, plaintext frame size: 182, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 184, plaintext frame size: 184, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 156, plaintext frame size: 156, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 177, plaintext frame size: 177, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 166, plaintext frame size: 166, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 164, plaintext frame size: 164, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 156, plaintext frame size: 156, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 133, plaintext frame size: 133, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 76, plaintext frame size: 76, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 72, plaintext frame size: 72, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 72, plaintext frame size: 72, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 71, plaintext frame size: 71, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 73, plaintext frame size: 73, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 78, plaintext frame size: 78, number of cryptor managers: 1, pass through enabled: no
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [ERROR] Failed to finalize decryption
+10:25:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:06,399 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 75, plaintext frame size: 75, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,501 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,542 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 90, plaintext frame size: 90, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 150, plaintext frame size: 150, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 88, plaintext frame size: 88, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,694 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 71, plaintext frame size: 71, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 60, plaintext frame size: 60, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 73, plaintext frame size: 73, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 101, plaintext frame size: 101, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 193, plaintext frame size: 193, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 208, plaintext frame size: 208, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 179, plaintext frame size: 179, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 83, plaintext frame size: 83, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 98, plaintext frame size: 98, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 61, plaintext frame size: 61, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 57, plaintext frame size: 57, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 61, plaintext frame size: 61, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 152, plaintext frame size: 152, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 189, plaintext frame size: 189, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [ERROR] Failed to finalize decryption
+10:25:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-11 10:25:07,695 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 168, plaintext frame size: 168, number of cryptor managers: 1, pass through enabled: no
+10:25:07 [INFO] Transcription successful | audio_transcription:complete
+10:25:08 [INFO] Transcription successful | audio_transcription:complete
+10:25:09 [INFO] Transcription successful | audio_transcription:complete
+10:25:11 [INFO] Received voice leave request | voice_leave:request
+10:25:12 [INFO] Voice session summary | voice_leave:session_summary
+10:25:12 [INFO] Transcript cleaned for summarization | transcript_summarization:cleaned
+✅ Bot ready: Summarise Bot#0090
+🐍 Python voice helper ready
+📡 Grafana webhook listening on port 3002 (all interfaces)
+10:26:23 [INFO] Discord client ready | discord_ready:start
+10:26:24 [INFO] OpenAI API key validation successful | openai_validation:complete
+10:26:24 [INFO] Grafana webhook server started | grafana_webhook_start:start
+10:26:24 [INFO] Weekly meeting reminder scheduled | weekly_reminder:scheduled
+10:26:24 [INFO] Auto-join voice channel resolved | auto_join:channel_resolved
+10:26:24 [INFO] Auto-join scheduler started | auto_join:started
+10:26:24 [INFO] Auto-leave enabled | auto_join:auto_leave_enabled
+10:26:24 [WARNING] Skipping auto-summary for a session that spans more than one meeting | session_recovery:summary_skipped_span
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,021 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,022 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,050 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,050 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,050 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,053 [INFO] Session 1361291235549118507:1361316314999816252 phase -> ready_received
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,054 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_ip_discovery
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,055 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_protocol_select
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,059 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_description_received
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,059 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_negotiation
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,067 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_session_ready
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,067 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_external_sender
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,068 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,070 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_running
+09:00:14 [INFO] Auto-join started recording | auto_join:recording_started
+09:00:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:00:14,073 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:03:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:03:44,908 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:03:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:03:44,913 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:03:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:03:46,219 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:03:54 [INFO] Transcription successful | audio_transcription:complete
+09:04:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:04:03,681 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:04:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:04:03,687 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:04:19 [INFO] Transcription successful | audio_transcription:complete
+09:05:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:05:32,027 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:05:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:05:32,032 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:05:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:05:32,880 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:05:48 [INFO] Transcription successful | audio_transcription:complete
+09:05:49 [INFO] Transcription successful | audio_transcription:complete
+09:05:56 [INFO] Transcription successful | audio_transcription:complete
+09:06:19 [INFO] Transcription successful | audio_transcription:complete
+09:06:48 [INFO] Transcription successful | audio_transcription:complete
+09:06:51 [INFO] Transcription successful | audio_transcription:complete
+09:06:57 [INFO] Transcription successful | audio_transcription:complete
+09:07:02 [INFO] Transcription successful | audio_transcription:complete
+09:07:15 [INFO] Transcription successful | audio_transcription:complete
+09:07:21 [INFO] Transcription successful | audio_transcription:complete
+09:07:45 [INFO] Transcription successful | audio_transcription:complete
+09:08:16 [INFO] Transcription successful | audio_transcription:complete
+09:08:17 [INFO] Transcription successful | audio_transcription:complete
+09:08:25 [INFO] Transcription successful | audio_transcription:complete
+09:08:36 [INFO] Transcription successful | audio_transcription:complete
+09:08:48 [INFO] Transcription successful | audio_transcription:complete
+09:09:16 [INFO] Transcription successful | audio_transcription:complete
+09:09:46 [INFO] Transcription successful | audio_transcription:complete
+09:10:01 [INFO] Transcription successful | audio_transcription:complete
+09:10:03 [INFO] Transcription successful | audio_transcription:complete
+09:10:10 [INFO] Transcription successful | audio_transcription:complete
+09:10:12 [INFO] Transcription successful | audio_transcription:complete
+09:10:22 [INFO] Transcription successful | audio_transcription:complete
+09:10:54 [INFO] Transcription successful | audio_transcription:complete
+09:11:25 [INFO] Transcription successful | audio_transcription:complete
+09:11:38 [INFO] Transcription successful | audio_transcription:complete
+09:11:54 [INFO] Transcription successful | audio_transcription:complete
+09:12:24 [INFO] Transcription successful | audio_transcription:complete
+09:12:55 [INFO] Transcription successful | audio_transcription:complete
+09:12:56 [INFO] Transcription successful | audio_transcription:complete
+09:13:26 [INFO] Transcription successful | audio_transcription:complete
+09:13:37 [INFO] Transcription successful | audio_transcription:complete
+09:13:56 [INFO] Transcription successful | audio_transcription:complete
+09:14:25 [INFO] Transcription successful | audio_transcription:complete
+09:14:27 [INFO] Transcription successful | audio_transcription:complete
+09:14:38 [INFO] Transcription successful | audio_transcription:complete
+09:14:44 [INFO] Transcription successful | audio_transcription:complete
+09:14:54 [INFO] Transcription successful | audio_transcription:complete
+09:14:57 [INFO] Transcription successful | audio_transcription:complete
+09:15:28 [INFO] Transcription successful | audio_transcription:complete
+09:15:33 [INFO] Transcription successful | audio_transcription:complete
+09:15:34 [INFO] Transcription successful | audio_transcription:complete
+09:15:44 [INFO] Transcription successful | audio_transcription:complete
+09:15:56 [INFO] Transcription successful | audio_transcription:complete
+09:16:06 [INFO] Transcription successful | audio_transcription:complete
+09:16:19 [INFO] Transcription successful | audio_transcription:complete
+09:16:22 [INFO] Transcription successful | audio_transcription:complete
+09:16:29 [INFO] Transcription successful | audio_transcription:complete
+09:16:52 [INFO] Transcription successful | audio_transcription:complete
+09:16:53 [INFO] Transcription successful | audio_transcription:complete
+09:16:59 [INFO] Transcription successful | audio_transcription:complete
+09:17:05 [INFO] Transcription successful | audio_transcription:complete
+09:17:10 [INFO] Transcription successful | audio_transcription:complete
+09:17:19 [INFO] Transcription successful | audio_transcription:complete
+09:17:22 [INFO] Transcription successful | audio_transcription:complete
+09:17:40 [INFO] Transcription successful | audio_transcription:complete
+09:17:50 [INFO] Transcription successful | audio_transcription:complete
+09:18:14 [INFO] Transcription successful | audio_transcription:complete
+09:18:32 [INFO] Transcription successful | audio_transcription:complete
+09:18:38 [INFO] Transcription successful | audio_transcription:complete
+09:18:42 [INFO] Transcription successful | audio_transcription:complete
+09:18:43 [INFO] Transcription successful | audio_transcription:complete
+09:18:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:18:49,884 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:18:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:18:49,889 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:18:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:18:51,502 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:18:55 [INFO] Transcription successful | audio_transcription:complete
+09:18:55 [INFO] Transcription successful | audio_transcription:complete
+09:18:58 [INFO] Transcription successful | audio_transcription:complete
+09:19:04 [INFO] Transcription successful | audio_transcription:complete
+09:19:07 [INFO] Transcription successful | audio_transcription:complete
+09:19:36 [INFO] Transcription successful | audio_transcription:complete
+09:19:44 [INFO] Transcription successful | audio_transcription:complete
+09:19:46 [INFO] Transcription successful | audio_transcription:complete
+09:20:15 [INFO] Transcription successful | audio_transcription:complete
+09:20:17 [INFO] Transcription successful | audio_transcription:complete
+09:20:35 [INFO] Transcription successful | audio_transcription:complete
+09:20:59 [INFO] Transcription successful | audio_transcription:complete
+09:21:23 [INFO] Transcription successful | audio_transcription:complete
+09:21:27 [INFO] Transcription successful | audio_transcription:complete
+09:21:35 [INFO] Transcription successful | audio_transcription:complete
+09:21:53 [INFO] Transcription successful | audio_transcription:complete
+09:21:55 [INFO] Transcription successful | audio_transcription:complete
+09:22:24 [INFO] Transcription successful | audio_transcription:complete
+09:22:32 [INFO] Transcription successful | audio_transcription:complete
+09:22:48 [INFO] Transcription successful | audio_transcription:complete
+09:23:10 [INFO] Transcription successful | audio_transcription:complete
+09:23:36 [INFO] Transcription successful | audio_transcription:complete
+09:24:05 [INFO] Transcription successful | audio_transcription:complete
+09:24:36 [INFO] Transcription successful | audio_transcription:complete
+09:24:42 [INFO] Transcription successful | audio_transcription:complete
+09:24:46 [INFO] Transcription successful | audio_transcription:complete
+09:24:56 [INFO] Transcription successful | audio_transcription:complete
+09:25:27 [INFO] Transcription successful | audio_transcription:complete
+09:25:39 [INFO] Transcription successful | audio_transcription:complete
+09:26:00 [INFO] Transcription successful | audio_transcription:complete
+09:26:28 [INFO] Transcription successful | audio_transcription:complete
+09:26:28 [INFO] Transcription successful | audio_transcription:complete
+09:26:28 [WARNING] Skipping auto-summary for a session that spans more than one meeting | session_recovery:summary_skipped_span
+09:26:40 [INFO] Transcription successful | audio_transcription:complete
+09:26:51 [INFO] Transcription successful | audio_transcription:complete
+09:27:02 [INFO] Transcription successful | audio_transcription:complete
+09:27:06 [INFO] Transcription successful | audio_transcription:complete
+09:27:11 [INFO] Transcription successful | audio_transcription:complete
+09:27:38 [INFO] Transcription successful | audio_transcription:complete
+09:27:50 [INFO] Transcription successful | audio_transcription:complete
+09:28:08 [INFO] Transcription successful | audio_transcription:complete
+09:28:38 [INFO] Transcription successful | audio_transcription:complete
+09:29:09 [INFO] Transcription successful | audio_transcription:complete
+09:29:13 [INFO] Transcription successful | audio_transcription:complete
+09:29:36 [INFO] Transcription successful | audio_transcription:complete
+09:29:39 [INFO] Transcription successful | audio_transcription:complete
+09:29:48 [INFO] Transcription successful | audio_transcription:complete
+09:29:52 [INFO] Transcription successful | audio_transcription:complete
+09:29:55 [INFO] Transcription successful | audio_transcription:complete
+09:30:02 [INFO] Transcription successful | audio_transcription:complete
+09:30:06 [INFO] Transcription successful | audio_transcription:complete
+09:30:16 [INFO] Transcription successful | audio_transcription:complete
+09:30:18 [INFO] Transcription successful | audio_transcription:complete
+09:30:31 [INFO] Transcription successful | audio_transcription:complete
+09:30:44 [INFO] Transcription successful | audio_transcription:complete
+09:30:50 [INFO] Transcription successful | audio_transcription:complete
+09:31:01 [INFO] Transcription successful | audio_transcription:complete
+09:31:07 [INFO] Transcription successful | audio_transcription:complete
+09:31:35 [INFO] Transcription successful | audio_transcription:complete
+09:32:03 [INFO] Transcription successful | audio_transcription:complete
+09:32:34 [INFO] Transcription successful | audio_transcription:complete
+09:32:41 [INFO] Transcription successful | audio_transcription:complete
+09:32:48 [INFO] Transcription successful | audio_transcription:complete
+09:33:07 [INFO] Transcription successful | audio_transcription:complete
+09:33:15 [INFO] Transcription successful | audio_transcription:complete
+09:33:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:33:15,477 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:33:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-14 09:33:15,483 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:33:17 [INFO] Transcription successful | audio_transcription:complete
+09:33:18 [INFO] Transcription successful | audio_transcription:complete
+09:33:20 [INFO] Transcription successful | audio_transcription:complete
+09:33:24 [INFO] Transcription successful | audio_transcription:complete
+09:33:25 [INFO] Received voice leave request | voice_leave:request
+09:33:25 [INFO] Auto-join paused for the rest of this window after a manual /leave | auto_join:window_suppressed
+09:33:28 [INFO] Transcription successful | audio_transcription:complete
+09:33:30 [INFO] Voice session summary | voice_leave:session_summary
+09:33:30 [INFO] Transcript cleaned for summarization | transcript_summarization:cleaned

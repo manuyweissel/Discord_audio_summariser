@@ -28,6 +28,7 @@ class RecoveryService:
     def __init__(self, transcript_store: TranscriptStore) -> None:
         self.transcript_store = transcript_store
         self.is_recovering = False
+        self._span_warned: set[str] = set()
 
     async def run(self, auto_summarize: bool = True) -> dict[str, int]:
         if self.is_recovering:
@@ -81,7 +82,11 @@ class RecoveryService:
         max_age = SETTINGS.spool_max_age_hours
         if span_hours <= SETTINGS.session_max_span_hours and age_hours <= max_age:
             return True
-        logger.warning(
+        # The poisoned session is permanent, and the recovery loop runs every 30 minutes, so
+        # warn once per process and drop to debug afterwards instead of 47 warnings a day.
+        first_time = session_id not in self._span_warned
+        self._span_warned.add(session_id)
+        (logger.warning if first_time else logger.debug)(
             "Skipping auto-summary for a session that spans more than one meeting",
             extra={
                 "action": "session_recovery",

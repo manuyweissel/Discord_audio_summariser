@@ -12,6 +12,47 @@ This document describes the environment variables used by the Python-first Disco
 - Required: yes
 - Description: OpenAI API key used for Whisper transcription and summary generation.
 
+## Automatic Meeting Recording
+
+The bot joins the meeting voice channel on a schedule, records, and posts the minutes to a
+per-meeting text channel. It waits for a person to be present before joining, so an empty room
+is never recorded and a meeting that starts late is still captured from the moment it begins.
+
+### `AUTO_JOIN_ENABLED`
+Default `true`. Set to `false` to go back to manual `/join` only.
+
+### `AUTO_JOIN_VOICE_CHANNEL_ID`
+Default `1361316314999816252` (`team-meetings`). The voice channel to join.
+
+### `AUTO_JOIN_SCHEDULE`
+Windows in local time (`TIMEZONE`), as `<days> <start>-<end> -> <text channel id>`, separated
+by `;`. Days accept names (`thu`), ranges (`mon-fri`) and lists (`mon,wed,fri`). The channel id
+is where that meeting's minutes are posted. End times are exclusive.
+
+Default:
+```
+mon-fri 09:00-10:00 -> 1364921683936284734;   # daily-standup
+thu 11:00-12:00 -> 1473976066052984967;       # biweekly-research-meeting
+thu 15:00-16:00 -> 1438825022377562122        # weekly-meeting
+```
+(written on one line, without the comments)
+
+### `AUTO_JOIN_POLL_SECONDS`
+Default `30`. How often the scheduler re-checks the window and the channel.
+
+### `AUTO_LEAVE_EMPTY_SECONDS`
+Default `120`. Once no person is left in the voice channel for this long, the bot stops
+recording and posts the minutes — for scheduled and manual `/join` sessions alike (a manual
+session posts to the channel `/join` was run in). The delay keeps a dropped connection or a quick
+rejoin from splitting one meeting into two sets of minutes. `0` disables it.
+
+### `AUTO_POST_MIN_CHARS`
+Default `500`. A session the bot ends on its own (window end or empty channel) is only turned into
+minutes when, after filtering, it contains at least this many characters of speech. Across 124 past
+transcripts every session under ~320 characters was a test or a drop-in hello, and real meetings
+start around 600. Shorter sessions keep their transcript on disk but post nothing. A manual
+`/leave` always produces minutes. `0` disables the check.
+
 ## Core Optional Variables
 
 ### `TIMEZONE`
