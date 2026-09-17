@@ -173,21 +173,21 @@ class VoiceReceiveSessionTests(unittest.IsolatedAsyncioTestCase):
 
     @staticmethod
     def _assert_one_bucket_each(test, counters) -> None:
-        causes = counters.media_drops_no_decryptor + counters.media_drops_encrypted + counters.media_drops_plaintext
+        causes = counters.media_drops_no_decryptor + counters.media_drops_dave_trailer + counters.media_drops_other
         sizes = counters.media_drops_small + counters.media_drops_voice_sized
         test.assertEqual(causes, counters.media_decrypt_drops)
         test.assertEqual(sizes, counters.media_decrypt_drops)
 
-    async def test_undecryptable_encrypted_voice_frame(self) -> None:
+    async def test_undecryptable_voice_frame_with_a_dave_trailer(self) -> None:
         counters = await self._drop(b"\x11" * 118 + b"\xfa\xfa")  # DAVE trailer present
         self.assertEqual(counters.media_decrypt_drops, 1)
-        self.assertEqual(counters.media_drops_encrypted, 1)
+        self.assertEqual(counters.media_drops_dave_trailer, 1)
         self.assertEqual(counters.media_drops_voice_sized, 1)
         self._assert_one_bucket_each(self, counters)
 
-    async def test_small_unencrypted_frame_counts_as_noise(self) -> None:
+    async def test_small_frame_without_a_trailer_counts_as_noise(self) -> None:
         counters = await self._drop(b"\x01\x02\x03\x04")
-        self.assertEqual(counters.media_drops_plaintext, 1)
+        self.assertEqual(counters.media_drops_other, 1)
         self.assertEqual(counters.media_drops_small, 1)
         self.assertEqual(counters.media_drops_voice_sized, 0)
         self._assert_one_bucket_each(self, counters)
@@ -195,7 +195,7 @@ class VoiceReceiveSessionTests(unittest.IsolatedAsyncioTestCase):
     async def test_missing_decryptor_is_its_own_cause(self) -> None:
         counters = await self._drop(b"\x11" * 118 + b"\xfa\xfa", decryptors={})
         self.assertEqual(counters.media_drops_no_decryptor, 1)
-        self.assertEqual(counters.media_drops_encrypted, 0)
+        self.assertEqual(counters.media_drops_dave_trailer, 0)
         self._assert_one_bucket_each(self, counters)
 
     async def test_drops_near_a_key_change_are_counted_separately(self) -> None:
@@ -208,9 +208,22 @@ class VoiceReceiveSessionTests(unittest.IsolatedAsyncioTestCase):
         session = self._build_session()
         session.dave_state = FakeDaveState(ready=True)
         snapshot = session.build_stats_snapshot()
-        for key in ("mediaDropsNoDecryptor", "mediaDropsEncrypted", "mediaDropsPlaintext",
-                    "mediaDropsSmall", "mediaDropsVoiceSized", "mediaDropsNearTransition"):
+        for key in ("mediaDropsNoDecryptor", "mediaDropsDaveTrailer", "mediaDropsOther",
+                    "mediaDropsSmall", "mediaDropsVoiceSized", "mediaDropsNearTransition",
+                    "mediaDropSamples"):
             self.assertIn(key, snapshot)
+
+    async def test_dropped_frames_are_sampled_for_inspection(self) -> None:
+        session = self._build_session()
+        dave_state = FakeDaveState(ready=True)
+        dave_state.decrypt_result = None
+        session.dave_state = dave_state
+        for index in range(12):  # more than the sample cap
+            pending = PendingPacket(ssrc=42, timestamp=index, received_at=0.0, frame=bytes([index]) * 40)
+            await session._process_pending_packet(pending, user_id=77)
+        samples = session.build_stats_snapshot()["mediaDropSamples"]
+        self.assertEqual(len(samples), 8)  # capped, so a bad session cannot flood the stats
+        self.assertTrue(samples[0].startswith("n=40 head="))
 
 
 if __name__ == "__main__":

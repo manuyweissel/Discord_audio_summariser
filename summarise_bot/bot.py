@@ -203,7 +203,7 @@ class SummariseBotRuntime:
             return
 
         active.post_channel_id = ctx.channel_id
-        self.active_sessions[ctx.guild_id] = active
+        self.register_session(active)
         self._reconnect_counts.pop(active.session_id, None)
         logger.info("Voice session started", extra={"action": "voice_join", "event": "complete", "session_id": active.session_id})
         await ctx.followup.send(f"🎙️ Aufnahme gestartet in <#{active.channel_id}>.")
@@ -273,6 +273,11 @@ class SummariseBotRuntime:
             )
         except Exception:
             await ctx.followup.send(f"📝 Meeting-Protokoll erstellt. Datei gespeichert: `{summary_path.name}`")
+
+    def register_session(self, active: ActiveSession) -> None:
+        """Register a freshly started recording and give it its own transcript file."""
+        self.transcript_store.start_session(active.session_id)
+        self.active_sessions[active.guild_id] = active
 
     def claim_session(self, active: ActiveSession) -> bool:
         """Mark a session as being finished. False if another path already claimed it.

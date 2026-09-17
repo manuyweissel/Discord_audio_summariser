@@ -284,7 +284,7 @@ class AutoJoinScheduler:
             return
         active.auto_window = window.label
         active.post_channel_id = window.post_channel_id
-        self.runtime.active_sessions[channel.guild.id] = active
+        self.runtime.register_session(active)
         logger.info(
             "Auto-join started recording",
             extra={

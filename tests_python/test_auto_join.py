@@ -141,6 +141,9 @@ class FakeRuntime:
         self.started.append(channel)
         return FakeSession(guild_id=channel.guild.id, channel_id=channel.id)
 
+    def register_session(self, session) -> None:
+        self.active_sessions[session.guild_id] = session
+
     def claim_session(self, session) -> bool:
         if session.finishing:
             return False

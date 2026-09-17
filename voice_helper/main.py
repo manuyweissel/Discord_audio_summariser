@@ -33,11 +33,13 @@ VOICE_SEGMENT_SILENCE_MS = int(os.environ.get("VOICE_SEGMENT_SILENCE_MS", os.env
 VOICE_MAX_SEGMENT_MS = int(os.environ.get("VOICE_MAX_SEGMENT_MS", os.environ.get("VOICE_WORKER_MAX_SEGMENT_MS", "30000")))
 VOICE_PACKET_QUEUE_LIMIT = int(os.environ.get("VOICE_PACKET_QUEUE_LIMIT", "256"))
 VOICE_MEDIA_PAUSE_MS = int(os.environ.get("VOICE_MEDIA_PAUSE_MS", "750"))
-# Drop diagnostics. A DAVE-encrypted frame ends in this magic marker, so a dropped frame without
-# it was sent unencrypted. Frames this small carry comfort noise, not speech.
-DAVE_MAGIC_MARKER = b"\xfa\xfa"
+# Drop diagnostics. These bytes are meant to end a DAVE-encrypted frame, but on 2026-09-15 libdave
+# reported 6 "no valid cryptor" frames — encrypted by its own reckoning — that did not end in them.
+# So a missing trailer does NOT prove a frame was plaintext; mediaDropSamples is the ground truth.
+DAVE_TRAILER = b"\xfa\xfa"
 SMALL_FRAME_BYTES = 10
 TRANSITION_WINDOW_SECONDS = 2.0
+MEDIA_DROP_SAMPLES = 8
 VOICE_STATS_EMIT_INTERVAL_MS = int(os.environ.get("VOICE_STATS_EMIT_INTERVAL_MS", "5000"))
 VOICE_HELPER_DEBUG_TRACE_SESSION_ID = os.environ.get("VOICE_HELPER_DEBUG_TRACE_SESSION_ID", "").strip()
 
@@ -94,8 +96,8 @@ class SessionCounters:
     media_decrypt_drops: int = 0
     # Breakdown of media_decrypt_drops: each drop lands in one cause and one size bucket.
     media_drops_no_decryptor: int = 0
-    media_drops_encrypted: int = 0
-    media_drops_plaintext: int = 0
+    media_drops_dave_trailer: int = 0
+    media_drops_other: int = 0
     media_drops_small: int = 0
     media_drops_voice_sized: int = 0
     media_drops_near_transition: int = 0
@@ -352,6 +354,7 @@ class VoiceReceiveSession:
         self.ssrc_map: dict[int, dict[str, int]] = {}
         self.pending_packets: dict[int, deque[PendingPacket]] = {}
         self.decoders: dict[int, discord.opus.Decoder] = {}
+        self.media_drop_samples: list[str] = []
         self.dave_state = DaveReceiveState(self)
         self.counters = SessionCounters()
         self.phase = "initialized"
@@ -404,8 +407,9 @@ class VoiceReceiveSession:
             "transportDecryptDrops": self.counters.transport_decrypt_drops,
             "mediaDecryptDrops": self.counters.media_decrypt_drops,
             "mediaDropsNoDecryptor": self.counters.media_drops_no_decryptor,
-            "mediaDropsEncrypted": self.counters.media_drops_encrypted,
-            "mediaDropsPlaintext": self.counters.media_drops_plaintext,
+            "mediaDropsDaveTrailer": self.counters.media_drops_dave_trailer,
+            "mediaDropsOther": self.counters.media_drops_other,
+            "mediaDropSamples": list(self.media_drop_samples),
             "mediaDropsSmall": self.counters.media_drops_small,
             "mediaDropsVoiceSized": self.counters.media_drops_voice_sized,
             "mediaDropsNearTransition": self.counters.media_drops_near_transition,
@@ -748,10 +752,14 @@ class VoiceReceiveSession:
         decryptors = getattr(self.dave_state, "decryptors", None)
         if decryptors is not None and decryptors.get(user_id) is None:
             counters.media_drops_no_decryptor += 1
-        elif frame.endswith(DAVE_MAGIC_MARKER):
-            counters.media_drops_encrypted += 1
+        elif frame.endswith(DAVE_TRAILER):
+            counters.media_drops_dave_trailer += 1
         else:
-            counters.media_drops_plaintext += 1
+            counters.media_drops_other += 1
+        if len(self.media_drop_samples) < MEDIA_DROP_SAMPLES:
+            # Raw bytes beat a guess: the head shows whether it looks like Opus, the tail whether
+            # the DAVE trailer is really where it is expected.
+            self.media_drop_samples.append(f"n={len(frame)} head={frame[:6].hex()} tail={frame[-6:].hex()}")
         if len(frame) <= SMALL_FRAME_BYTES:
             counters.media_drops_small += 1
         else:

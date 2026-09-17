@@ -755,3 +755,1283 @@
 09:33:28 [INFO] Transcription successful | audio_transcription:complete
 09:33:30 [INFO] Voice session summary | voice_leave:session_summary
 09:33:30 [INFO] Transcript cleaned for summarization | transcript_summarization:cleaned
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,672 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,672 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,916 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,916 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,916 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,935 [INFO] Session 1361291235549118507:1361316314999816252 phase -> ready_received
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,935 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_ip_discovery
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,955 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_protocol_select
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,975 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_description_received
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,975 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_negotiation
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,980 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_session_ready
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,980 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_external_sender
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,981 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:01:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:30,982 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_running
+09:01:30 [INFO] Auto-join started recording | auto_join:recording_started
+09:01:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:31,001 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:01:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:41,372 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:01:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:41,392 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:01:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:41,593 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:01:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:49,981 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:49,990 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:50,224 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:50,228 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:50,253 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:50,262 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:50,303 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:50,303 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:50,340 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:01:50,346 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:01:57 [INFO] Transcription successful | audio_transcription:complete
+09:04:47 [INFO] Transcription successful | audio_transcription:complete
+09:07:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:07,110 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:07,110 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:07,154 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:07,564 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:07,564 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:07,963 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Transcription successful | audio_transcription:complete
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,624 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,630 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,679 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,695 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,715 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,716 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,762 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,762 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,785 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:10,785 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:12 [INFO] Transcription successful | audio_transcription:complete
+09:07:32 [INFO] Transcription successful | audio_transcription:complete
+09:07:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:37,683 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:37,683 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:37,711 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:37,711 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:37,738 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:41 [INFO] Transcription successful | audio_transcription:complete
+09:07:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:41,957 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:41,957 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:41,994 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:42,368 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:42,368 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:42,401 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:42,407 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:42,431 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:42,431 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:07:42,456 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:07:46 [INFO] Transcription successful | audio_transcription:complete
+09:07:47 [INFO] Transcription successful | audio_transcription:complete
+09:08:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:17,569 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:08:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:17,595 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:08:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:19,261 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:08:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:22,368 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:22,388 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:22,783 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:22,783 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:22,866 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:22,866 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:26 [INFO] Transcription successful | audio_transcription:complete
+09:08:28 [INFO] Transcription successful | audio_transcription:complete
+09:08:32 [INFO] Transcription successful | audio_transcription:complete
+09:08:35 [INFO] Transcription successful | audio_transcription:complete
+09:08:38 [INFO] Transcription successful | audio_transcription:complete
+09:08:48 [INFO] Transcription successful | audio_transcription:complete
+09:08:51 [INFO] Transcription successful | audio_transcription:complete
+09:08:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:52,234 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:52,234 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:52,255 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:52,263 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:52,313 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:52,316 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:52,336 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,184 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,188 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,224 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,229 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,273 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,278 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,306 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,314 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,342 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:53,343 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,219 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,233 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,276 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,622 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,623 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,627 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,628 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,628 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,628 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:55,673 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,433 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,451 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,476 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,506 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,512 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,551 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,556 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,585 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,594 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:08:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:08:59,617 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,061 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,064 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,100 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,105 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,404 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,404 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,404 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,404 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,404 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:01,404 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:02 [INFO] Transcription successful | audio_transcription:complete
+09:09:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:05,464 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:05,468 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:09,164 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:10,763 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:10,763 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,386 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,428 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,435 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,463 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,563 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,583 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,587 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,626 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,634 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:11,666 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:15 [INFO] Transcription successful | audio_transcription:complete
+09:09:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:16,576 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:16,586 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:16,630 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:16,636 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:16,663 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:17,063 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:17,063 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:17,543 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:17,544 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:17,913 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:19 [INFO] Transcription successful | audio_transcription:complete
+09:09:23 [INFO] Transcription successful | audio_transcription:complete
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,580 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,581 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,616 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,632 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,661 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,675 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,704 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,704 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,751 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:33,751 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:36 [INFO] Transcription successful | audio_transcription:complete
+09:09:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:44,302 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:44,308 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:44,363 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:44,363 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:44,392 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:44,396 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:46,728 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:46,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:46,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:46,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:46,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:46,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:46,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:46,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:47 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:47,493 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:47 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:47,513 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:47 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:47,543 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:47 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:47,953 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:47 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:47,953 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:51 [INFO] Transcription successful | audio_transcription:complete
+09:09:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:52,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:52,876 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:53,272 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:53,293 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:53,696 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:53,716 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:57,476 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:57,493 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:57,900 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:57 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:57,918 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:09:58 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:09:58,464 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:05,356 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:05,395 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:05,403 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:05,436 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:05,442 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:05,469 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:05,576 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:05 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:05,593 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:06 [INFO] Transcription successful | audio_transcription:complete
+09:10:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:07,522 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:07,523 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:07,548 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:07,556 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:07,596 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:07,611 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:07,641 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:07,646 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:08 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:08,584 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:08 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:08,591 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:08 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:08,625 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:08 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:08,633 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,428 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,455 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,465 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,506 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,506 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,554 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,554 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,943 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,973 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:09,991 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,663 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,664 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,713 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,713 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,744 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,783 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,787 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,834 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,834 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:10,874 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:13,396 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:13,403 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:13,421 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:13,421 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:13,476 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:13,898 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:13,898 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:14,410 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:14,410 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:14,410 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:18,066 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:18,073 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:18,103 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:18,111 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:18,136 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:18,143 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:18,177 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:18,196 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:21,596 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:21,597 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:22,030 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:22,030 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:22,068 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:22,068 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:22,111 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:22,111 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:22,143 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:23 [INFO] Transcription successful | audio_transcription:complete
+09:10:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:23,338 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:23,768 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:23,768 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:24,231 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:24,232 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:24,703 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:24,704 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:24,996 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:25,036 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:25,286 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,455 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,467 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,523 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,524 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,553 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,556 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,575 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,604 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,643 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:26,643 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:27,898 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:27,916 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:28,343 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:28,762 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:28,762 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,156 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,162 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,195 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,203 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,236 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,248 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,676 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,683 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,723 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:30,723 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,205 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,205 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,244 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,244 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,273 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,275 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,315 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,323 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,349 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:31,689 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:32,913 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:32,913 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:32,956 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:32,963 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:33,184 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:33,194 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:33,235 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:33,243 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:33,266 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:37 [INFO] Transcription successful | audio_transcription:complete
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,113 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,133 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,148 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,185 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,185 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,215 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,230 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,255 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,273 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:44,296 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:53,656 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:53,756 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:53,762 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:53,796 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:10:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:10:53,804 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:11:15 [INFO] Transcription successful | audio_transcription:complete
+09:11:45 [INFO] Transcription successful | audio_transcription:complete
+09:12:16 [INFO] Transcription successful | audio_transcription:complete
+09:12:46 [INFO] Transcription successful | audio_transcription:complete
+09:13:16 [INFO] Transcription successful | audio_transcription:complete
+09:13:46 [INFO] Transcription successful | audio_transcription:complete
+09:14:17 [INFO] Transcription successful | audio_transcription:complete
+09:14:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:28,650 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:28,654 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:28,675 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:28,704 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:28,727 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:28,733 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:31,135 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:31,170 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:31,175 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:31,213 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:31,214 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:31,235 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:31,423 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:31,427 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:32,855 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:32,883 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:32,883 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:32,922 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:32,922 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:32,963 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:32,973 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:33,006 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:33,006 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:14:33,047 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:14:36 [INFO] Transcription successful | audio_transcription:complete
+09:14:45 [INFO] Transcription successful | audio_transcription:complete
+09:15:16 [INFO] Transcription successful | audio_transcription:complete
+09:15:46 [INFO] Transcription successful | audio_transcription:complete
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,779 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,795 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,847 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,886 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,895 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,920 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,936 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,959 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:48,973 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:15:49,011 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:15:51 [INFO] Transcription successful | audio_transcription:complete
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,288 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,288 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,333 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,335 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,371 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,371 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,401 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,413 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,449 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:13 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:13,465 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:15,999 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:16,016 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:16,063 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:16,063 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:16,103 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:16,103 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:16,128 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:19 [INFO] Transcription successful | audio_transcription:complete
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,766 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,778 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,809 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,816 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,843 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,848 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,877 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,892 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,933 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:25,935 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,202 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,223 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,242 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,242 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,286 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,286 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,366 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,373 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:27,780 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:28 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:28,213 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,482 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,492 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:30,865 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:32,448 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:32,488 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:32,887 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:32,887 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:33,314 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:33,316 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:33,732 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:33 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:33,732 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:34,144 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:34,163 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:36 [INFO] Transcription successful | audio_transcription:complete
+09:16:40 [INFO] Transcription successful | audio_transcription:complete
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,502 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,507 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,544 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,544 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,574 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,575 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,618 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,626 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,665 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:41,673 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:46 [INFO] Transcription successful | audio_transcription:complete
+09:16:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:46,178 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:46,178 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:46,218 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:46,288 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:46,295 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:46,938 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:46,968 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:46,974 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:49,620 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:49,828 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:53,737 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:53,737 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:53,737 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:53 [INFO] Transcription successful | audio_transcription:complete
+09:16:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:54,435 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:54,443 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:54,472 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:54,492 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:54,508 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:54,530 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:55 [INFO] Transcription successful | audio_transcription:complete
+09:16:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:56,332 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:56,831 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:56,836 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:56,840 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:56,843 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:56,843 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:16:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:16:56,843 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:00,726 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:00,752 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:00,775 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:01,168 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:01,176 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:01,575 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:01,599 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:02,430 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:05 [INFO] Transcription successful | audio_transcription:complete
+09:17:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:14,478 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:14,493 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:14,525 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:14,533 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:14,570 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:14 [INFO] Transcription successful | audio_transcription:complete
+09:17:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:14,967 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:14,980 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:15,386 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:15,416 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:15,963 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:17,251 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:17,264 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:17,301 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:17,301 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,141 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,145 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,172 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,178 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Transcription successful | audio_transcription:complete
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,207 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,215 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,244 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,255 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,296 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:18,528 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:19,338 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:19,346 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:21,005 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:21,012 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:21,395 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:21,413 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,178 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,203 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,218 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,240 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,254 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,291 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,295 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,329 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,329 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:22,360 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:23,278 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:23,287 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:23,315 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:23,366 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:23,375 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:23,785 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:23,805 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:24,202 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:17:24,223 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:17:28 [INFO] Transcription successful | audio_transcription:complete
+09:17:50 [INFO] Transcription successful | audio_transcription:complete
+09:18:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:18:19,123 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:18:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:18:19,133 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:18:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:18:19,168 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:18:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:18:19,168 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:18:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:18:19,215 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:18:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:18:19,605 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:18:20 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:18:20,028 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:18:20 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:18:20,450 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:18:22 [INFO] Transcription successful | audio_transcription:complete
+09:18:37 [INFO] Transcription successful | audio_transcription:complete
+09:18:49 [INFO] Transcription successful | audio_transcription:complete
+09:18:56 [INFO] Transcription successful | audio_transcription:complete
+09:19:29 [INFO] Transcription successful | audio_transcription:complete
+09:19:59 [INFO] Transcription successful | audio_transcription:complete
+09:20:12 [INFO] Transcription successful | audio_transcription:complete
+09:20:38 [INFO] Transcription successful | audio_transcription:complete
+09:20:40 [INFO] Transcription successful | audio_transcription:complete
+09:20:54 [INFO] Transcription successful | audio_transcription:complete
+09:21:08 [INFO] Transcription successful | audio_transcription:complete
+09:21:39 [INFO] Transcription successful | audio_transcription:complete
+09:22:09 [INFO] Transcription successful | audio_transcription:complete
+09:22:12 [INFO] Transcription successful | audio_transcription:complete
+09:22:17 [INFO] Transcription successful | audio_transcription:complete
+09:22:39 [INFO] Transcription successful | audio_transcription:complete
+09:23:10 [INFO] Transcription successful | audio_transcription:complete
+09:23:39 [INFO] Transcription successful | audio_transcription:complete
+09:24:10 [INFO] Transcription successful | audio_transcription:complete
+09:24:12 [INFO] Transcription successful | audio_transcription:complete
+09:24:34 [INFO] Transcription successful | audio_transcription:complete
+09:24:40 [INFO] Transcription successful | audio_transcription:complete
+09:24:42 [INFO] Transcription successful | audio_transcription:complete
+09:25:17 [INFO] Transcription successful | audio_transcription:complete
+09:25:47 [INFO] Transcription successful | audio_transcription:complete
+09:26:18 [INFO] Transcription successful | audio_transcription:complete
+09:26:48 [INFO] Transcription successful | audio_transcription:complete
+09:26:49 [INFO] Transcription successful | audio_transcription:complete
+09:27:17 [INFO] Transcription successful | audio_transcription:complete
+09:27:49 [INFO] Transcription successful | audio_transcription:complete
+09:27:52 [INFO] Transcription successful | audio_transcription:complete
+09:28:06 [INFO] Transcription successful | audio_transcription:complete
+09:28:25 [INFO] Transcription successful | audio_transcription:complete
+09:28:45 [INFO] Transcription successful | audio_transcription:complete
+09:28:50 [INFO] Transcription successful | audio_transcription:complete
+09:29:12 [INFO] Transcription successful | audio_transcription:complete
+09:29:31 [INFO] Transcription successful | audio_transcription:complete
+09:29:39 [INFO] Transcription successful | audio_transcription:complete
+09:29:41 [INFO] Transcription successful | audio_transcription:complete
+09:29:50 [INFO] Transcription successful | audio_transcription:complete
+09:30:12 [INFO] Transcription successful | audio_transcription:complete
+09:30:33 [INFO] Transcription successful | audio_transcription:complete
+09:30:42 [INFO] Transcription successful | audio_transcription:complete
+09:30:55 [INFO] Transcription successful | audio_transcription:complete
+09:31:06 [INFO] Transcription successful | audio_transcription:complete
+09:31:12 [INFO] Transcription successful | audio_transcription:complete
+09:31:15 [INFO] Transcription successful | audio_transcription:complete
+09:31:23 [INFO] Transcription successful | audio_transcription:complete
+09:31:32 [INFO] Transcription successful | audio_transcription:complete
+09:31:58 [INFO] Transcription successful | audio_transcription:complete
+09:32:27 [INFO] Transcription successful | audio_transcription:complete
+09:32:58 [INFO] Transcription successful | audio_transcription:complete
+09:33:12 [INFO] Transcription successful | audio_transcription:complete
+09:33:17 [INFO] Transcription successful | audio_transcription:complete
+09:33:47 [INFO] Transcription successful | audio_transcription:complete
+09:34:18 [INFO] Transcription successful | audio_transcription:complete
+09:34:23 [INFO] Transcription successful | audio_transcription:complete
+09:34:30 [INFO] Transcription successful | audio_transcription:complete
+09:34:33 [INFO] Transcription successful | audio_transcription:complete
+09:34:43 [INFO] Transcription successful | audio_transcription:complete
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,108 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,128 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,141 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,166 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,182 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,214 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,214 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,258 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,259 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:48,302 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:50,451 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:50 [INFO] Transcription successful | audio_transcription:complete
+09:34:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:50,851 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:50,856 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:51,271 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:51,289 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:51,694 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:51,694 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:54,943 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:54,979 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:54 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:54,979 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:55,018 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:55,025 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,734 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,740 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,766 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,778 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,806 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,823 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,848 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,863 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,889 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:34:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:34:56,902 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:00,376 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:00,376 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:00,414 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:00,414 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:00,446 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:01,848 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:01,865 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:01,884 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:01,901 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:01,937 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:01,937 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:01,975 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:02,213 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:02,213 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:02,251 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,412 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,813 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,814 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,819 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,819 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,819 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,819 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,819 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:03,819 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:06,409 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:06,409 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:06,784 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:06,812 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:07,055 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:07,091 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:07,102 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:14,231 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:14,389 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:14,389 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:14,395 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:14 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:14,395 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:16,138 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:16,335 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:16,335 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:16,335 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:16,335 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:16,335 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:16,335 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:16 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:16,335 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:17,888 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:17,903 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:17,922 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:17,941 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:17,961 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:17,973 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:18,000 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:18,021 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:20 [INFO] Transcription successful | audio_transcription:complete
+09:35:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:21,140 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:21,163 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:21,571 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:21,571 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:21,625 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:21,634 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:23,966 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:23,977 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:24,476 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:24,476 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:24,489 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:24,489 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:24,489 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:26,579 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:26,626 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:26,626 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:26,645 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:26,663 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:26,698 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:26,705 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:26,720 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:27,133 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:27,153 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:29 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:29,807 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:29 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:29,814 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:29 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:29,848 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:30,043 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:30,052 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:30,456 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:30 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:30,491 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,292 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,306 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,329 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,724 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,896 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,921 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,933 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,961 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:31 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:31,973 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:36,323 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:36,333 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:36,365 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:36,382 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:36,406 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:36,451 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:36,480 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,149 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,149 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,162 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,163 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,169 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,169 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,169 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,169 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:39,169 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,294 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,299 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,341 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,350 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,361 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,380 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,419 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,419 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,459 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:41,466 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:44,061 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:44,062 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:44,451 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:44,490 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:44,538 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:44 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:44,546 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:48,064 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:48,090 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:48,290 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:48,300 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:49 [INFO] Transcription successful | audio_transcription:complete
+09:35:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:50,337 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:51,607 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:51,627 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:52,116 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:52,116 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:52,459 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:52,459 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:52,859 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:52,888 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:53,282 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:35:53,316 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:35:54 [INFO] Transcription successful | audio_transcription:complete
+09:36:26 [INFO] Transcription successful | audio_transcription:complete
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,695 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,704 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,722 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,739 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,774 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,774 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,814 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,819 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,853 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:32 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:32,859 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,386 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,408 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,435 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,464 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,498 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,507 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,529 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,554 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:34,574 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:34 [INFO] Transcription successful | audio_transcription:complete
+09:36:39 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:39,712 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:40 [INFO] Transcription successful | audio_transcription:complete
+09:36:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:41,664 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:41,668 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:41,695 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,130 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,168 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,180 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,896 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,903 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,933 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,937 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,975 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:42 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:42,975 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:43,009 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:43,018 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:43,054 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:36:43,059 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:36:46 [INFO] Transcription successful | audio_transcription:complete
+09:37:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:23,414 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:23,424 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:23 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:23,855 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:24,064 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:24,093 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:50,993 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,016 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,016 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,059 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,059 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,099 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,106 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,141 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,146 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:51 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:51,179 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,364 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,374 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,394 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,764 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,764 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,769 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,769 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,769 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,769 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:37:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:37:55,769 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:00,296 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:00,512 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:00,546 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,423 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,451 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,614 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,646 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,660 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,689 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,706 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,736 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:02,779 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:07,215 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:07,215 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:07,251 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:07,271 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:07,297 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:07,715 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:07 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:07,715 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:08 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:08,691 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:08 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:08,710 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:08 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:08,729 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:08 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:08,749 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:09,155 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:09,176 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:09,643 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:09,643 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:09,753 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:10,813 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:10,917 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:10,933 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:10,938 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:11,787 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:11,816 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:11,817 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:11,866 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:11,866 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:11 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:11,896 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:12 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:12,307 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:12 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:12,307 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:12 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:12,751 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:12 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:12,751 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,378 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,419 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,426 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,444 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,469 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,501 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,512 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,547 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,547 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:18,581 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:22,268 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:22,289 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:22,751 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:22,751 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:22 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:22,899 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:25,694 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:25,698 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:25,732 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:26,127 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:26,145 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:26,536 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:26,581 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:26,974 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:26,974 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:27,384 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:36,392 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:36,392 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:36,653 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:36 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:36,676 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:37,082 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:37,508 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:37,508 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:37,911 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:37 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:37,937 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:43,172 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:43,172 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:43,212 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:43,217 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:43 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:43,274 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:46,052 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:46,064 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:46,094 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:46 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:46,103 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,177 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,177 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,207 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,254 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,287 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,307 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,329 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,349 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,389 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:48 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:48,389 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:49,491 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:49,896 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:49 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:49,897 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:50,036 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:50,043 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:50 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:50,079 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:52,151 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:52,157 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:52,180 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:52,191 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:52,226 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:52,233 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:52,264 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:52 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:52,274 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:53,826 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:53,843 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:53,869 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:53,909 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:53,938 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:53,947 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:55,851 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:38:55 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:38:55,877 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,249 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,267 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,429 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,446 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,454 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,497 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,509 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,527 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,541 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:00,569 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:02,539 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:02,539 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:02,579 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:02,579 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:02 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:02,988 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:03,027 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:03,420 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:03 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:03,427 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:06,204 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:06 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:06,204 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:10,867 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:10,867 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:10,867 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:10,867 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:10,867 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:15,014 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:15,019 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:15,048 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:15,058 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:15 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:15,467 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:17,179 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:17,211 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:17,229 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:17,267 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:17,267 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:17 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:17,712 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:18,864 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:18,896 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:18,904 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:18,929 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:18,949 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:18,965 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:18,979 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:19,016 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:19,016 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:24,888 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:24 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:24,917 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:25,655 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:25 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:25,691 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:26,114 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:26,114 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:26,502 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:26,529 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:26,928 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:26,947 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:27,852 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:27 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:27,852 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,609 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,632 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,667 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,674 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,689 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,707 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,726 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,748 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,769 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:39:53 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:39:53,792 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:00,630 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:00 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:00,666 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:01,061 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:01,066 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:01,166 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:01,184 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:01,207 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:01,234 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:01,249 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:01 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:01,275 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,019 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,019 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,049 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,064 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,094 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,094 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,145 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,145 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:04 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:04,572 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:20 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:20,487 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:20 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:20,516 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:20 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:20,940 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:20 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:20,940 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:21,347 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:21,354 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:21,752 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:21,787 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:21,854 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:21,860 [WARNING] Encrypted frame is too small to contain min supplemental bytes
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,328 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,351 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,487 [ERROR] Failed to finalize decryption
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,487 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 134, plaintext frame size: 134, number of cryptor managers: 1, pass through enabled: no
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [ERROR] Failed to finalize decryption
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 130, plaintext frame size: 130, number of cryptor managers: 1, pass through enabled: no
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [ERROR] Failed to finalize decryption
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 113, plaintext frame size: 113, number of cryptor managers: 1, pass through enabled: no
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [ERROR] Failed to finalize decryption
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 82, plaintext frame size: 82, number of cryptor managers: 1, pass through enabled: no
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [ERROR] Failed to finalize decryption
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 68, plaintext frame size: 68, number of cryptor managers: 1, pass through enabled: no
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [ERROR] Failed to finalize decryption
+09:40:26 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-15 09:40:26,488 [WARNING] Decrypt failed, no valid cryptor found, type: audio, encrypted frame size: 65, plaintext frame size: 65, number of cryptor managers: 1, pass through enabled: no
+09:40:27 [INFO] Received voice leave request | voice_leave:request
+09:40:27 [INFO] Auto-join paused for the rest of this window after a manual /leave | auto_join:window_suppressed
+09:40:57 [WARNING] Failed stopping voice helper session | voice_leave:helper_stop_failed
+09:41:27 [INFO] Voice session summary | voice_leave:session_summary
+09:41:27 [INFO] Transcript cleaned for summarization | transcript_summarization:cleaned
+09:42:06 [INFO] Transcription successful | audio_transcription:complete
+09:42:08 [INFO] Transcription successful | audio_transcription:complete
+09:42:11 [INFO] Transcription successful | audio_transcription:complete
+09:42:13 [INFO] Transcription successful | audio_transcription:complete
+09:42:14 [INFO] Transcription successful | audio_transcription:complete
+09:42:17 [INFO] Transcription successful | audio_transcription:complete
+09:42:18 [INFO] Transcription successful | audio_transcription:complete
+09:42:21 [INFO] Transcription successful | audio_transcription:complete
+09:42:25 [INFO] Transcription successful | audio_transcription:complete
+09:42:28 [INFO] Transcription successful | audio_transcription:complete
+09:42:29 [INFO] Transcription successful | audio_transcription:complete
+09:42:30 [INFO] Transcription successful | audio_transcription:complete
+09:42:30 [INFO] Transcription successful | audio_transcription:complete
+09:42:32 [INFO] Transcription successful | audio_transcription:complete
+09:42:34 [INFO] Transcription successful | audio_transcription:complete
+09:42:35 [INFO] Transcription successful | audio_transcription:complete
+09:42:36 [INFO] Transcription successful | audio_transcription:complete
+09:42:38 [INFO] Transcription successful | audio_transcription:complete
+Ignoring exception in on_connect
+Traceback (most recent call last):
+  File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/client.py", line 463, in _run_event
+    await coro(*args, **kwargs)
+  File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/bot.py", line 1231, in on_connect
+    await self.sync_commands()
+  File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/bot.py", line 759, in sync_commands
+    registered_commands = await self.register_commands(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/bot.py", line 551, in register_commands
+    prefetched_commands = await self._bot.http.get_global_commands(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/http.py", line 400, in request
+    raise DiscordServerError(response, data)
+discord.errors.DiscordServerError: 500 Internal Server Error (error code: 0): <html>
+  <head>
+    <title>Internal Server Error</title>
+  </head>
+  <body>
+    <h1><p>Internal Server Error</p></h1>
+    
+  <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a3b86fb9fa39dcb2',t:'MTc4OTQ4Mzc0OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
+Task exception was never retrieved
+future: <Task finished name='Task-9541' coro=<ConnectionState._delay_ready() done, defined at /home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/state.py:617> exception=DiscordServerError('500 Internal Server Error (error code: 0): <html>\n  <head>\n    <title>Internal Server Error</title>\n  </head>\n  <body>\n    <h1><p>Internal Server Error</p></h1>\n    \n  <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement(\'script\');d.innerHTML="window.__CF$cv$params={r:\'a3b86fc63a6edcb2\',t:\'MTc4OTQ4Mzc1MQ==\'};var a=document.createElement(\'script\');a.src=\'/cdn-cgi/challenge-platform/scripts/jsd/main.js\';document.getElementsByTagName(\'head\')[0].appendChild(a);";b.getElementsByTagName(\'head\')[0].appendChild(d)}}if(document.body){var a=document.createElement(\'iframe\');a.height=1;a.width=1;a.style.position=\'absolute\';a.style.top=0;a.style.left=0;a.style.border=\'none\';a.style.visibility=\'hidden\';document.body.appendChild(a);if(\'loading\'!==document.readyState)c();else if(window.addEventListener)document.addEventListener(\'DOMContentLoaded\',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);\'loading\'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>\n</html>\n')>
+Traceback (most recent call last):
+  File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/state.py", line 666, in _delay_ready
+    await self._add_default_sounds()
+  File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/state.py", line 2098, in _add_default_sounds
+    default_sounds = await self.http.get_default_sounds()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/datanxt/Desktop/Product/Projects/Discord_summarise_bot/discord-voice-bot/.voice-worker-venv/lib/python3.12/site-packages/discord/http.py", line 400, in request
+    raise DiscordServerError(response, data)
+discord.errors.DiscordServerError: 500 Internal Server Error (error code: 0): <html>
+  <head>
+    <title>Internal Server Error</title>
+  </head>
+  <body>
+    <h1><p>Internal Server Error</p></h1>
+    
+  <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a3b86fc63a6edcb2',t:'MTc4OTQ4Mzc1MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
+09:00:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:18,865 [INFO] Session 1361291235549118507:1361316314999816252 phase -> creating_http_session
+09:00:18 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:18,887 [INFO] Session 1361291235549118507:1361316314999816252 phase -> connecting_voice_websocket
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,059 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_websocket_connected
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,061 [INFO] Session 1361291235549118507:1361316314999816252 phase -> identify_sent
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,064 [INFO] Session 1361291235549118507:1361316314999816252 phase -> hello_received
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,070 [INFO] Session 1361291235549118507:1361316314999816252 phase -> ready_received
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,070 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_ip_discovery
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,074 [INFO] Session 1361291235549118507:1361316314999816252 phase -> udp_protocol_select
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,081 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_description_received
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,081 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_negotiation
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,097 [INFO] Session 1361291235549118507:1361316314999816252 phase -> voice_session_ready
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,098 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_external_sender
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,100 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,103 [INFO] Session 1361291235549118507:1361316314999816252 phase -> session_running
+09:00:19 [INFO] Auto-join started recording | auto_join:recording_started
+09:00:19 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:19,111 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:00:41 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:00:41,093 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:01:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:01:56,433 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:01:56 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:01:56,442 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:01:59 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:01:59,466 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:02:04 [INFO] Transcription successful | audio_transcription:complete
+09:02:06 [INFO] Transcription successful | audio_transcription:complete
+09:02:09 [INFO] Transcription successful | audio_transcription:complete
+09:02:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:02:09,986 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:02:09 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:02:09,994 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:02:16 [INFO] Transcription successful | audio_transcription:complete
+09:02:29 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:02:29,749 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:02:30 [INFO] Transcription successful | audio_transcription:complete
+09:02:36 [INFO] Transcription successful | audio_transcription:complete
+09:02:40 [INFO] Transcription successful | audio_transcription:complete
+09:02:41 [INFO] Transcription successful | audio_transcription:complete
+09:02:48 [INFO] Transcription successful | audio_transcription:complete
+09:03:00 [INFO] Transcription successful | audio_transcription:complete
+09:03:06 [INFO] Transcription successful | audio_transcription:complete
+09:04:09 [INFO] Transcription successful | audio_transcription:complete
+09:04:39 [INFO] Transcription successful | audio_transcription:complete
+09:05:03 [INFO] Transcription successful | audio_transcription:complete
+09:05:06 [INFO] Transcription successful | audio_transcription:complete
+09:05:09 [INFO] Transcription successful | audio_transcription:complete
+09:05:10 [INFO] Transcription successful | audio_transcription:complete
+09:05:30 [INFO] Transcription successful | audio_transcription:complete
+09:05:40 [INFO] Transcription successful | audio_transcription:complete
+09:05:47 [INFO] Transcription successful | audio_transcription:complete
+09:05:50 [INFO] Transcription successful | audio_transcription:complete
+09:05:59 [INFO] Transcription successful | audio_transcription:complete
+09:06:04 [INFO] Transcription successful | audio_transcription:complete
+09:06:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:06:10,746 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_proposals
+09:06:10 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:06:10,754 [INFO] Session 1361291235549118507:1361316314999816252 phase -> dave_commit_transition
+09:06:15 [INFO] Transcription successful | audio_transcription:complete
+09:06:20 [INFO] Transcription successful | audio_transcription:complete
+09:06:25 [INFO] Transcription successful | audio_transcription:complete
+09:06:53 [INFO] Transcription successful | audio_transcription:complete
+09:07:24 [INFO] Transcription successful | audio_transcription:complete
+09:07:52 [INFO] Transcription successful | audio_transcription:complete
+09:08:25 [INFO] Transcription successful | audio_transcription:complete
+09:08:43 [INFO] Transcription successful | audio_transcription:complete
+09:08:48 [INFO] Transcription successful | audio_transcription:complete
+09:08:53 [INFO] Transcription successful | audio_transcription:complete
+09:09:02 [INFO] Transcription successful | audio_transcription:complete
+09:09:18 [INFO] Transcription successful | audio_transcription:complete
+09:09:24 [INFO] Transcription successful | audio_transcription:complete
+09:09:53 [INFO] Transcription successful | audio_transcription:complete
+09:10:23 [INFO] Transcription successful | audio_transcription:complete
+09:10:51 [INFO] Transcription successful | audio_transcription:complete
+09:11:20 [INFO] Transcription successful | audio_transcription:complete
+09:11:52 [INFO] Transcription successful | audio_transcription:complete
+09:11:59 [INFO] Transcription successful | audio_transcription:complete
+09:12:09 [INFO] Transcription successful | audio_transcription:complete
+09:12:24 [INFO] Transcription successful | audio_transcription:complete
+09:12:30 [INFO] Transcription successful | audio_transcription:complete
+09:12:49 [INFO] Transcription successful | audio_transcription:complete
+09:12:59 [INFO] Transcription successful | audio_transcription:complete
+09:13:12 [INFO] Transcription successful | audio_transcription:complete
+09:13:13 [INFO] Transcription successful | audio_transcription:complete
+09:13:20 [INFO] Transcription successful | audio_transcription:complete
+09:13:21 [INFO] Voice helper stderr | voice_helper:stderr | 2026-09-16 09:13:21,487 [INFO] Session 1361291235549118507:1361316314999816252 phase -> speaker_mapping
+09:13:55 [INFO] Transcription successful | audio_transcription:complete
+09:14:24 [INFO] Transcription successful | audio_transcription:complete
+09:14:54 [INFO] Transcription successful | audio_transcription:complete
+09:15:22 [INFO] Transcription successful | audio_transcription:complete
+09:15:46 [INFO] Transcription successful | audio_transcription:complete
+09:16:09 [INFO] Transcription successful | audio_transcription:complete
+09:16:20 [INFO] Transcription successful | audio_transcription:complete
+09:16:24 [INFO] Transcription successful | audio_transcription:complete
+09:16:31 [INFO] Transcription successful | audio_transcription:complete
+09:16:50 [INFO] Transcription successful | audio_transcription:complete
+09:16:56 [INFO] Transcription successful | audio_transcription:complete
+09:17:26 [INFO] Transcription successful | audio_transcription:complete
+09:17:54 [INFO] Transcription successful | audio_transcription:complete
+09:18:26 [INFO] Transcription successful | audio_transcription:complete
+09:18:55 [INFO] Transcription successful | audio_transcription:complete
+09:19:26 [INFO] Transcription successful | audio_transcription:complete
+09:19:56 [INFO] Transcription successful | audio_transcription:complete
+09:20:25 [INFO] Transcription successful | audio_transcription:complete
+09:20:57 [INFO] Transcription successful | audio_transcription:complete
+09:21:25 [INFO] Transcription successful | audio_transcription:complete
+09:21:55 [INFO] Transcription successful | audio_transcription:complete
+09:22:25 [INFO] Transcription successful | audio_transcription:complete
+09:22:43 [INFO] Transcription successful | audio_transcription:complete
+09:22:55 [INFO] Transcription successful | audio_transcription:complete
+09:22:58 [INFO] Transcription successful | audio_transcription:complete
+09:23:02 [INFO] Transcription successful | audio_transcription:complete
+09:23:04 [INFO] Transcription successful | audio_transcription:complete
+09:23:25 [INFO] Transcription successful | audio_transcription:complete
+09:23:33 [INFO] Transcription successful | audio_transcription:complete
+09:24:05 [INFO] Transcription successful | audio_transcription:complete
+09:24:07 [INFO] Transcription successful | audio_transcription:complete
+09:24:29 [INFO] Transcription successful | audio_transcription:complete
+09:24:31 [INFO] Transcription successful | audio_transcription:complete
+09:24:38 [INFO] Transcription successful | audio_transcription:complete
+09:24:46 [INFO] Transcription successful | audio_transcription:complete
+09:24:51 [INFO] Received voice leave request | voice_leave:request
+09:24:51 [INFO] Auto-join paused for the rest of this window after a manual /leave | auto_join:window_suppressed
+09:24:52 [INFO] Transcription successful | audio_transcription:complete
+09:24:53 [INFO] Transcription successful | audio_transcription:complete
+09:24:54 [INFO] Transcription successful | audio_transcription:complete
+09:24:54 [INFO] Voice session summary | voice_leave:session_summary
+09:24:54 [INFO] Transcript cleaned for summarization | transcript_summarization:cleaned
+✅ Bot ready: Summarise Bot#0090
+🐍 Python voice helper ready
+📡 Grafana webhook listening on port 3002 (all interfaces)
+09:25:59 [INFO] Discord client ready | discord_ready:start
+09:26:00 [INFO] OpenAI API key validation successful | openai_validation:complete
+09:26:00 [INFO] Grafana webhook server started | grafana_webhook_start:start
+09:26:00 [INFO] Weekly meeting reminder scheduled | weekly_reminder:scheduled
+09:26:00 [INFO] Auto-join voice channel resolved | auto_join:channel_resolved
+09:26:00 [INFO] Auto-join scheduler started | auto_join:started
+09:26:00 [INFO] Auto-leave enabled | auto_join:auto_leave_enabled
+09:26:00 [WARNING] Skipping auto-summary for a session that spans more than one meeting | session_recovery:summary_skipped_span

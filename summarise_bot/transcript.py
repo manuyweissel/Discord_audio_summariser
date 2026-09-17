@@ -42,5 +42,15 @@ class TranscriptStore:
             handle.write(line)
         return path
 
+    def start_session(self, session_id: str) -> None:
+        """Begin a recording: forget any path memoised for this session id.
+
+        Session ids are "guild:channel", so they repeat for every meeting in a channel. A late
+        write from the previous meeting — after a stop_session timeout, say — can memoise a fresh
+        path after release(), and without this the next meeting appends to that file: on
+        2026-09-16 the standup started inside Tuesday's leftover transcript.
+        """
+        self.session_logs.pop(session_id, None)
+
     def release(self, session_id: str) -> Path | None:
         return self.session_logs.pop(session_id, None)
